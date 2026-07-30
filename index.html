@@ -26,17 +26,25 @@
   }
   #wrap{width:min(1080px,100%);}
   #topbar{
-    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
     background:var(--panel); border:2px solid var(--line); border-radius:12px 12px 0 0;
     padding:8px 14px; font-size:15px; font-weight:bold;
   }
+  /* stats flow and wrap freely; the controls stay welded together as one block, so a
+     narrow window moves the whole control bar as a unit instead of orphaning a button */
+  #statGroup{display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex:1 1 auto; min-width:0;}
+  #ctrlGroup{display:flex; align-items:center; gap:6px; flex:0 0 auto; margin-left:auto;}
   #topbar .stat{display:flex; align-items:center; gap:4px; white-space:nowrap;}
   #monthLbl{color:var(--blue); font-size:16px;}
   #cashLbl{color:var(--gold);}
   #apLbl{color:#c8f5c8;}
   #endBtn{
     margin-left:auto; background:var(--green); color:#15200c; border:none; border-radius:10px;
-    font-family:inherit; font-weight:bold; font-size:16px; padding:8px 22px; cursor:pointer;
+    font-family:inherit; font-weight:bold; font-size:16px; padding:8px 12px; cursor:pointer;
+    /* fixed footprint so swapping to the countdown label can't reflow the topbar —
+       the ✋ emoji has a taller line box than ▶, so height is pinned too */
+    min-width:148px; height:38px; flex-shrink:0; white-space:nowrap; line-height:1;
+    display:inline-flex; align-items:center; justify-content:center;
   }
   #endBtn:hover{filter:brightness(1.1);}
   #endBtn:disabled{opacity:.4; cursor:not-allowed;}
@@ -208,7 +216,8 @@
   @media (max-width:720px){
     body{padding:6px;}
     #topbar{gap:8px; font-size:13.5px; padding:7px 10px;}
-    #endBtn{width:100%; margin-left:0; padding:11px 0; font-size:17px; order:99;}
+    #ctrlGroup{width:100%; margin-left:0; flex-wrap:wrap; gap:6px;}
+    #endBtn{flex:1 1 100%; margin-left:0; padding:0; height:46px; font-size:17px; order:99;}
     #ticker{font-size:12.5px;}
     #nstrip.on{flex-wrap:wrap;}
     .nb{flex:1 1 30%; padding:6px 2px 7px;}
@@ -231,21 +240,25 @@
 <!-- HOA HAVOC — © 2026 Jeffrey Farkas and BigSpoke AI. All rights reserved. -->
 <div id="wrap">
   <div id="topbar">
-    <span class="stat" id="monthLbl">📅 Month 1</span>
-    <span class="stat" id="cashLbl">💵 $0</span>
-    <span class="stat" title="Home equity. Reaches 0 = foreclosure.">🏠 <span id="eqLbl">100</span></span>
-    <span class="stat" title="Home condition. Low condition invites citations and drains equity.">🛠️ <span id="condLbl">70%</span></span>
-    <span class="stat" title="Board anger. Angrier boards act more often.">😠 <span id="angerLbl">0</span></span>
-    <span class="stat" title="Documented evidence. Fuels contests and the recall vote.">📸 <span id="evLbl">0</span></span>
-    <span class="stat" title="Street reputation. Scared neighbors only back a recall if they respect you.">⭐ <span id="repLbl">5</span></span>
-  <span class="stat" title="Common areas. The board lets them rot; neglect drags everyone's equity. You can fix them yourself.">🌳 <span id="comLbl">60%</span></span>
-    <span class="stat" title="Communication: chats, favors, and planted messages. Plentiful — but the month always ends.">📞 <span id="commsLbl">8/8</span></span>
-    <span class="stat" id="apLbl" title="Action points this month.">⚡ 3/3</span>
-    <button id="musicBtn" class="tbtn" title="Background music on/off — generative suburban muzak, never quite the same twice.">🎵</button>
-    <button id="aiBtn" class="tbtn" title="An AI assistant that advises you every month — but the board and the gossips get AI too. Toggle anytime.">🤖 AI: OFF</button>
-    <button id="helpBtn" class="tbtn" title="How to play & strategy guide">❓</button>
-    <button id="quitBtn" class="tbtn" title="List the house and sell. There are only three ways out of Pleasant Meadows: foreclosure, dissolving the board, or this.">🏷️ Sell</button>
-    <button id="endBtn">End Month ▶</button>
+    <div id="statGroup">
+      <span class="stat" id="monthLbl">📅 Month 1</span>
+      <span class="stat" id="cashLbl">💵 $0</span>
+      <span class="stat" title="Home equity. Reaches 0 = foreclosure.">🏠 <span id="eqLbl">100</span></span>
+      <span class="stat" title="Home condition. Low condition invites citations and drains equity.">🛠️ <span id="condLbl">70%</span></span>
+      <span class="stat" title="Board anger. Angrier boards act more often.">😠 <span id="angerLbl">0</span></span>
+      <span class="stat" title="Documented evidence. Fuels contests and the recall vote.">📸 <span id="evLbl">0</span></span>
+      <span class="stat" title="Street reputation. Scared neighbors only back a recall if they respect you.">⭐ <span id="repLbl">5</span></span>
+      <span class="stat" title="Common areas. The board lets them rot; neglect drags everyone's equity. You can fix them yourself.">🌳 <span id="comLbl">60%</span></span>
+      <span class="stat" title="Communication: chats, favors, and planted messages. Plentiful — but the month always ends.">📞 <span id="commsLbl">8/8</span></span>
+      <span class="stat" id="apLbl" title="Action points this month.">⚡ 3/3</span>
+    </div>
+    <div id="ctrlGroup">
+      <button id="musicBtn" class="tbtn" title="Background music on/off.">🎵</button>
+      <button id="aiBtn" class="tbtn" title="AI assistant: advises you every month — but the board and the gossips get AI too. Toggle anytime.">🤖 OFF</button>
+      <button id="helpBtn" class="tbtn" title="How to play &amp; strategy guide">❓</button>
+      <button id="quitBtn" class="tbtn" title="List the house and sell. There are only three ways out: foreclosure, dissolving the board, or this.">🏷️ Sell</button>
+      <button id="endBtn">End Month ▶</button>
+    </div>
   </div>
   <div id="ticker">Welcome home. Population: you, the neighbors, and a board with opinions.</div>
   <div id="nstrip"></div>
@@ -339,7 +352,7 @@
     <div id="socLog"></div>
     <div>
       <button class="btn sm" id="chatBtn">💬 Chat (1📞)</button>
-      <button class="btn sm" id="helpBtn">🌻 Help Out (1📞)</button>
+      <button class="btn sm" id="socHelpBtn">🌻 Help Out (1📞)</button>
       <button class="btn sm" id="plantBtn">📨 Plant Message (1📞)</button>
       <button class="btn sm" id="allyBtn">🤝 Alliance (1⚡)</button>
       <button class="btn sm alt" id="accuseBtn">🚨 Accuse (1⚡)</button>
@@ -1303,7 +1316,7 @@ function aiAdvisor(){
 function syncAiBtn(){
   const b = document.getElementById('aiBtn');
   b.classList.toggle('on', !!(S && S.ai));
-  b.textContent = S && S.ai ? '🤖 AI: ON' : '🤖 AI: OFF';
+  b.textContent = S && S.ai ? '🤖 ON' : '🤖 OFF';
 }
 document.getElementById('aiBtn').addEventListener('click', () => {
   if (!S || S.mode !== 'playing') return;
@@ -1713,7 +1726,7 @@ function renderSocial(){
   const mute = n.exposed || n.hostile;
   document.getElementById('chatBtn').disabled = mute || S.comms < 1 || n.chattedMonth === S.month;
   document.getElementById('chatBtn').textContent = n.chattedMonth === S.month ? '💬 Chatted this month' : '💬 Chat (1📞)';
-  document.getElementById('helpBtn').disabled = mute || S.comms < 1 || n.rel >= 3;
+  document.getElementById('socHelpBtn').disabled = mute || S.comms < 1 || n.rel >= 3;
   document.getElementById('plantBtn').disabled = mute || S.comms < 1 || n.plantedMonth === S.month;
   document.getElementById('plantBtn').textContent = n.plantedMonth === S.month ? '📨 Message planted' : '📨 Plant Message (1📞)';
   document.getElementById('allyBtn').disabled = mute || n.alliance || n.rel < 2 || S.ap < 1;
@@ -1730,7 +1743,7 @@ document.getElementById('chatBtn').addEventListener('click', () => {
   setTicker(`${n.ico} ${n.name}: "${tip.text}"`);
   renderSocial(); renderStrip(); render();
 });
-document.getElementById('helpBtn').addEventListener('click', () => {
+document.getElementById('socHelpBtn').addEventListener('click', () => {
   if (S.socialTarget == null || S.comms < 1) return;
   const n = S.neighbors[S.socialTarget];
   S.comms--; n.rel = Math.min(3, n.rel + 1); S.rep = Math.min(10, S.rep + 1);
@@ -1973,14 +1986,14 @@ function maybeAuto(){
     if (autoTimer && (!S || S.mode !== 'playing' || S.ap > 0)) cancelAuto();
     return;
   }
-  if (autoTimer){ b.textContent = `✋ Hold (auto in ${autoLeft}s)`; return; }
+  if (autoTimer){ b.textContent = `✋ Hold · ${autoLeft}s`; return; }
   autoLeft = 4;
-  b.textContent = `✋ Hold (auto in ${autoLeft}s)`;
+  b.textContent = `✋ Hold · ${autoLeft}s`;
   autoTimer = setInterval(() => {
     if (!S || S.mode !== 'playing' || S.ap > 0 || S.holdMonth){ cancelAuto(); return; }
     autoLeft--;
     if (autoLeft <= 0){ cancelAuto(); endMonth(); }
-    else document.getElementById('endBtn').textContent = `✋ Hold (auto in ${autoLeft}s)`;
+    else document.getElementById('endBtn').textContent = `✋ Hold · ${autoLeft}s`;
   }, 1000);
 }
 
