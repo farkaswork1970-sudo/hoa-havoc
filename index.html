@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOA Havoc — A Turn-Based Game of Suburban Survival</title>
+<style>
+  :root{
+    --bg:#1a2314; --panel:#24301b; --panel2:#2e3d22; --line:#4a5c38;
+    --gold:#ffd24a; --red:#ff5c5c; --green:#8fd14f; --ink:#eef3e4; --blue:#9fd0ff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:radial-gradient(1200px 700px at 50% -10%, #2b3a1e, var(--bg));
+    color:var(--ink); font-family:"Trebuchet MS", Verdana, sans-serif;
+    display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:10px; user-select:none;
+  }
+  #wrap{width:min(1080px,100%);}
+  #topbar{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    background:var(--panel); border:2px solid var(--line); border-radius:12px 12px 0 0;
+    padding:8px 14px; font-size:15px; font-weight:bold;
+  }
+  #topbar .stat{display:flex; align-items:center; gap:4px; white-space:nowrap;}
+  #monthLbl{color:var(--blue); font-size:16px;}
+  #cashLbl{color:var(--gold);}
+  #apLbl{color:#c8f5c8;}
+  #endBtn{
+    margin-left:auto; background:var(--green); color:#15200c; border:none; border-radius:10px;
+    font-family:inherit; font-weight:bold; font-size:16px; padding:8px 22px; cursor:pointer;
+  }
+  #endBtn:hover{filter:brightness(1.1);}
+  #endBtn:disabled{opacity:.4; cursor:not-allowed;}
+  .tbtn{
+    background:#3a4a63; color:#cfe2ff; border:2px solid #5a7096; border-radius:8px;
+    font-family:inherit; font-weight:bold; font-size:13px; padding:5px 9px; cursor:pointer; white-space:nowrap;
+  }
+  .tbtn:hover{filter:brightness(1.15);}
+  #aiBtn.on{background:#4a2e5a; border-color:#9668b8; color:#ecd8ff;}
+  #log .ai{color:#d8b8f0;}
+  #tutBody{text-align:left; font-size:14px; line-height:1.55; min-height:170px;}
+  #tutBody b{color:var(--gold);}
+  #tutStep{color:#c9d6b4; font-size:12px; margin-top:6px;}
+  #ticker{
+    background:#3d2f13; border:2px solid var(--line); border-top:none;
+    color:#ffe9a8; padding:5px 14px; font-size:13.5px; font-style:italic; min-height:29px;
+  }
+  #nstrip{
+    display:none; gap:8px; padding:6px 8px;
+    background:#20301f; border:2px solid var(--line); border-top:none;
+  }
+  #nstrip.on{display:flex;}
+  .nb{
+    flex:1; min-width:0; text-align:center; cursor:pointer; padding:4px 2px 5px;
+    background:var(--panel2); border:2px solid var(--line); border-radius:10px; position:relative;
+  }
+  .nb:hover{border-color:#7a9455;}
+  .nb .av{font-size:24px; line-height:1.1;}
+  .nb .nm{font-size:12px; font-weight:bold; display:block;}
+  .nb .rel{font-size:10px; color:var(--gold); letter-spacing:1px;}
+  .nb .rec{font-size:11px; letter-spacing:2px; min-height:14px;}
+  .nb .rec .T{color:var(--green);} .nb .rec .F{color:var(--red);} .nb .rec .U{color:#8a9a78;}
+  .nb .badge{position:absolute; top:-7px; right:-5px; font-size:14px;}
+  .nb.exposed{border-color:var(--red); opacity:.75;}
+  .nb.hostile{opacity:.5;}
+  .nb.ally{border-color:#5a965a;}
+  #main{
+    display:flex; gap:10px; background:var(--panel); border:2px solid var(--line); border-top:none;
+    border-radius:0 0 12px 12px; padding:10px; align-items:stretch;
+  }
+  .col{display:flex; flex-direction:column; gap:10px;}
+  #colL{flex:1.1; min-width:0;}
+  #colR{flex:1; min-width:0;}
+  .box{background:#1d2716; border:2px solid var(--line); border-radius:10px; padding:10px 12px;}
+  .box h3{font-size:14px; color:#c9d6b4; letter-spacing:1px; margin-bottom:8px;}
+  /* house */
+  #housePanel .bars{display:flex; flex-direction:column; gap:6px; margin-bottom:8px;}
+  .barrow{display:flex; align-items:center; gap:8px; font-size:13px;}
+  .barrow .lb{width:105px; white-space:nowrap;}
+  .bar{flex:1; height:14px; background:#141a0e; border:1px solid var(--line); border-radius:7px; overflow:hidden;}
+  .bar > div{height:100%; transition:width .3s;}
+  .barrow .val{width:58px; text-align:right; font-weight:bold; font-size:12px;}
+  .vio{
+    background:#33231a; border:1px solid #6e4a33; border-radius:8px; padding:7px 10px; margin-bottom:7px; font-size:13px;
+  }
+  .vio.escalated{border-color:var(--red); background:#3d1f1a;}
+  .vio .vt{font-weight:bold;}
+  .vio .meta{color:#e0b9a0; font-size:12px; margin:3px 0;}
+  .vio button{
+    font-family:inherit; font-size:12px; font-weight:bold; border:none; border-radius:6px;
+    padding:4px 10px; margin-right:6px; margin-top:2px; cursor:pointer;
+  }
+  .vio .comply{background:var(--green); color:#15200c;}
+  .vio .contest{background:#5a7096; color:#eaf2ff;}
+  .vio button:disabled{opacity:.35; cursor:not-allowed;}
+  #noVio{color:#8a9a78; font-size:13px; font-style:italic;}
+  #rulesBox{font-size:12.5px; color:#d8c9a8; max-height:90px; overflow-y:auto;}
+  #rulesBox div{margin-bottom:3px;}
+  /* actions */
+  #actGrid{display:grid; grid-template-columns:1fr 1fr; gap:7px;}
+  .act{
+    background:var(--panel2); border:2px solid var(--line); border-radius:9px; padding:7px 9px;
+    cursor:pointer; font-size:12.5px; text-align:left; font-family:inherit; color:var(--ink);
+  }
+  .act:hover{border-color:#7a9455;}
+  .act b{display:block; font-size:13px;}
+  .act .cost{color:var(--gold); font-size:11.5px;}
+  .act:disabled{opacity:.38; cursor:not-allowed;}
+  /* log */
+  #log{font-size:12.5px; line-height:1.45; max-height:240px; overflow-y:auto;}
+  #log .mh{color:var(--blue); font-weight:bold; margin-top:6px; border-top:1px dashed var(--line); padding-top:5px;}
+  #log .mh:first-child{margin-top:0; border-top:none; padding-top:0;}
+  #log .bad{color:#ffb0a6;} #log .good{color:#b8e39a;} #log .info{color:#d8d2b8;} #log .tip{color:#a8c8e8;}
+  /* overlays */
+  .overlay{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(10,14,6,.86); z-index:5; padding:14px;
+  }
+  .panel{
+    background:var(--panel); border:3px solid var(--line); border-radius:16px;
+    max-width:640px; width:100%; max-height:92vh; overflow-y:auto;
+    padding:22px 26px; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,.6);
+  }
+  .panel h1{font-size:30px; color:var(--gold); margin-bottom:4px;}
+  .panel h2{font-size:21px; margin-bottom:10px;}
+  .panel p{font-size:14px; line-height:1.45; margin-bottom:8px;}
+  .panel .small{font-size:12.5px; color:#c9d6b4;}
+  .btn{
+    display:inline-block; margin:6px 5px 0; padding:9px 20px; font-size:15px; font-weight:bold;
+    background:var(--green); color:#15200c; border:none; border-radius:10px; cursor:pointer; font-family:inherit;
+  }
+  .btn:hover{filter:brightness(1.1);}
+  .btn.alt{background:#d86a5a; color:#fff;}
+  .btn.law{background:#5a7096; color:#eaf2ff;}
+  .btn.sm{font-size:13px; padding:7px 14px;}
+  .btn.grey{background:#556; color:#fff;}
+  .btn:disabled{opacity:.35; cursor:not-allowed;}
+  .hidden{display:none !important;}
+  .diffs{display:flex; flex-direction:column; gap:8px; margin:10px 0; text-align:left;}
+  .diff{background:var(--panel2); border:2px solid var(--line); border-radius:10px; padding:9px 14px; cursor:pointer;}
+  .diff:hover{border-color:#7a9455;}
+  .diff.sel{border-color:var(--gold); box-shadow:0 0 8px rgba(255,210,74,.4);}
+  .diff b{font-size:15px;}
+  .diff span{display:block; font-size:12px; color:#c9d6b4; margin-top:2px;}
+  .toggle{
+    display:flex; align-items:flex-start; gap:10px; text-align:left; font-size:13.5px;
+    background:var(--panel2); border:2px solid var(--line); border-radius:10px; padding:10px 14px; cursor:pointer;
+  }
+  .toggle input{width:18px; height:18px; margin-top:2px; accent-color:var(--gold); cursor:pointer;}
+  .toggle span small{display:block; color:#c9d6b4; font-size:11.5px; margin-top:2px;}
+  .selhead{text-align:left; font-size:11.5px; color:#c9d6b4; letter-spacing:1px; margin-top:8px; font-weight:bold;}
+  .nameinputs{display:flex; gap:8px; margin:10px 0 2px;}
+  .nameinputs label{
+    flex:1; text-align:left; font-size:11.5px; color:#c9d6b4; font-weight:bold; letter-spacing:1px;
+    display:flex; flex-direction:column; gap:3px; position:relative;
+  }
+  .nameinputs input{
+    background:#141a0e; border:2px solid var(--line); border-radius:8px; color:var(--ink);
+    font-family:inherit; font-size:14px; padding:7px 30px 7px 9px; user-select:text; -webkit-user-select:text; width:100%;
+  }
+  .nameinputs input:focus{outline:none; border-color:var(--gold);}
+  #hoaDice{position:absolute; right:4px; bottom:4px; background:none; border:none; font-size:17px; cursor:pointer; padding:2px;}
+  #hoaDice:hover{transform:rotate(20deg);}
+  .sliders{text-align:left;}
+  .sliders label{display:block; font-size:12.5px; font-weight:bold; margin:7px 0 2px;}
+  .sliders output{color:var(--gold); float:right; font-size:12px;}
+  .sliders input[type=range]{width:100%; accent-color:var(--gold); cursor:pointer; margin:2px 0 0;}
+  .sliders .hint{display:block; color:#8a9a78; font-size:10.5px; font-style:italic; font-weight:normal; margin-top:1px;}
+  #diffMeter{height:14px; background:#141a0e; border:1px solid var(--line); border-radius:7px; overflow:hidden; margin-top:12px;}
+  #diffFill{height:100%; width:50%; background:#ffd24a; transition:width .25s, background .25s;}
+  #diffLabel{font-size:13px; margin-top:6px; color:#ffe9a8; min-height:34px; text-align:left;}
+  #diffLabel b{color:var(--gold);}
+  .chiprow{display:flex; gap:6px; margin:6px 0;}
+  .chip{flex:1; background:var(--panel2); border:2px solid var(--line); border-radius:10px; padding:7px 5px; cursor:pointer; text-align:center;}
+  .chip:hover{border-color:#7a9455;}
+  .chip b{display:block; font-size:12.5px;}
+  .chip span{color:#c9d6b4; font-size:10.5px; display:block; margin-top:2px; line-height:1.3;}
+  .chip.sel{border-color:var(--gold); box-shadow:0 0 8px rgba(255,210,74,.4);}
+  #boardBox{font-size:12.5px;}
+  #boardBox .bm{margin-bottom:6px; line-height:1.35;}
+  #boardBox .bd{color:#c9d6b4; font-size:11.5px;}
+  #boardList, #voteList{text-align:left; font-size:13.5px; line-height:1.5; margin:10px 0;}
+  #boardList div{margin-bottom:6px; padding:6px 10px; background:#1d2716; border-radius:8px; border:1px solid var(--line);}
+  #voteList div{margin-bottom:4px; padding:5px 10px; background:#1d2716; border-radius:8px; border:1px solid var(--line);}
+  #socHead{display:flex; align-items:center; gap:14px; text-align:left; margin-bottom:8px;}
+  #socAv{font-size:48px;}
+  #socName{font-size:22px; font-weight:bold;}
+  #socRel{color:var(--gold); font-size:13px; letter-spacing:2px;}
+  #socStatus{font-size:12.5px; color:#c9d6b4;}
+  #socLog{
+    text-align:left; background:#141a0e; border:1px solid var(--line); border-radius:8px;
+    padding:8px 12px; font-size:12.5px; max-height:140px; overflow-y:auto; margin:8px 0;
+  }
+  #socLog .tag{font-weight:bold; margin-right:5px;}
+  #socLog .tag.T{color:var(--green);} #socLog .tag.F{color:var(--red);} #socLog .tag.P{color:#8a9a78;}
+  #socLog .tipl{margin-bottom:6px; line-height:1.35;}
+  button{-webkit-tap-highlight-color:transparent; touch-action:manipulation;}
+  /* ---- phone layout ---- */
+  @media (max-width:720px){
+    body{padding:6px;}
+    #topbar{gap:8px; font-size:13.5px; padding:7px 10px;}
+    #endBtn{width:100%; margin-left:0; padding:11px 0; font-size:17px; order:99;}
+    #ticker{font-size:12.5px;}
+    #nstrip.on{flex-wrap:wrap;}
+    .nb{flex:1 1 30%; padding:6px 2px 7px;}
+    #main{flex-direction:column; padding:8px;}
+    #actGrid{grid-template-columns:1fr 1fr;}
+    .act{padding:11px 10px; font-size:13px;}
+    .act b{font-size:14px;}
+    .vio button{padding:9px 12px; font-size:13px;}
+    .btn{padding:11px 18px;}
+    .btn.sm{padding:10px 12px; font-size:13.5px;}
+    #log{max-height:200px;}
+    .barrow .lb{width:92px; font-size:12px;}
+    .panel{padding:16px 14px;}
+    .panel h1{font-size:26px;}
+    .panel h2{font-size:18px;}
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="topbar">
+    <span class="stat" id="monthLbl">📅 Month 1</span>
+    <span class="stat" id="cashLbl">💵 $0</span>
+    <span class="stat" title="Home equity. Reaches 0 = foreclosure.">🏠 <span id="eqLbl">100</span></span>
+    <span class="stat" title="Home condition. Low condition invites citations and drains equity.">🛠️ <span id="condLbl">70%</span></span>
+    <span class="stat" title="Board anger. Angrier boards act more often.">😠 <span id="angerLbl">0</span></span>
+    <span class="stat" title="Documented evidence. Fuels contests and the recall vote.">📸 <span id="evLbl">0</span></span>
+    <span class="stat" title="Street reputation. Scared neighbors only back a recall if they respect you.">⭐ <span id="repLbl">5</span></span>
+  <span class="stat" title="Common areas. The board lets them rot; neglect drags everyone's equity. You can fix them yourself.">🌳 <span id="comLbl">60%</span></span>
+    <span class="stat" title="Communication: chats, favors, and planted messages. Plentiful — but the month always ends.">📞 <span id="commsLbl">8/8</span></span>
+    <span class="stat" id="apLbl" title="Action points this month.">⚡ 3/3</span>
+    <button id="musicBtn" class="tbtn" title="Background music on/off — generative suburban muzak, never quite the same twice.">🎵</button>
+    <button id="aiBtn" class="tbtn" title="An AI assistant that advises you every month — but the board and the gossips get AI too. Toggle anytime.">🤖 AI: OFF</button>
+    <button id="helpBtn" class="tbtn" title="How to play & strategy guide">❓</button>
+    <button id="quitBtn" class="tbtn" title="List the house and sell. There are only three ways out of Pleasant Meadows: foreclosure, dissolving the board, or this.">🏷️ Sell</button>
+    <button id="endBtn">End Month ▶</button>
+  </div>
+  <div id="ticker">Welcome home. Population: you, the neighbors, and a board with opinions.</div>
+  <div id="nstrip"></div>
+  <div id="main">
+    <div class="col" id="colL">
+      <div class="box" id="housePanel">
+        <h3>🏠 YOUR PROPERTY</h3>
+        <div class="bars">
+          <div class="barrow"><span class="lb">🏠 Equity</span><div class="bar"><div id="eqBar" style="background:linear-gradient(90deg,#e2b23a,#8fd14f)"></div></div><span class="val" id="eqVal"></span></div>
+          <div class="barrow"><span class="lb">🛠️ Condition</span><div class="bar"><div id="condBar" style="background:#7ab0d8"></div></div><span class="val" id="condVal"></span></div>
+          <div class="barrow"><span class="lb">😠 Board anger</span><div class="bar"><div id="angerBar" style="background:#d86a5a"></div></div><span class="val" id="angerVal"></span></div>
+          <div class="barrow" title="Rolling index of neighborhood sale prices vs. your purchase-time value. Your equity drifts with it — and falling comps radicalize everyone."><span class="lb">📈 Comparables</span><div class="bar"><div id="compsBar" style="background:#c9a86a"></div></div><span class="val" id="compsVal"></span></div>
+        </div>
+        <h3>📋 OPEN VIOLATIONS</h3>
+        <div id="vioList"><div id="noVio">None. Suspicious. They're definitely planning something.</div></div>
+      </div>
+      <div class="box">
+        <h3>🏛️ YOUR BOARD</h3>
+        <div id="boardBox"></div>
+      </div>
+      <div class="box">
+        <h3>📜 RULES THE BOARD HAS PASSED (<span id="ruleCt">0</span>)</h3>
+        <div id="rulesBox"><div style="color:#8a9a78;font-style:italic;">Just the original 214-page rulebook. So far.</div></div>
+      </div>
+    </div>
+    <div class="col" id="colR">
+      <div class="box">
+        <h3>⚡ ACTIONS</h3>
+        <div id="actGrid"></div>
+      </div>
+      <div class="box">
+        <h3>📰 NEIGHBORHOOD LOG</h3>
+        <div id="log"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="menu" class="overlay">
+  <div class="panel">
+    <h1>🏠 HOA HAVOC</h1>
+    <h2>A Turn-Based Game of Suburban Survival</h2>
+    <p>Each month you get <b>3 actions</b>. The board plots in secret. Neighbors know things — some tell the truth, some are wearing a wire. Keep your equity above zero, and if you gather enough <b>allies, evidence, and respect</b>… vote the board out of existence.</p>
+    <div class="nameinputs">
+      <label>YOUR NAME<input id="playerName" maxlength="20" placeholder="Alex"></label>
+      <label>YOUR HOA'S NAME<input id="hoaName" maxlength="28" placeholder="Pleasant Meadows"><button id="hoaDice" type="button" title="Generate a name the developer would approve of">🎲</button></label>
+    </div>
+    <div class="selhead">BOARD REGIME — pick a preset, or open the workshop</div>
+    <div class="chiprow" id="regimeRow">
+      <div class="chip" data-r="reasonable"><b>🌷 Reasonable Board</b><span>(allegedly) warnings first, grace periods, naps</span></div>
+      <div class="chip sel" data-r="stickler"><b>📋 Stickler Board</b><span>rules are rules are rules are rules</span></div>
+      <div class="chip" data-r="tyrant"><b>👑 Tyrannical Board</b><span>the bylaws have bylaws</span></div>
+    </div>
+    <button class="btn sm law" id="customBtn" style="margin-top:6px;">⚙️ Customize — size, age &amp; five dials of dysfunction</button>
+    <div id="diffMeter"><div id="diffFill"></div></div>
+    <div id="diffLabel"></div>
+    <button class="btn" id="startBtn">Move In ▶</button>
+    <button class="btn law hidden" id="resumeBtn">💾 Resume</button>
+    <button class="btn sm grey" id="menuTutBtn">📖 How to Play</button>
+  </div>
+</div>
+
+<div id="reachModal" class="overlay hidden">
+  <div class="panel">
+    <h2>👋 A KNOCK AT THE DOOR</h2>
+    <p id="reachText" style="font-size:15px;"></p>
+    <button class="btn sm" id="reachA"></button>
+    <button class="btn sm grey" id="reachB"></button>
+  </div>
+</div>
+
+<div id="boardModal" class="overlay hidden">
+  <div class="panel">
+    <h2>🏛️ THE BOARD ACTS — <span id="boardMonth"></span></h2>
+    <div id="boardList"></div>
+    <button class="btn" id="boardOk">Deep Breath. Continue ▶</button>
+  </div>
+</div>
+
+<div id="socialModal" class="overlay hidden">
+  <div class="panel">
+    <div id="socHead">
+      <div id="socAv">🧓</div>
+      <div style="flex:1">
+        <div id="socName">Marge</div>
+        <div id="socRel">★☆☆</div>
+        <div id="socStatus"></div>
+      </div>
+    </div>
+    <div id="socLog"></div>
+    <div>
+      <button class="btn sm" id="chatBtn">💬 Chat (1📞)</button>
+      <button class="btn sm" id="helpBtn">🌻 Help Out (1📞)</button>
+      <button class="btn sm" id="plantBtn">📨 Plant Message (1📞)</button>
+      <button class="btn sm" id="allyBtn">🤝 Alliance (1⚡)</button>
+      <button class="btn sm alt" id="accuseBtn">🚨 Accuse (1⚡)</button>
+    </div>
+    <p class="small" style="margin-top:8px;">Chat for intel on this month's secret board plan · Helping builds trust and reputation · Wrong accusations cost you the street.</p>
+    <button class="btn sm grey" id="socClose">Close</button>
+  </div>
+</div>
+
+<div id="meetingModal" class="overlay hidden">
+  <div class="panel">
+    <h2 id="meetTitle">🗳️ THE ANNUAL MEETING</h2>
+    <p id="meetIntro"></p>
+    <div id="voteList" class="hidden"></div>
+    <p id="meetResult" class="hidden" style="font-size:16px;font-weight:bold;"></p>
+    <button class="btn alt" id="voteBtn">Call the Recall Vote 🗳️</button>
+    <button class="btn grey" id="meetSkip">Sit Quietly</button>
+    <button class="btn hidden" id="meetDone">Continue ▶</button>
+  </div>
+</div>
+
+<div id="customModal" class="overlay hidden">
+  <div class="panel">
+    <h2>⚙️ DESCRIBE YOUR HOA</h2>
+    <p class="small">Drag until it hurts like home. The livability meter updates live.</p>
+    <div class="selhead">THE BOARD'S PERSONALITY</div>
+    <div class="sliders">
+      <label>🔍 Enforcement pettiness <output id="oPetty">55</output><input type="range" id="sPetty" min="0" max="100" value="55"><span class="hint">"live and let live" ⟶ "measures grass with calipers"</span></label>
+      <label>💸 Fine appetite <output id="oFines">50</output><input type="range" id="sFines" min="0" max="100" value="50"><span class="hint">friendly warning letters ⟶ fines as a revenue model</span></label>
+      <label>🏦 Dues ambition <output id="oDues">45</output><input type="range" id="sDues" min="0" max="100" value="45"><span class="hint">break-even budgeting ⟶ bronze-statue-of-the-president fund</span></label>
+      <label>⏳ Cure-period mercy <output id="oMercy">50</output><input type="range" id="sMercy" min="0" max="100" value="50"><span class="hint">"whenever you get to it, hon" ⟶ "you had 30 minutes"</span></label>
+      <label>😤 Grudge retention <output id="oGrudge">50</output><input type="range" id="sGrudge" min="0" max="100" value="50"><span class="hint">forgives by Tuesday ⟶ still cites the flag incident of '09</span></label>
+    </div>
+    <div class="selhead">YOUR COMMUNITY</div>
+    <div class="sliders">
+      <label>🏘️ Size <output id="oHomes">90 homes</output><input type="range" id="sHomes" min="30" max="150" step="5" value="90"><span class="hint">a nosy cul-de-sac ⟶ a master-planned bureaucracy</span></label>
+      <label>📅 Age <output id="oYears">25 years old</output><input type="range" id="sYears" min="5" max="50" value="25"><span class="hint">fresh sod &amp; a lurking developer ⟶ founder-run rule labyrinth with 1985 pipes</span></label>
+    </div>
+    <div id="diffMeter2" style="height:14px;background:#141a0e;border:1px solid var(--line);border-radius:7px;overflow:hidden;margin-top:12px;"><div id="diffFill2" style="height:100%;width:50%;background:#ffd24a;transition:width .25s, background .25s;"></div></div>
+    <div id="diffLabel2" style="font-size:13px;margin-top:6px;color:#ffe9a8;min-height:34px;text-align:left;"></div>
+    <button class="btn" id="customDone">Looks Terrible. Done ▶</button>
+  </div>
+</div>
+
+<div id="welcomeModal" class="overlay hidden">
+  <div class="panel">
+    <h2 id="welcomeTitle"></h2>
+    <p id="welcomeBody" style="text-align:left; font-size:14.5px; line-height:1.55;"></p>
+    <button class="btn" id="welcomeOk">Unpack the Boxes ▶</button>
+  </div>
+</div>
+
+<div id="tutModal" class="overlay hidden">
+  <div class="panel">
+    <h2 id="tutTitle"></h2>
+    <div id="tutBody"></div>
+    <div id="tutStep"></div>
+    <button class="btn sm grey" id="tutPrev">◀ Back</button>
+    <button class="btn sm" id="tutNext">Next ▶</button>
+    <button class="btn sm alt" id="tutSkip">Skip — let the fines teach me</button>
+  </div>
+</div>
+
+<div id="quitModal" class="overlay hidden">
+  <div class="panel">
+    <h2>🏷️ SELL THE HOUSE?</h2>
+    <p id="quitText">Nobody just <i>leaves</i> an HOA. There are exactly three exits: 🔨 foreclosure, 🎉 dissolving the board, or 🏷️ selling. This is the selling one — you walk away with your equity and your sanity, but the board stays in power. Neither victory nor defeat. Just… suburbia.</p>
+    <button class="btn alt" id="quitYes">List It. Sell It. Leave.</button>
+    <button class="btn grey" id="quitNo">Stay and Fight</button>
+  </div>
+</div>
+
+<div id="endModal" class="overlay hidden">
+  <div class="panel">
+    <h2 id="endTitle"></h2>
+    <p id="endText"></p>
+    <button class="btn" id="againBtn">Back to the Listings ↻</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ================= data =================
+const REGIME_PRESETS = {
+  reasonable: { petty:15, fines:15, dues:20, mercy:100, grudge:10, label:'🌷 The Reasonable Board (allegedly)' },
+  stickler:   { petty:55, fines:50, dues:45, mercy:50,  grudge:50, label:'📋 The Stickler Board' },
+  tyrant:     { petty:95, fines:90, dues:85, mercy:0,   grudge:95, label:'👑 The Tyrannical Board' },
+};
+const CUSTOM_REGIME_LABEL = '🛠️ The Custom Board (your trauma, your settings)';
+const LIV_TIERS = [
+  { max:20,  t:'🏖️ Basically No HOA',            d:'The board meets annually, mostly to cancel the meeting. Frame this settings screen.' },
+  { max:40,  t:'🌷 Livable, Suspiciously',        d:'Occasional beige memos. Someone owns a clipboard but rarely uses it. Stay alert.' },
+  { max:60,  t:'📋 Passive-Aggressive Standard',  d:'Casseroles with subtext. Your grass is being discussed at meetings you weren\'t told about.' },
+  { max:80,  t:'🚨 Full Clipboard State',         d:'Measure your lawn before they do. They will. They have a laser for it.' },
+  { max:101, t:'☠️ Suburban Despotism',           d:'The bylaws have bylaws. The fines have interest. The lawn owns you.' },
+];
+function livScore(homes, years, r){
+  return Math.round(
+    (homes - 30) / 120 * 18 + (years - 5) / 45 * 18
+    + r.petty / 100 * 22 + r.fines / 100 * 14 + r.dues / 100 * 8
+    + (100 - r.mercy) / 100 * 10 + r.grudge / 100 * 10);
+}
+function livTier(score){ return LIV_TIERS.find(t => score < t.max) || LIV_TIERS[LIV_TIERS.length - 1]; }
+// the opening letter matches whatever the player just confessed to on the settings screen
+const WELCOME_LETTERS = [
+  { t:'🎉 CONGRATULATIONS. SERIOUSLY?', b:(p,h) =>
+    `Dear ${p},<br><br>You have described <b>${h}</b> as an HOA that barely governs. Frame this letter — some people search their entire lives. The welcome committee left a fruit basket with <i>zero conditions attached</i>, which frankly makes us nervous on your behalf.<br><br>Enjoy your equity, your unmeasured grass, and the eerie sound of nobody judging you. It won't last. It never lasts.<br><br>— Warmly (and, weirdly, unconditionally),<br>The Welcome Committee` },
+  { t:'🌷 A WARM-ISH WELCOME', b:(p,h) =>
+    `Dear ${p},<br><br>Welcome to <b>${h}</b>, where the board is mostly harmless. Mostly. Someone here owns a clipboard — someone always owns a clipboard — but it stays in the drawer more months than not.<br><br>Our well wishes are genuine. Our smiles are about 60% genuine. Keep the hedge at whatever height feels "neighborly" and you may actually be fine.<br><br>— Warmly,<br>The Welcome Committee` },
+  { t:'🍀 GOOD LUCK. SINCERELY.', b:(p,h) =>
+    `Dear ${p},<br><br>You've described <b>${h}</b> with unsettling accuracy: standard-issue suburban passive aggression. Expect casseroles with subtext, memos in Comic Sans, and your trash can placement discussed at meetings you weren't told about.<br><br>We genuinely wish you luck. You will need a normal amount, which is to say: a lot. Document everything, starting with this letter.<br><br>— With measured warmth,<br>The Welcome Committee` },
+  { t:'🦺 ADVISORY: FLAK JACKET RECOMMENDED', b:(p,h) =>
+    `${p} —<br><br>What you have described at <b>${h}</b> is not a neighborhood. It is a jurisdiction. Practical guidance follows: mow before they measure. Photograph everything, including the photographs. Trust slowly. And never — <i>never</i> — bring up the flag incident of '09.<br><br>The board already knows you're reading this. Wave to the drone.<br><br>— In compliance,<br>The Welcome Committee` },
+  { t:'☠️ WELCOME TO THE OCCUPATION', b:(p,h) =>
+    `${p}.<br><br>You have described <b>${h}</b> as a regime with landscaping. There is no advice at this tier — only doctrine: cash for the fines, evidence for the scared, allies for the vote, and a lawyer on retainer <i>before</i> your first violation matures. You'll get about 30 minutes.<br><br>The fruit basket is a bugging device. "Good luck" is not applicable here.<br><br>— Eternally,<br>The Welcome Committee (est. before you, dissolved never)` },
+];
+const MGMT_NAMES = [
+  'Pinnacle Community Solutions LLC', 'TotalCompliance Partners', 'Harmony Property Group (a subsidiary of Discord Holdings)',
+  'Vanguard Covenant Management', 'ClearView Community Services (no relation to clarity)',
+];
+const PA_NEWSLETTER = [
+  'The newsletter reminds everyone that SOME people still haven\'t returned the communal ladder. You know who you are.',
+  'This month\'s newsletter features a two-page essay on "Mailbox Integrity". It is not <i>not</i> about you.',
+  '"Yard of the Month" went, again, to the president\'s sister. The judging remains "impartial".',
+  'A "friendly reminder" about noise appeared in the newsletter. It was printed in all caps.',
+  'The newsletter now has a "Violations Corner". It has a mascot. The mascot is a frowning acorn.',
+  'The newsletter thanks "most residents" for their compliance. The italics were audible.',
+];
+const ANNUAL = 12; // annual meetings recur every 12 months; the game runs until you win, lose, or sell
+const AI_EVENTS = [
+  () => { issueViolation('Algorithmic citation: "lawn entropy detected" (issued 3:11 AM)', '🤖');
+          log('🤖 The board\'s compliance AI cited you at 3:11 AM. It does not sleep. It does not dream.', 'bad'); },
+  () => { S.rep = Math.max(0, S.rep - 1);
+          log('🤖 The AI newsletter ran a generated image of "your" lawn with 7 flamingos. You own zero flamingos. −1 ⭐.', 'bad'); },
+  () => { S.dues += 5;
+          log('🤖 The board\'s AI "optimized" the budget. Dues +$5. The optimization consultant was the AI itself.', 'bad'); },
+];
+const TUTORIAL_STEPS = [
+  { t:'🎯 The Goal', b:'Nobody just leaves an HOA. There are exactly three exits:<br><br>🎉 <b>Win</b> — vote the board out of existence at a meeting.<br>🔨 <b>Lose</b> — your 🏠 equity hits zero and the bank takes the house.<br>🏷️ <b>Sell</b> — your choice, anytime you still have equity. Not a victory, not a defeat; the board simply outlives you.<br><br>There is no timer — the siege continues until one of the three happens. Every ending shows your <b>final score</b>: equity, cash, allies, exposed spies, and reputation all count.' },
+  { t:'📊 Your Stats', b:'💵 <b>Cash</b> — pays for everything; dues drain it monthly.<br>🏠 <b>Equity</b> — your health bar. Liens, blight, and market shocks eat it.<br>🛠️ <b>Condition</b> — decays every month. Below 50% inspections cite you; below 40% equity rots. At 80%+ you get <b>+1⚡</b>.<br>😠 <b>Board anger</b> — angrier boards act more each month.<br>📸 <b>Evidence</b> — fuels legal contests AND gives scared neighbors courage to vote.<br>⭐ <b>Reputation</b> — at 8+ you get <b>+1⚡</b>; fence-sitters won\'t back a nobody.<br>🌳 <b>Commons</b> — the board lets them rot, dragging everyone\'s equity. Fix them yourself.<br>📞 <b>Communication</b> — a separate, generous budget for chats, favors, and planted messages. Talk is cheap; use lots of it.<br>📈 <b>Comparables</b> — the neighborhood\'s tracked sale prices. Your equity drifts with them, and falling comps radicalize everyone against the board.' },
+  { t:'⚡ Actions', b:'🌱 <b>Mow</b> before inspections — check your board for an Enforcer.<br>💼 <b>Overtime</b> pays more each consecutive month ($80→$160), double in 🔥 crunch months.<br>🏷️ <b>Yard Sale</b> scales with reputation.<br>📸 <b>Document</b> early — you\'ll want 3+ evidence at every vote.<br>🏛️ <b>Attend the meeting</b> to learn the board\'s true monthly plan. Costs 1⚡; never lies.<br>🔨 <b>Improvements</b> boost equity but neighbors report "unapproved construction".<br>⚖️ <b>The lawyer</b> unlocks contests and shakes up alliances.' },
+  { t:'📋 Violations', b:'Citations have deadlines. Miss one: the fine is charged and it <b>escalates</b> (doubled). Miss again: <b>lien</b>, −15 equity.<br><br>✅ <b>Comply</b> — pay half the fine, done.<br>⚖️ <b>Contest</b> — needs the lawyer, $30, and 1📸. Always wins.<br>📨 <b>Appeal</b> — free, freezes the deadline a month while "the committee reviews". It is <b>always denied</b> ("Appeal denied: your tone."). Use it purely to buy time.' },
+  { t:'🏘️ Neighbors', b:'Every neighbor is secretly a truthful <b>friend</b>, a scared <b>fence-sitter</b>, or a <b>deceiver</b> reporting to the board. All of them offer intel about the board\'s secret monthly plan — deceivers\' first tip is TRUE to earn your trust.<br><br>Watch the <b>✓/✗ record</b> on their card — but carefully: friends are occasionally <i>honestly wrong</i>, and good spies are right most of the time. Expect a year of chatter before you can truly sort the street. 🚨 <b>Accuse</b> only with a pattern, not a single ✗.<br><br>Every neighbor also <b>sways a circle of households</b> (shown in their dossier) — and 🌐 super-connectors float through every circle: message carriers as allies, wide-reach spies otherwise. 📨 <b>Plant messages</b> (1📞) to win blocs before a vote — through the wrong person, your words come back rearranged. And neighbors <b>sell and move</b>: their replacement inherits the circle with an unknown allegiance.' },
+  { t:'🏛️ The Board', b:'Your board members are people — terrible people. Each has an archetype (📏 Enforcer, 🧮 Treasurer-for-Life, 📜 Parliamentarian, 📢 Megaphone, 🕰️ Founder, 🏗️ Declarant) and <b>pushes their own obsessions onto the monthly agenda</b>.<br><br>Read the roster panel: an Enforcer-heavy board means keep the lawn tight; a Founder/Parliamentarian board means constant bylaw amendments. Every board action in the log is signed by its author.' },
+  { t:'🗳️ Meetings & the Recall', b:'The <b>annual meeting</b> comes every 12th month. With enough allies you can 📢 <b>petition</b> a special meeting early (re-usable after a failed vote).<br><br>The vote is <b>community-wide</b>: every home casts a ballot. Primaries vote their conscience (friends need to know you; fence-sitters need ★★ trust, evidence, and ⭐5+ rep; unexposed deceivers vote no) — and each one <b>delivers their influence circle</b>, scaled by how much you\'ve swayed it. Unaffiliated homes follow your reputation. Falling 📈 comps make every group angrier at the board. Win the majority of ballots.<br><br>⚠️ And if the board ever hires a <b>management company</b>, everyone\'s equity bleeds monthly — rally enough allies and 🔥 fire them to claw back every point they drained.' },
+  { t:'🤖 AI & 💾 Saving', b:'The <b>🤖 AI assistant</b> is a deal with the devil: ON, you get a monthly strategic advisor that reads the field and sometimes leaks the board\'s real plans — but <b>everyone gets AI</b>: the board acts more often, files algorithmic 3 AM citations, and "optimizes" your dues. Toggle it anytime; decide if the intel is worth the arms race.<br><br>💾 The game <b>autosaves every month</b> — close the tab whenever; the menu will offer to resume. Good luck. The board already knows you\'re reading this.' },
+];
+
+const VIOLATIONS = [
+  'Garden gnome operating without a Gnome License',
+  'Grass measured at 2.1 inches (limit: 2.0)',
+  'Trash cans visible from the street for 11 minutes',
+  'Mailbox painted Beige #7 (only Beige #4 approved)',
+  'Flag determined to be 3 inches too patriotic',
+  'Wind chimes classified as "unauthorized outdoor music"',
+  'Bird feeder attracting unauthorized birds',
+  'Family observed experiencing excessive joy in front yard',
+  'Vehicle parked in own driveway. Overnight.',
+  'Dog bark exceeds community decibel covenant',
+  'Porch light emitting non-approved lumens',
+  'Welcome mat exceeds federally friendly limits',
+  'Garden hose coiled counter-clockwise',
+  'Residual holiday spirit detected in March',
+];
+const RULES_PASSED = [
+  'Resolution 88-B: all gnomes must now be licensed AND insured.',
+  'Resolution 91: pickup trucks reclassified as "farm equipment". Banned.',
+  'Resolution 94: basketball hoops are officially "street menaces".',
+  'Resolution 97: koi ponds require an Aquatic Livestock Permit.',
+  'Resolution 101: holiday lights banned 11 months per year.',
+  'Resolution 104: lawn ornaments capped at zero (0) per lawn.',
+  'Resolution 108: all fences must be exactly fence-colored.',
+  'Resolution 112: bird baths must submit weekly water samples.',
+];
+const RUMORS = [
+  'your koi are unlicensed and "possibly foreign"',
+  'you rent your basement to a jazz band',
+  'your compost pile is "getting political"',
+  'you waved at the mail carrier "aggressively"',
+  'your sprinklers run at non-approved angles',
+];
+const ASSESS_REASONS = [
+  'resurfacing the pool (closed since 2019)',
+  'the gazebo fund (there is no gazebo)',
+  'legal fees from suing a different neighborhood',
+  'a bronze statue of the board president',
+  'drone maintenance',
+];
+const FIRST_NAMES = ['Marge','Phil','Dottie','Russ','Linda','Gary','Sue','Ted','Carol','Dennis','Yolanda','Herb',
+  'Patrice','Walt','Nadia','Cliff','Bev','Stan','Rhonda','Earl','Tammy','Vern','Lucille','Ray','Opal','Gus',
+  'Marcy','Sal','Ingrid','Buck','Fern','Monty'];
+const NEIGHBOR_ICONS = ['🧓','👨‍🦳','👵','🧔','💁‍♀️','🕶️','👩‍🌾','🎣','🧑‍🍳','👷‍♀️','🧑‍🏫','👩‍🔧','🧶','🛹','🎺','🚴'];
+const REVEALS = [
+  { after:4,  txt:'Courthouse records reveal the previous owner never permitted the sunroom. Yours now. −5 🏠.', fx(){ S.equity -= 5; } },
+  { after:6,  txt:'The neighborhood was built on a "decommissioned" golf-course landfill. Comps sag −3%.', fx(){ S.comps = Math.max(70, S.comps - 3); } },
+  { after:8,  txt:'The HOA quietly lost a lawsuit in 2019. The judgment remains unpaid. Dues +$5, comps −2%.', fx(){ S.dues += 5; S.comps = Math.max(70, S.comps - 2); } },
+  { after:10, txt:'Your street\'s sewer line was "value-engineered" in a way actual engineers deny. −4 🏠.', fx(){ S.equity -= 4; } },
+  { after:12, txt:'The reserve fund was invested in the president\'s nephew\'s kombucha brand. It did not ferment well. Comps −3%.', fx(){ S.comps = Math.max(70, S.comps - 3); } },
+];
+const REL_NAMES = ['Stranger', 'Acquaintance', 'Confidant', 'Inner Circle'];
+// every mechanical knob derives continuously from the sliders — the world IS the settings
+function buildConfig(){
+  const homes = +document.getElementById('sHomes').value;
+  const years = +document.getElementById('sYears').value;
+  const r = {
+    petty:+document.getElementById('sPetty').value, fines:+document.getElementById('sFines').value,
+    dues:+document.getElementById('sDues').value, mercy:+document.getElementById('sMercy').value,
+    grudge:+document.getElementById('sGrudge').value,
+  };
+  const a = (years - 5) / 45, z = (homes - 30) / 120; // 0..1 age & size factors
+  const neighbors = 4 + Math.round(z * 4);
+  const size = {
+    label:`${homes} homes`, neighbors,
+    boardCount:3 + (homes >= 70 ? 1 : 0) + (homes >= 120 ? 1 : 0),
+    planBonus:homes >= 120 ? 1 : 0,
+    petition:Math.ceil(neighbors / 2),
+    rumorRep:homes >= 120 ? 2 : 1,
+    outreach:0.6 - z * 0.25,
+  };
+  const age = {
+    label:`${years} years old`,
+    legacy:Math.round(a * 6), commonsStart:Math.round(80 - a * 35), commonsDecay:Math.round(2 + a * 4),
+    fineAdd:+(a * 0.3).toFixed(2), assessMult:+(1 + a * 0.5).toFixed(2), infra:+(0.05 + a * 0.25).toFixed(2),
+    eqBonus:Math.round(a * 20), amendWeight:years >= 35 ? 2 : years >= 20 ? 1 : 0,
+    special:years <= 12 ? 'declarant' : years >= 35 ? 'founder' : null,
+  };
+  const preset = REGIME_PRESETS[chosenRegime];
+  const diff = {
+    label:preset ? preset.label : CUSTOM_REGIME_LABEL,
+    equity:100, cash:300, income:100, ap:3,
+    dues:Math.round(20 + r.dues / 100 * 45 + z * 20),
+    actions:1 + (r.petty >= 40 ? 1 : 0) + (r.petty >= 80 ? 1 : 0),
+    deadline:r.mercy >= 67 ? 3 : r.mercy >= 34 ? 2 : 1,
+    fineMult:+(0.7 + r.fines / 100 * 0.9).toFixed(2),
+    angerRamp:Math.round(2 + r.grudge / 100 * 7),
+    sleepy:r.petty < 30, // a lazy board occasionally skips a beat
+  };
+  const score = livScore(homes, years, r);
+  const tier = score < 40 ? 'easy' : score < 70 ? 'medium' : 'expert';
+  const lt = livTier(score);
+  return { homes, years, r, size, age, diff, score, tier, tierIdx:LIV_TIERS.indexOf(lt), liv:`${lt.t} (${score}/100)`, livDesc:lt.d };
+}
+const LEGACY_RULES = [
+  'Legacy rule (1987): garage doors may be open no longer than 90 seconds.',
+  'Legacy rule (1992): curtains visible from the street must be "off-white or regret-beige".',
+  'Legacy rule (1979): no vehicle may bear a bumper sticker of any kind or opinion.',
+  'Legacy rule (1984): lemonade stands require a Commercial Beverage Permit.',
+  'Legacy rule (1990): satellite dishes are "an admission of failure". Banned.',
+  'Legacy rule (1988): hammocks imply idleness. Banned.',
+];
+const INFRA_EVENTS = [
+  () => { const amt = Math.round(50 * S.age.assessMult); charge(amt, 'an emergency assessment'); S.stats.assessed += amt;
+          log(`🏚️ AGING INFRASTRUCTURE: the clubhouse roof finally gave in. Emergency assessment −$${amt}.`, 'bad'); },
+  () => { S.commons = Math.max(0, S.commons - 10);
+          log('🚿 AGING INFRASTRUCTURE: the original pipes burst under the commons (−10% 🌳). The geyser is "being monitored".', 'bad'); },
+  () => { S.dues += 5;
+          log('🧾 RESERVE STUDY: total reserves located: $61.17. Dues +$5 to "rebuild the future fund".', 'bad'); },
+  () => { S.commons = Math.max(0, S.commons - 5);
+          log('⛲ The entrance fountain (installed 1985) now makes a coughing sound (−5% 🌳). A committee has been formed.', 'bad'); },
+];
+const BOARD_ARCHS = {
+  enforcer:        { ico:'📏', title:'The Enforcer',        desc:'Owns a laser grass-gauge. Files citations recreationally.', kinds:['violation','inspection'] },
+  treasurer:       { ico:'🧮', title:'Treasurer-for-Life',  desc:'Money has been "finding itself missing" since 2009. Loves an assessment.', kinds:['assessment','duesHike'] },
+  parliamentarian: { ico:'📜', title:'The Parliamentarian', desc:'Quotes Robert\'s Rules at children. Amends bylaws for sport.', kinds:['rule','amend'] },
+  megaphone:       { ico:'📢', title:'The Megaphone',       desc:'Runs three community Facebook groups. All of them hostile.', kinds:['rumor','rule'] },
+  founder:         { ico:'🕰️', title:'The Founder',         desc:'President since the Reagan administration. Considers the bylaws "his".', kinds:['amend','duesHike'] },
+  declarant:       { ico:'🏗️', title:'The Declarant',       desc:'Works for the developer. Technically owns the retention pond.', kinds:['assessment','violation'] },
+};
+const BOARD_NAMES = ['Hargrove','Prudence','Willoughby','Doris','Chet','Eugenia','Mort','Balthazar'];
+const HOA_ADJ = ['Pleasant','Whispering','Rolling','Stately','Harmony','Quail Hollow','Golden Pond','Eagle Crest','Tranquil','Regal','Sunny Glen','Copper Kettle'];
+const HOA_NOUN = ['Meadows','Pines','Estates','Commons','Glen','Acres','Landing','Preserve','Villas','Crossing','Bluffs','Hollow'];
+function randomHoaName(){ return pick(HOA_ADJ) + ' ' + pick(HOA_NOUN); }
+function esc(s){ return String(s).replace(/[<>&"']/g, ''); }
+const DIFF_FLAVOR = {
+  easy:'Semi-retired; occasionally naps mid-citation.',
+  medium:'Diligent in the worst possible way.',
+  expert:'Has nothing but time.',
+};
+const PLAN_DESC = {
+  violation:'a citation blitz', inspection:'a surprise inspection', assessment:'a special assessment',
+  rule:'a new rule vote', rumor:'a smear campaign', duesHike:'a dues increase', amend:'a bylaw amendment',
+};
+const MARKET_EVENTS = [
+  { txt:'A comparable house sold WAY over asking.', eq:6 },
+  { txt:'A highway extension was announced two streets over.', eq:-8 },
+  { txt:'An HGTV crew filmed a "Charming Cul-de-sacs" segment nearby.', eq:5 },
+  { txt:'A sinkhole opened near the retention pond. It has a name now.', eq:-6 },
+  { txt:'The appraisal district made an error in your favor.', eq:4 },
+  { txt:'Zillow shaved your estimate for "vibes".', eq:-4 },
+];
+const APPEAL_DENIALS = [
+  'Appeal denied: submitted in blue ink. Blue-black ink is required.',
+  'Appeal denied: the committee "could not locate" your appeal. Here is its denial anyway.',
+  'Appeal denied: quorum was not met, except for the vote to deny.',
+  'Appeal denied: your tone.',
+  'Appeal denied: appeals are reviewed by the person who cited you.',
+  'Appeal denied: form 27-B was replaced by form 27-B(revised) while you were filling it out.',
+];
+
+// ================= audio =================
+let AC = null;
+function ensureAC(){
+  if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+  return AC;
+}
+function beep(freq, dur, type, vol){
+  try{
+    ensureAC();
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type || 'square'; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol || 0.04, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + (dur || 0.1));
+    o.connect(g); g.connect(AC.destination);
+    o.start(); o.stop(AC.currentTime + (dur || 0.1));
+  }catch(e){}
+}
+function shuffle(a){ for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+// ---------- background music: generative suburban muzak, never the same twice ----------
+const Music = {
+  on:(() => { try{ return localStorage.getItem('hoaMusic') !== '0'; }catch(e){ return true; } })(),
+  started:false, master:null, timer:null, nextBar:0, barCount:0, chordIdx:0, prog:null, lastMel:72,
+  BAR:2.8, // ~86bpm — pleasant, unhurried, keeps you building
+  PROGS:[ // [bassMidi, ...padMidis] per chord — warm maj7/min7 loops, pure sim-game comfort
+    [[36,60,64,67,71],[33,57,60,64,67],[29,57,60,65,69],[31,55,59,62,67]], // C  Am  F  G
+    [[33,57,60,64,67],[29,57,60,65,69],[36,60,64,67,71],[31,55,59,62,67]], // Am F  C  G
+    [[38,62,65,69,72],[36,60,64,67,71],[33,57,60,64,67],[31,55,59,62,67]], // Dm C  Am G
+    [[29,53,57,60,65],[31,55,59,62,67],[33,57,60,64,67],[36,60,64,67,71]], // F  G  Am C
+  ],
+  SCALE:[60,62,64,67,69,72,74,76], // C major pentatonic — impossible to play a wrong note
+  f(m){ return 440 * Math.pow(2, (m - 69) / 12); },
+  tone(freq, t, dur, vol, type){
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + Math.min(1.1, dur * 0.4));
+    g.gain.setValueAtTime(vol, t + dur * 0.7);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(this.master);
+    o.start(t); o.stop(t + dur + 0.05);
+  },
+  bar(t){
+    const chord = this.prog[this.chordIdx];
+    // warm pads, sustained across two bars
+    if (this.barCount % 2 === 0){
+      for (let i = 1; i < chord.length; i++){
+        this.tone(this.f(chord[i]) * (1 + (Math.random() * 0.002 - 0.001)), t, this.BAR * 2.2, 0.016, 'triangle');
+      }
+    }
+    // soft round bass on beats 1 and 3
+    this.tone(this.f(chord[0]), t, this.BAR * 0.45, 0.035, 'sine');
+    this.tone(this.f(chord[0] + (Math.random() < 0.25 ? 7 : 0)), t + this.BAR / 2, this.BAR * 0.4, 0.028, 'sine');
+    // gentle e-piano plinks: pentatonic strolling, each note with a soft octave shimmer
+    for (let s = 0; s < 8; s++){
+      if (Math.random() < 0.25){
+        let idx = this.SCALE.indexOf(this.lastMel);
+        if (idx < 0) idx = 4;
+        idx = Math.max(0, Math.min(this.SCALE.length - 1, idx + Math.floor(Math.random() * 3) - 1));
+        this.lastMel = this.SCALE[idx];
+        const when = t + s * this.BAR / 8;
+        this.tone(this.f(this.lastMel), when, 0.85, 0.02, 'sine');
+        this.tone(this.f(this.lastMel + 12), when, 0.5, 0.006, 'sine'); // the shimmer
+      }
+    }
+    // a soft chime at the top of each 8-bar phrase — the "your town is fine" bell
+    if (this.barCount % 8 === 0){
+      this.tone(this.f(chord[chord.length - 1] + 12), t, 2.2, 0.012, 'sine');
+    }
+    if (this.barCount % 2 === 1){
+      this.chordIdx++;
+      if (this.chordIdx >= this.prog.length){
+        this.chordIdx = 0;
+        if (Math.random() < 0.5) this.prog = pick(this.PROGS); // drift to a new loop, never the same twice
+      }
+    }
+    this.barCount++;
+  },
+  tick(){
+    if (!this.started) return;
+    while (this.nextBar < AC.currentTime + 1.2){
+      this.bar(this.nextBar);
+      this.nextBar += this.BAR;
+    }
+    this.timer = setTimeout(() => this.tick(), 400);
+  },
+  start(){
+    if (this.started || !this.on) return;
+    try{
+      ensureAC();
+      if (AC.state === 'suspended') AC.resume();
+      if (!this.master){
+        this.master = AC.createGain();
+        this.master.gain.value = 0.9;
+        this.master.connect(AC.destination);
+      }
+      this.started = true;
+      this.prog = pick(this.PROGS);
+      this.chordIdx = 0;
+      this.nextBar = AC.currentTime + 0.15;
+      this.tick();
+    }catch(e){}
+  },
+  stop(){
+    this.started = false;
+    if (this.timer) clearTimeout(this.timer);
+    if (this.master && AC){
+      try{ this.master.gain.setTargetAtTime(0.0001, AC.currentTime, 0.25); }catch(e){}
+      const m = this.master;
+      this.master = null;
+      setTimeout(() => { try{ m.disconnect(); }catch(e){} }, 1500);
+    }
+  },
+  toggle(){
+    this.on = !this.on;
+    try{ localStorage.setItem('hoaMusic', this.on ? '1' : '0'); }catch(e){}
+    if (this.on) this.start(); else this.stop();
+    syncMusicBtn();
+  },
+};
+function syncMusicBtn(){
+  const b = document.getElementById('musicBtn');
+  if (b) b.textContent = Music.on ? '🎵' : '🔇';
+}
+
+// ================= state =================
+let S = null;
+let chosenRegime = 'stickler';
+let vioId = 0;
+
+function makeNeighbors(count, homes){
+  const names = shuffle([...FIRST_NAMES]).slice(0, count);
+  // guarantee one of each type; distribute the rest in a fixed rotation, then shuffle
+  const extras = ['friend','deceiver','fence','deceiver','friend'];
+  const types = shuffle(['friend','fence','deceiver', ...extras.slice(0, Math.max(0, count - 3))]);
+  // influence blocs: everyone sways a circle of households; 1-2 super-connectors float through all of them
+  const superIdx = new Set(shuffle([...Array(count).keys()]).slice(0, count >= 7 ? 2 : 1));
+  const weights = names.map((_, i) => superIdx.has(i) ? 2.6 : 0.6 + Math.random() * 0.9);
+  const wSum = weights.reduce((a, b) => a + b, 0);
+  const blocPool = Math.max(0, homes - 1 - count) * 0.75; // ~75% of homes listen to somebody
+  return names.map((nm, i) => ({
+    name:nm, ico:pick(NEIGHBOR_ICONS), type:types[i],
+    superInfluencer:superIdx.has(i), influence:Math.max(1, Math.round(blocPool * weights[i] / wSum)), sway:0,
+    rel:0, tips:[], alliance:false, exposed:false, hostile:false, accused:false, chattedMonth:-1, plantedMonth:-1,
+  }));
+}
+function replaceNeighbor(i){
+  const old = S.neighbors[i];
+  const used = new Set(S.neighbors.map(n => n.name));
+  let nm = pick(FIRST_NAMES), g = 0;
+  while (used.has(nm) && g++ < 60) nm = pick(FIRST_NAMES);
+  const price = Math.round(S.comps + (Math.random() * 4 - 2));
+  S.sales.push({ month:S.month, name:old.name, price });
+  S.comps = Math.max(70, S.comps - (price < 100 ? 0.6 : 0.2));
+  S.neighbors[i] = { name:nm, ico:pick(NEIGHBOR_ICONS), type:pick(['friend','fence','deceiver']),
+    superInfluencer:old.superInfluencer, influence:old.influence, sway:0,
+    rel:0, tips:[], alliance:false, exposed:false, hostile:false, accused:false, chattedMonth:-1, plantedMonth:-1 };
+  log(`🚚 <b>${old.name}</b> sold at ${price}% of peak and moved out${old.alliance ? ' — there goes an ally' : ''}. ` +
+      `<b>${nm}</b> moved in: brand-new curtains, unknown allegiance, and ${old.influence} homes' worth of inherited influence. Start over.`, 'bad');
+  renderStrip();
+}
+function makeBoard(size, age){
+  const names = shuffle([...BOARD_NAMES]);
+  const archKeys = ['enforcer','treasurer','parliamentarian','megaphone','enforcer'].slice(0, size.boardCount);
+  if (age.special) archKeys[0] = age.special; // the president reflects the community's age
+  return archKeys.map((k, i) => ({ name:names[i], arch:BOARD_ARCHS[k], president:i === 0 }));
+}
+function renderBoard(){
+  const box = document.getElementById('boardBox');
+  box.innerHTML = S.board.map(m =>
+    `<div class="bm" title="${DIFF_FLAVOR[S.diffKey]}">${m.arch.ico} <b>${m.name}</b>${m.president ? ' 👑' : ''} — ${m.arch.title}` +
+    `<br><span class="bd">${m.arch.desc}</span></div>`
+  ).join('') +
+  (S.livLabel ? `<div class="bm" style="margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;">📊 <b>Livability:</b> ${S.livLabel}<br><span class="bd">${S.livDesc || ''}</span></div>` : '');
+}
+function newGame(cfg){
+  const d = cfg.diff, age = cfg.age, size = cfg.size;
+  vioId = 0;
+  const neighbors = makeNeighbors(size.neighbors, cfg.homes);
+  const unaffiliated = Math.max(0, cfg.homes - 1 - neighbors.length - neighbors.reduce((a, n) => a + n.influence, 0));
+  return {
+    mode:'playing', diffKey:cfg.tier, diff:d, age, size, factions:true,
+    comms:8, commsMax:8, comps:100, sales:[], revealsFired:[], unaffiliated,
+    livLabel:cfg.liv, livDesc:cfg.livDesc, livTierIdx:cfg.tierIdx, homes:cfg.homes, years:cfg.years,
+    month:1, ap:d.ap, apMax:d.ap, cash:d.cash, equity:d.equity, eqMax:d.equity + 60 + age.eqBonus,
+    condition:70, anger:0, evidence:0, rep:5, dues:d.dues,
+    commons:age.commonsStart, otStreak:0, workedOT:false, otBonus:false, lastYardSale:-9, holdMonth:false,
+    fineBonus:age.fineAdd, freeComply:false,
+    violations:[], rules:LEGACY_RULES.slice(0, age.legacy), neighbors,
+    board:makeBoard(size, age),
+    voteNeed:Math.ceil(size.neighbors / 2), petitionNeed:size.petition, ai:false,
+    mgmtCo:null, mgmtCoCooldown:0,
+    plan:[], planRevealed:false, improvedThisMonth:false, lawyer:false,
+    socialTarget:null, meetingHeld:false, petitioned:false,
+    stats:{ complied:0, contested:0, liens:0, tipsTrue:0, tipsFalse:0, exposed:0, wrongAccusals:0, assessed:0, appeals:0, amendments:0 },
+  };
+}
+
+// ================= log =================
+function log(msg, cls){
+  const el = document.createElement('div');
+  el.className = cls || 'info';
+  el.innerHTML = msg;
+  const box = document.getElementById('log');
+  box.prepend(el);
+  while (box.children.length > 80) box.removeChild(box.lastChild);
+}
+function logMonth(){
+  const el = document.createElement('div');
+  el.className = 'mh';
+  el.textContent = `— Month ${S.month} —`;
+  document.getElementById('log').prepend(el);
+}
+function setTicker(t){ document.getElementById('ticker').textContent = t; }
+
+// ================= money =================
+function charge(amount, why){
+  // cash first; shortfall taps home equity ($10 = 1 equity)
+  const fromCash = Math.min(S.cash, amount);
+  S.cash -= fromCash;
+  const short = amount - fromCash;
+  if (short > 0){
+    const eqHit = Math.ceil(short / 10);
+    S.equity -= eqHit;
+    log(`💳 Couldn't cover $${short} of ${why} — dipped into home equity (−${eqHit} 🏠).`, 'bad');
+  }
+}
+
+// ================= board plan =================
+function makePlan(){
+  const d = S.diff;
+  let count = d.actions + S.size.planBonus + (S.anger >= 50 ? 1 : 0) + (S.anger >= 80 ? 1 : 0)
+            + (S.ai && Math.random() < 0.4 ? 1 : 0); // the board's AI never sleeps
+  if (S.diff.sleepy && Math.random() < 0.3) count = Math.max(0, count - 1); // a lazy board skips a beat
+  if (S.comps < 85 && Math.random() < 0.25) count = Math.max(0, count - 1); // the board spent the meeting arguing about Zillow
+  const kinds = ['violation','violation','inspection','assessment','rule','rumor','duesHike','amend'];
+  for (let i = 0; i < S.age.amendWeight; i++) kinds.push('amend'); // old boards amend compulsively
+  const plan = [];
+  for (let i = 0; i < count; i++){
+    const member = pick(S.board);
+    // board personalities drive the agenda: members push their own obsessions
+    let k = Math.random() < 0.7 ? pick(member.arch.kinds) : pick(kinds);
+    if ((k === 'duesHike' || k === 'amend') && plan.some(p => p.kind === k)) k = 'violation';
+    plan.push({ kind:k, by:member });
+  }
+  S.plan = plan;
+  S.planRevealed = false;
+}
+
+// ================= tips (intel about this month's plan) =================
+function planSummaryTrue(){
+  if (!S.plan.length) return { text:'nothing at all — a quiet month', kind:null };
+  const p = pick(S.plan);
+  return { text:PLAN_DESC[p.kind], kind:p.kind };
+}
+function makeTip(n){
+  const month = S.month;
+  let text, truthful, claim = true;
+  const realKinds = S.plan.map(p => p.kind);
+  if (n.type === 'friend'){
+    truthful = Math.random() < 0.88; // honest, but occasionally honestly wrong — trust takes a year to calibrate
+    if (truthful){
+      const t = planSummaryTrue();
+      text = S.plan.length
+        ? `I saw the agenda — the board is planning ${t.text} this month. Get ahead of it.`
+        : `Good news for once: the agenda is empty. A genuinely quiet month.`;
+    } else {
+      const fake = pick(Object.keys(PLAN_DESC).filter(k => !realKinds.includes(k)));
+      text = `I saw the agenda — pretty sure it said ${PLAN_DESC[fake] || 'a bake sale'} this month. My glasses were in the car, but pretty sure.`;
+    }
+  } else if (n.type === 'fence'){
+    if (Math.random() < 0.6){
+      truthful = true;
+      text = S.plan.length
+        ? `*whispers* Maybe don't plan any vacations this month. Something about ${planSummaryTrue().text}. Please forget my name.`
+        : `*whispers* I think… I think this month is actually safe. Don't quote me. Ever.`;
+    } else {
+      truthful = true; claim = false;
+      text = pick([
+        `They keep minutes, you know. Real minutes. I've seen things in those minutes.`,
+        `Just… keep your receipts. Keep ALL your receipts.`,
+        `The president waters his lawn at midnight. Make of that what you will.`,
+      ]);
+    }
+  } else { // deceiver
+    if (n.tips.length < 2 || Math.random() < 0.55){
+      // trust-builders and maintenance truths — a good spy is right MOST of the time
+      truthful = true;
+      text = S.plan.length
+        ? `Between us? Word is there's ${planSummaryTrue().text} coming this month. Us homeowners have to stick together! 😊`
+        : `Between us? Quiet month ahead. See, I always share what I hear! 😊`;
+    } else {
+      truthful = false;
+      if (S.plan.length){
+        const fake = pick(Object.keys(PLAN_DESC).filter(k => !realKinds.includes(k)));
+        text = pick([
+          `Relax! I have it on good authority the agenda is completely EMPTY this month.`,
+          `My board contact says the only thing coming is ${PLAN_DESC[fake] || 'a bake sale'}. Nothing else. Promise.`,
+        ]);
+      } else {
+        text = `Huge month coming — ${PLAN_DESC[pick(Object.keys(PLAN_DESC))]}, at least! I'd spend everything on defenses NOW.`;
+      }
+    }
+  }
+  const tip = { month, text, truthful, claim, resolved:false };
+  n.tips.push(tip);
+  return tip;
+}
+function resolveTips(){
+  for (const n of S.neighbors){
+    for (const t of n.tips){
+      if (!t.resolved && t.month <= S.month){
+        t.resolved = true;
+        if (t.claim){ t.truthful ? S.stats.tipsTrue++ : S.stats.tipsFalse++; }
+      }
+    }
+  }
+}
+
+// ================= violations =================
+function issueViolation(reason, why){
+  const fine = Math.round((40 + Math.random() * 50) * (S.diff.fineMult + S.fineBonus));
+  S.violations.push({ id:++vioId, txt:reason, fine, deadline:S.diff.deadline, escalated:false });
+  log(`📬 VIOLATION${why ? ' ' + why : ''}: "${reason}" — fine $${fine}, ${S.diff.deadline} month(s) to respond.`, 'bad');
+}
+function tickViolations(lines){
+  for (const v of [...S.violations]){
+    if (v.underAppeal) continue; // deadline frozen while "the committee reviews"
+    v.deadline--;
+    if (v.deadline <= 0){
+      if (!v.escalated){
+        charge(v.fine, 'an expired fine');
+        v.escalated = true; v.fine *= 2; v.deadline = S.diff.deadline;
+        S.anger = Math.min(100, S.anger + 5);
+        lines.push(`⏰ Deadline blown on "${v.txt}" — fine of $${v.fine/2} charged, citation ESCALATED (now $${v.fine}).`);
+      } else {
+        S.violations = S.violations.filter(x => x !== v);
+        S.equity -= 15; S.stats.liens++;
+        S.anger = Math.min(100, S.anger + 10);
+        lines.push(`🏦 LIEN FILED over "${v.txt}" — −15 🏠 equity. This is how they get you.`);
+      }
+    }
+  }
+}
+
+// ================= board phase =================
+function boardPhase(){
+  const lines = [];
+  // deceiver leak: an allied or trusted unexposed deceiver feeds the board
+  const leak = S.neighbors.find(n => n.type === 'deceiver' && !n.exposed && (n.alliance || n.rel >= 2));
+  for (const p of S.plan){
+    const who = p.by ? `${p.by.arch.ico} ${p.by.name}: ` : '';
+    if (p.kind === 'violation'){
+      const reason = pick(VIOLATIONS);
+      const fine = Math.round((40 + Math.random() * 50) * (S.diff.fineMult + S.fineBonus));
+      S.violations.push({ id:++vioId, txt:reason, fine, deadline:S.diff.deadline, escalated:false });
+      lines.push(`${who}📬 Citation issued: "${reason}" — fine $${fine}, respond within ${S.diff.deadline} month(s).`);
+    } else if (p.kind === 'inspection'){
+      if (S.condition < 50){
+        const reason = 'Property condition below community standards (' + S.condition + '%)';
+        const fine = Math.round(60 * (S.diff.fineMult + S.fineBonus));
+        S.violations.push({ id:++vioId, txt:reason, fine, deadline:S.diff.deadline, escalated:false });
+        lines.push(`${who}🔍 SURPRISE INSPECTION: your condition (${S.condition}%) failed. Citation issued — $${fine}.`);
+      } else {
+        lines.push(`${who}🔍 SURPRISE INSPECTION: clipboard out, white gloves on… nothing found (${S.condition}%). They seemed genuinely sad.`);
+      }
+    } else if (p.kind === 'assessment'){
+      const amt = Math.round((30 + Math.random() * 40) * S.diff.fineMult * S.age.assessMult);
+      charge(amt, 'a special assessment');
+      S.stats.assessed += amt;
+      if (Math.random() < 0.4){
+        S.commons = Math.min(100, S.commons + 5);
+        lines.push(`${who}🌳 "BEAUTIFICATION" ASSESSMENT: −$${amt}. The commons improved 5%. A consultant was paid $4,000 to recommend mulch.`);
+      } else {
+        lines.push(`${who}🏊 SPECIAL ASSESSMENT: −$${amt} for ${pick(ASSESS_REASONS)}.`);
+      }
+    } else if (p.kind === 'amend'){
+      S.stats.amendments++;
+      const roll = Math.random();
+      if (roll < 0.3){
+        S.dues += 5;
+        const txt = `Amendment ${12 + S.stats.amendments}: "founding families" exempted from dues increases. You are not a founding family. Dues +$5.`;
+        S.rules.push(txt); lines.push(`${who}📋 BYLAWS AMENDED: ${txt}`);
+      } else if (roll < 0.6){
+        const target = S.neighbors.find(n => n.type !== 'deceiver' && !n.bribed && !n.hostile && !n.exposed);
+        if (target){
+          target.bribed = true;
+          const txt = `Amendment ${12 + S.stats.amendments}: ${target.name}'s ${pick(['gazebo','koi pond','flagpole','carport'])} is retroactively exempted from all rules.`;
+          S.rules.push(txt);
+          lines.push(`${who}📋 BYLAWS AMENDED: ${txt} ${target.name} seems suddenly… fond of the board.`);
+        } else {
+          S.fineBonus += 0.1;
+          const txt = `Amendment ${12 + S.stats.amendments}: fine schedule "modernized" upward.`;
+          S.rules.push(txt); lines.push(`${who}📋 BYLAWS AMENDED: ${txt}`);
+        }
+      } else if (roll < 0.85){
+        S.fineBonus += 0.1;
+        const txt = `Amendment ${12 + S.stats.amendments}: all fines indexed to "community sentiment" (up 10%).`;
+        S.rules.push(txt); lines.push(`${who}📋 BYLAWS AMENDED: ${txt}`);
+      } else {
+        S.freeComply = true;
+        const txt = `Amendment ${12 + S.stats.amendments}: a drafting error makes your next compliance free.`;
+        S.rules.push(txt); lines.push(`${who}📋 BYLAWS AMENDED: ${txt} The board hasn't noticed. Yet.`);
+      }
+    } else if (p.kind === 'rule'){
+      const r = RULES_PASSED[S.rules.length % RULES_PASSED.length];
+      S.rules.push(r);
+      lines.push(`${who}📜 NEW RULE PASSED: ${r}`);
+      if (Math.random() < 0.4){
+        issueViolation(pick(VIOLATIONS), 'under the new rule');
+        lines.push(`…and naturally, you're already in violation of it.`);
+      }
+    } else if (p.kind === 'rumor'){
+      S.rep = Math.max(0, S.rep - S.size.rumorRep);
+      const src = S.neighbors.find(n => n.type === 'deceiver' && !n.exposed);
+      lines.push(`${who}🗣️ A rumor is going around that ${pick(RUMORS)}. −${S.size.rumorRep} ⭐ reputation.` +
+        (src ? ` It started "somewhere near ${src.name}'s cul-de-sac", people say.` : '') +
+        (S.sizeKey === 'large' ? ' In a community this size, rumors travel at highway speed.' : ''));
+    } else if (p.kind === 'duesHike'){
+      S.dues += 10;
+      lines.push(`${who}📈 DUES INCREASE: monthly dues are now $${S.dues}. The newsletter calls it "an investment in excellence".`);
+    }
+  }
+  if (leak){
+    issueViolation(pick(VIOLATIONS), '(oddly specific)');
+    lines.push(`🕵️ A citation arrived describing your backyard in detail no drone could see. Someone you trust is talking to the board.`);
+  }
+  if (S.improvedThisMonth && Math.random() < 0.35 + S.anger / 250){
+    issueViolation('Unapproved home improvement detected', '');
+    lines.push(`🔨 Your improvement project was reported as "unapproved construction".`);
+  }
+  S.improvedThisMonth = false;
+  tickViolations(lines);
+  // appeals resolve AFTER the tick — the frozen month is real, the denial is inevitable
+  for (const v of S.violations){
+    if (v.underAppeal){
+      v.underAppeal = false; v.appealed = true;
+      charge(10, 'an appeal processing fee');
+      lines.push(`📨 ${pick(APPEAL_DENIALS)} (−$10 processing fee. "${v.txt}" deadline resumes next month.)`);
+    }
+  }
+  if (!S.plan.length && !lines.length) lines.push('🌤️ An eerily quiet month. The board met, glared at a spreadsheet, and adjourned.');
+  // anger ramps naturally with time on harder boards
+  S.anger = Math.min(100, S.anger + Math.round(S.diff.angerRamp / 2));
+  return lines;
+}
+
+// ================= month cycle =================
+function startMonth(){
+  S.ap = S.diff.ap;
+  S.holdMonth = false;
+  const apNotes = [];
+  if (S.condition >= 80){ S.ap++; apNotes.push('a well-kept house runs itself (+1⚡)'); }
+  if (S.rep >= 8){ S.ap++; apNotes.push('neighbors pitch in with chores (+1⚡)'); }
+  S.apMax = S.ap;
+  S.commsMax = 8 + (S.neighbors.some(n => n.superInfluencer && n.alliance && !n.exposed && !n.hostile) ? 3 : 0);
+  S.comms = S.commsMax;
+  logMonth();
+  if (apNotes.length) log('✨ ' + apNotes.join(' · '), 'good');
+  if (!S.workedOT) S.otStreak = 0;
+  S.workedOT = false;
+  S.otBonus = Math.random() < 0.25;
+  if (S.otBonus) log('🔥 Crunch time at the office: overtime pays DOUBLE this month.', 'good');
+  S.cash += S.diff.income;
+  charge(S.dues, 'HOA dues');
+  log(`💵 Paycheck +$${S.diff.income} · HOA dues −$${S.dues}.`, 'info');
+  if (Math.random() < 0.35) log(`📰 ${pick(PA_NEWSLETTER)}`, 'info');
+  if (Math.random() < 0.4){
+    const ev = pick(MARKET_EVENTS);
+    S.equity = Math.min(S.eqMax, S.equity + ev.eq);
+    log(`${ev.eq > 0 ? '📈' : '📉'} ${ev.txt} (${ev.eq > 0 ? '+' : ''}${ev.eq} 🏠)`, ev.eq > 0 ? 'good' : 'bad');
+  }
+  S.commons = Math.max(0, S.commons - S.age.commonsDecay);
+  if (S.commons < 40){ S.equity -= 2; log(`🌳 The commons look post-apocalyptic (${S.commons}%). The whole street's equity sags: −2 🏠.`, 'bad'); }
+  else if (S.commons >= 70){ S.equity = Math.min(S.eqMax, S.equity + 1); log(`🌳 The commons look great (${S.commons}%) — thanks to you, mostly. +1 🏠.`, 'good'); }
+  if (Math.random() < S.age.infra) pick(INFRA_EVENTS)();
+  // the management company: every HOA's final boss
+  if (S.mgmtCo){
+    S.equity -= 3;
+    S.mgmtCo.drained += 3;
+    log(`🏢 ${S.mgmtCo.name} continues to "manage" the community: −3 🏠 for everyone. This month they invoiced the HOA for reading their own invoice.`, 'bad');
+  } else if (S.month > 3 && S.month >= S.mgmtCoCooldown && Math.random() < 0.07 + (S.anger >= 50 ? 0.05 : 0)){
+    const name = pick(MGMT_NAMES);
+    S.mgmtCo = { name, drained:8 };
+    S.equity -= 8;
+    S.dues += 10;
+    log(`🏢 OH NO. The board hired a MANAGEMENT COMPANY: <b>${name}</b>. Every mailbox got the same letter. The whole street's equity dips (−8 🏠) and dues rise $10 for the "administration convenience fee". Rally ${S.petitionNeed} allies and 🔥 fire them to claw it all back.`, 'bad');
+    setTicker(`🏢 ${name} has "assumed day-to-day operations". Nothing will be day-to-day ever again.`);
+    beep(196, 0.3, 'sawtooth', 0.06);
+  }
+  // comparables: the neighborhood's collective value, tracked sale by sale
+  let drift = Math.random() - 0.5;
+  if (S.commons >= 70) drift += 0.4; else if (S.commons < 40) drift -= 0.6;
+  if (S.mgmtCo) drift -= 0.8;
+  S.comps = Math.min(115, Math.max(70, S.comps + drift));
+  S.equity += (S.comps - 100) * 0.05;
+  if (S.comps < 85){
+    for (const n of S.neighbors) if (!n.exposed && !n.hostile) n.sway = Math.min(1, n.sway + 0.05);
+    if (Math.random() < 0.5) log(`📉 Comps at ${Math.round(S.comps)}%. The group chats are ablaze — everyone blames the board. (Every circle drifts your way.)`, 'tip');
+  } else if (S.comps < 92 && Math.random() < 0.35){
+    log(`📉 Comps at ${Math.round(S.comps)}%. Zillow screenshots are circulating at the mailboxes. People are… receptive to new leadership.`, 'tip');
+  }
+  // background sale somewhere in the community
+  if (Math.random() < Math.min(0.5, S.homes / 200)){
+    const price = Math.round(S.comps + (Math.random() * 6 - 3));
+    S.sales.push({ month:S.month, name:'a neighbor', price });
+    S.comps = Math.max(70, Math.min(115, S.comps + (price < 100 ? -0.4 : 0.3)));
+    log(`🪧 A house across ${S.hoaName || 'the neighborhood'} sold at ${price}% of peak. Comps now ${Math.round(S.comps)}%.`, price < 100 ? 'bad' : 'good');
+  }
+  // things you didn't know when you bought
+  if (Math.random() < 0.12){
+    const eligible = REVEALS.map((r, i) => ({ r, i })).filter(x => S.month >= x.r.after && !S.revealsFired.includes(x.i));
+    if (eligible.length){
+      const { r, i } = pick(eligible);
+      S.revealsFired.push(i);
+      r.fx();
+      log(`🕳️ THINGS YOU DIDN'T KNOW: ${r.txt}`, 'bad');
+    }
+  }
+  // turnover: someone always leaves eventually — faster when values fall
+  for (let i = 0; i < S.neighbors.length; i++){
+    const chance = 0.02 + (S.comps < 92 ? 0.03 : 0) + (S.comps < 85 ? 0.03 : 0);
+    if (Math.random() < chance){ replaceNeighbor(i); break; }
+  }
+  S.condition = Math.max(0, S.condition - (S.diffKey === 'expert' ? 8 : 5));
+  if (S.condition >= 70){ S.equity = Math.min(S.eqMax, S.equity + 2); }
+  else if (S.condition < 40){ S.equity -= 3; log('🏚️ Peeling paint and a sad lawn: −3 🏠 equity.', 'bad'); }
+  if (S.equity <= 0){ render(); return lose(); }
+  makePlan();
+  // ally auto-effects
+  for (const n of S.neighbors){
+    if (!n.alliance || n.exposed || n.hostile) continue;
+    if (n.type === 'friend'){
+      const tip = makeTip(n);
+      log(`${n.ico} <b>${n.name}</b> (ally): "${tip.text}"`, 'tip');
+      if (Math.random() < 0.5){ S.cash += 20; log(`${n.ico} ${n.name} dropped off a casserole. There was $20 inside.`, 'good'); }
+    } else if (n.type === 'fence' && Math.random() < 0.5){
+      const tip = makeTip(n);
+      log(`${n.ico} <b>${n.name}</b> (ally, whispering): "${tip.text}"`, 'tip');
+    } else if (n.type === 'deceiver'){
+      const steal = Math.min(S.cash, 15);
+      S.cash -= steal;
+      if (steal) log(`🧾 "Social committee dues" collected by ${n.name}: −$${steal}. There is no social committee.`, 'bad');
+      const tip = makeTip(n);
+      log(`${n.ico} <b>${n.name}</b> (ally): "${tip.text}"`, 'tip');
+    }
+  }
+  if (S.ai){
+    aiAdvisor();
+    if (Math.random() < 0.25) pick(AI_EVENTS)();
+  }
+  if (S.month % ANNUAL === 0 && S.factions && S.mode === 'playing'){
+    openMeeting('🗳️ THE ANNUAL MEETING', `The ${S.hoaName || 'HOA'} faithful assemble. Folding chairs. Burnt coffee. The board smirks behind a folding table. This is your moment, ${S.playerName || 'neighbor'} — call for the recall vote, or sit quietly another year?`);
+  } else if (S.factions && Math.random() < S.size.outreach){
+    neighborOutreach();
+  }
+  render();
+  saveGame();
+}
+
+// ================= the AI arms race =================
+function aiAdvisor(){
+  const tips = [];
+  const enforcer = S.board.some(m => m.arch.title === 'The Enforcer');
+  if (S.condition < 55) tips.push(`Condition ${S.condition}% — ${enforcer ? 'with an Enforcer on this board, an inspection citation is near-certain' : 'inspection risk is rising'}. Mow.`);
+  if (S.commons < 40) tips.push(`Commons at ${S.commons}% are bleeding the whole street's equity. One 🌳 fix pays for itself.`);
+  if (S.evidence < 3) tips.push(`Only ${S.evidence}📸 evidence on file — fence-sitters need 3+ to vote with you. Document.`);
+  const liar = S.neighbors.find(n => !n.accused && !n.exposed && !n.hostile && n.tips.some(t => t.resolved && t.claim && !t.truthful));
+  if (liar) tips.push(`${liar.name}'s record contains a proven lie. Cross-referencing lemonade attendance… consider an accusation.`);
+  const bribed = S.neighbors.find(n => n.bribed && n.rel < 3 && !n.exposed && !n.hostile);
+  if (bribed) tips.push(`${bribed.name} was bought by an amendment — they will abstain unless you reach ★★★ with them.`);
+  const allies = S.neighbors.filter(n => n.alliance && !n.exposed && !n.hostile).length;
+  if (allies >= S.petitionNeed && S.evidence >= 3 && !S.petitioned) tips.push(`You have the allies and the evidence. The votes may be there — consider the 📢 petition.`);
+  if (S.mgmtCo) tips.push(allies >= S.petitionNeed
+    ? `${S.mgmtCo.name} has drained ${S.mgmtCo.drained} 🏠 so far — you have the allies to 🔥 fire them TODAY and claw all of it back.`
+    : `${S.mgmtCo.name} is bleeding ${3} 🏠 per month from everyone. You need ${S.petitionNeed} allies to fire them; you have ${allies}.`);
+  if (S.comps < 92) tips.push(`Comparables at ${Math.round(S.comps)}% — falling values are radicalizing the whole street. A recall gets easier while the anger lasts.`);
+  const coldBloc = S.neighbors.filter(n => !n.exposed && !n.hostile && (n.sway || 0) <= 0).sort((a, b) => (b.influence || 0) - (a.influence || 0))[0];
+  if (coldBloc && S.comms >= 1) tips.push(`${coldBloc.name} sways ${coldBloc.influence} homes and their circle is cold on you. A planted 📨 message could move real ballots.`);
+  if (!tips.length) tips.push('All metrics nominal. Statistically, this is exactly when HOAs strike.');
+  shuffle(tips).slice(0, 2).forEach(t => log(`🤖 ADVISOR: ${t}`, 'ai'));
+  if (S.plan.length && Math.random() < 0.6){
+    log(`🤖 ADVISOR: pattern analysis of board calendars suggests ${PLAN_DESC[pick(S.plan).kind]} this month (confidence: ${70 + Math.floor(Math.random() * 25)}%).`, 'ai');
+  }
+}
+function syncAiBtn(){
+  const b = document.getElementById('aiBtn');
+  b.classList.toggle('on', !!(S && S.ai));
+  b.textContent = S && S.ai ? '🤖 AI: ON' : '🤖 AI: OFF';
+}
+document.getElementById('aiBtn').addEventListener('click', () => {
+  if (!S || S.mode !== 'playing') return;
+  S.ai = !S.ai;
+  syncAiBtn();
+  log(S.ai
+    ? '🤖 AI ASSISTANT ENABLED. Your advisor comes online next month. Somewhere across the street, the board\'s does too.'
+    : '🤖 AI disabled. The neighborhood returns to analog scheming.', 'ai');
+  setTicker(S.ai ? '🤖 The arms race begins. Everyone\'s assistant is "just here to help".' : '🤖 AI off. Blissful, ignorant silence.');
+  beep(880, 0.08, 'sine', 0.04);
+  render(); saveGame();
+});
+
+// ================= save / load =================
+function saveGame(){
+  if (!S || S.mode === 'over' || S.mode === 'won') return;
+  try{ localStorage.setItem('hoaSave', JSON.stringify({ s:S, log:document.getElementById('log').innerHTML })); }catch(e){}
+}
+function clearSave(){ try{ localStorage.removeItem('hoaSave'); }catch(e){} }
+function loadSaveData(){
+  try{ const d = JSON.parse(localStorage.getItem('hoaSave')); return d && d.s ? d : null; }catch(e){ return null; }
+}
+function refreshResume(){
+  const d = loadSaveData();
+  const b = document.getElementById('resumeBtn');
+  if (d){ b.classList.remove('hidden'); b.textContent = `💾 Resume — Month ${d.s.month}, ${d.s.diff.label}`; }
+  else b.classList.add('hidden');
+}
+document.getElementById('resumeBtn').addEventListener('click', () => {
+  const d = loadSaveData();
+  if (!d) return;
+  S = d.s;
+  // sanitize transient modal state from whenever the save happened
+  S.mode = 'playing'; S.socialTarget = null; S.pendingRule = null; S.pendingWin = false; S.holdMonth = false;
+  // patch saves from before the influence/comms/comparables systems
+  if (S.comms == null){ S.commsMax = 8; S.comms = 8; }
+  if (S.comps == null) S.comps = 100;
+  S.sales = S.sales || []; S.revealsFired = S.revealsFired || [];
+  for (const n of S.neighbors){
+    if (n.influence == null){ n.influence = 5; n.sway = 0; n.superInfluencer = false; n.plantedMonth = -1; }
+  }
+  if (S.unaffiliated == null) S.unaffiliated = Math.max(0, (S.homes || 60) - 1 - S.neighbors.length - S.neighbors.reduce((a, n) => a + n.influence, 0));
+  for (const id of ['boardModal','socialModal','meetingModal','reachModal','ruleModal','quitModal','tutModal','endModal'])
+    document.getElementById(id) && document.getElementById(id).classList.add('hidden');
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('log').innerHTML = d.log || '';
+  renderStrip(); renderBoard(); syncAiBtn(); render();
+  setTicker(`💾 Welcome back to ${S.hoaName || 'the neighborhood'}, ${S.playerName || 'neighbor'}. It is Month ${S.month}, and the board has not forgotten you.`);
+  beep(523, 0.1, 'triangle', 0.05);
+});
+
+// ================= tutorial =================
+let tutIdx = 0, tutReturnMode = 'playing';
+function renderTut(){
+  const step = TUTORIAL_STEPS[tutIdx];
+  document.getElementById('tutTitle').textContent = step.t;
+  document.getElementById('tutBody').innerHTML = step.b;
+  document.getElementById('tutStep').textContent = `Step ${tutIdx + 1} of ${TUTORIAL_STEPS.length}`;
+  document.getElementById('tutPrev').disabled = tutIdx === 0;
+  document.getElementById('tutNext').textContent = tutIdx === TUTORIAL_STEPS.length - 1 ? 'Play ▶' : 'Next ▶';
+}
+function openTut(){
+  if (S){
+    tutReturnMode = S.mode === 'tutorial' ? 'playing' : S.mode;
+    S.mode = 'tutorial';
+  }
+  tutIdx = 0; renderTut();
+  document.getElementById('tutModal').classList.remove('hidden');
+}
+function closeTut(){
+  document.getElementById('tutModal').classList.add('hidden');
+  if (S && S.mode === 'tutorial') S.mode = tutReturnMode;
+  try{ localStorage.setItem('hoaTutSeen', '1'); }catch(e){}
+  if (S) render();
+}
+
+// ================= the welcome letter =================
+let welcomeReturnMode = 'playing';
+function openWelcome(){
+  const letter = WELCOME_LETTERS[Math.min(S.livTierIdx || 0, WELCOME_LETTERS.length - 1)];
+  welcomeReturnMode = S.mode;
+  S.mode = 'welcome';
+  document.getElementById('welcomeTitle').textContent = letter.t;
+  document.getElementById('welcomeBody').innerHTML = letter.b(S.playerName || 'Neighbor', S.hoaName || 'your HOA');
+  document.getElementById('welcomeModal').classList.remove('hidden');
+  beep(523, 0.12, 'triangle', 0.05);
+}
+document.getElementById('welcomeOk').addEventListener('click', () => {
+  if (!S || S.mode !== 'welcome') return;
+  document.getElementById('welcomeModal').classList.add('hidden');
+  S.mode = welcomeReturnMode;
+  let tutSeen = false;
+  try{ tutSeen = !!localStorage.getItem('hoaTutSeen'); }catch(e){}
+  if (!tutSeen) openTut();
+  render();
+});
+document.getElementById('tutNext').addEventListener('click', () => {
+  if (tutIdx >= TUTORIAL_STEPS.length - 1) return closeTut();
+  tutIdx++; renderTut();
+});
+document.getElementById('tutPrev').addEventListener('click', () => { if (tutIdx > 0){ tutIdx--; renderTut(); } });
+document.getElementById('tutSkip').addEventListener('click', closeTut);
+document.getElementById('helpBtn').addEventListener('click', () => {
+  if (!S || (S.mode !== 'playing' && S.mode !== 'tutorial')) return;
+  openTut();
+});
+document.getElementById('menuTutBtn').addEventListener('click', () => openTut());
+
+// ================= sell & move out =================
+document.getElementById('quitBtn').addEventListener('click', () => {
+  if (!S || S.mode !== 'playing' || S.equity <= 0) return;
+  S.mode = 'quit';
+  document.getElementById('quitText').innerHTML =
+    `Nobody just <i>leaves</i> ${S.hoaName || 'an HOA'}. There are exactly three exits: 🔨 foreclosure, 🎉 dissolving the board, or 🏷️ selling. This is the selling one — you walk away with your equity and your sanity, but the board stays in power. Neither victory nor defeat. Just… suburbia.`;
+  document.getElementById('quitModal').classList.remove('hidden');
+});
+document.getElementById('quitYes').addEventListener('click', () => {
+  if (!S || S.mode !== 'quit') return;
+  document.getElementById('quitModal').classList.add('hidden');
+  sellOut();
+});
+document.getElementById('quitNo').addEventListener('click', () => {
+  if (!S || S.mode !== 'quit') return;
+  document.getElementById('quitModal').classList.add('hidden');
+  S.mode = 'playing';
+  render();
+});
+
+// ================= neighbors reaching out =================
+let reachFx = null;
+function openReach(text, optA, optB){
+  S.mode = 'reach';
+  reachFx = { a:optA, b:optB };
+  document.getElementById('reachText').textContent = text;
+  const bA = document.getElementById('reachA'), bB = document.getElementById('reachB');
+  bA.textContent = optA.label; bA.disabled = optA.ok === false;
+  bB.textContent = optB.label;
+  document.getElementById('reachModal').classList.remove('hidden');
+  beep(740, 0.08, 'sine', 0.04);
+}
+function closeReach(){
+  document.getElementById('reachModal').classList.add('hidden');
+  reachFx = null;
+  if (S.mode === 'reach') S.mode = 'playing';
+  renderStrip(); render();
+}
+document.getElementById('reachA').addEventListener('click', () => {
+  if (!reachFx || S.mode !== 'reach') return;
+  reachFx.a.fx(); closeReach();
+});
+document.getElementById('reachB').addEventListener('click', () => {
+  if (!reachFx || S.mode !== 'reach') return;
+  reachFx.b.fx(); closeReach();
+});
+function neighborOutreach(){
+  const cands = S.neighbors.filter(n => !n.exposed && !n.hostile);
+  if (!cands.length) return;
+  const n = pick(cands);
+  const r = Math.random();
+  if (r < 0.4){
+    const chore = pick(['move a couch', 'wrangle a rented rototiller', 'chase my escaped chickens', 'assemble a gazebo kit with no instructions']);
+    openReach(`${n.ico} ${n.name} waves you down: "Could you help me ${chore} this weekend?"`,
+      { label:'Help out (1⚡)', ok:S.ap >= 1, fx(){ S.ap--; n.rel = Math.min(3, n.rel + 1); S.rep = Math.min(10, S.rep + 1);
+          log(`🌻 You helped ${n.name} ${chore.split(' ')[0]} — the whole street saw. +1 rel, +1 ⭐.`, 'good'); } },
+      { label:'Too busy', fx(){ n.rel = Math.max(0, n.rel - 1);
+          log(`😐 You begged off. ${n.name} said "totally fine!" in a tone that wasn't. −1 rel.`, 'info'); } });
+  } else if (n.type === 'deceiver' && r < 0.7){
+    openReach(`${n.ico} ${n.name} leans over the fence: "Could you spot me $40 for the bake sale fund? You're the ONLY one here I trust."`,
+      { label:'Lend $40', ok:S.cash >= 40, fx(){ S.cash -= 40; n.rel = Math.min(3, n.rel + 1);
+          log(`💸 You lent ${n.name} $40 for the "bake sale". You have never once seen a bake sale here.`, 'info'); } },
+      { label:'Politely decline', fx(){ n.rel = Math.max(0, n.rel - 1);
+          log(`🙅 You declined. ${n.name}'s smile did not reach their eyes. −1 rel.`, 'info'); } });
+  } else {
+    const tip = makeTip(n);
+    log(`${n.ico} <b>${n.name}</b> comes to YOU: "${tip.text}"`, 'tip');
+    if (n.type === 'friend' && Math.random() < 0.4){
+      S.cash += 25;
+      log(`${n.ico} ${n.name} also left zucchini bread on your porch. There was $25 in it. Don't ask.`, 'good');
+    }
+    renderStrip();
+  }
+}
+function endMonth(){
+  if (S.mode !== 'playing') return;
+  S.ap = 0;
+  resolveTips();
+  const lines = boardPhase();
+  document.getElementById('boardMonth').textContent = 'Month ' + S.month;
+  document.getElementById('boardList').innerHTML = lines.map(l => `<div>${l}</div>`).join('');
+  for (const l of lines) log(l, l.includes('nothing found') || l.includes('quiet') ? 'good' : 'bad');
+  S.mode = 'board';
+  document.getElementById('boardModal').classList.remove('hidden');
+  beep(300, 0.12, 'square', 0.05);
+  render();
+}
+document.getElementById('boardOk').addEventListener('click', () => {
+  document.getElementById('boardModal').classList.add('hidden');
+  S.mode = 'playing';
+  if (S.equity <= 0) return lose();
+  S.month++;
+  startMonth();
+});
+
+// ================= actions =================
+const ACTIONS = [
+  { id:'mow',   ico:'🌱', name:'Mow & Maintain', cost:'1⚡ · $20', can:() => S.ap >= 1 && S.cash >= 20,
+    run(){ S.ap--; S.cash -= 20; S.condition = Math.min(100, S.condition + 12);
+      log('🌱 Mowed, edged, painted the trim. Condition +12%.', 'good'); } },
+  { id:'improve', ico:'🔨', name:'Home Improvement', cost:'1⚡ · $100', can:() => S.ap >= 1 && S.cash >= 100,
+    run(){ S.ap--; S.cash -= 100; S.equity = Math.min(S.eqMax, S.equity + 8); S.condition = Math.min(100, S.condition + 5); S.improvedThisMonth = true;
+      log('🔨 New pergola! +8 🏠 equity, +5% condition. Hopefully nobody "reports" it…', 'good'); } },
+  { id:'work',  ico:'💼', name:'Work Overtime', cost:'1⚡', can:() => S.ap >= 1,
+    run(){ S.ap--;
+      const base = Math.min(160, 80 + S.otStreak * 20);
+      const pay = base * (S.otBonus ? 2 : 1);
+      if (!S.workedOT){ S.workedOT = true; S.otStreak++; }
+      S.cash += pay;
+      log(`💼 Overtime: +$${pay}${S.otBonus ? ' (CRUNCH DOUBLE!)' : ''}${base > 80 ? ` — the streak raise is real ($${base} base)` : ''}. The office was quieter than this neighborhood.`, 'good'); } },
+  { id:'yard',  ico:'🏷️', name:'Yard Sale', cost:'1⚡ · every 3 mo', can:() => S.ap >= 1 && S.month - S.lastYardSale >= 3,
+    run(){ S.ap--; S.lastYardSale = S.month;
+      const earn = 40 + S.rep * 12;
+      S.cash += earn;
+      log(`🏷️ Yard sale! Your reputation drew a crowd: +$${earn}.`, 'good');
+      if (Math.random() < 0.25) issueViolation('Unpermitted commerce (yard sale)', '— naturally'); } },
+  { id:'commons', ico:'🌳', name:'Fix Common Area', cost:'1⚡ · $40', can:() => S.ap >= 1 && S.cash >= 40 && S.commons < 100,
+    run(){ S.ap--; S.cash -= 40; S.commons = Math.min(100, S.commons + 15); S.rep = Math.min(10, S.rep + 1);
+      log(`🌳 You fixed the playground swing and mowed the median (+15%). The newsletter credits "board initiative". +1 ⭐ anyway.`, 'good'); } },
+  { id:'doc',   ico:'📸', name:'Document Everything', cost:'1⚡', can:() => S.ap >= 1 && S.evidence < 5,
+    run(){ S.ap--; S.evidence++;
+      log(pick([
+        '📸 Photographed the board president\'s own dead lawn. +1 evidence.',
+        '📸 Copied the meeting minutes nobody was supposed to see. +1 evidence.',
+        '📸 Timestamped photos of your fully compliant trash cans. +1 evidence.',
+        '📸 Recorded the treasurer expensing a "business jacuzzi". +1 evidence.',
+      ]), 'good'); } },
+  { id:'meet',  ico:'🏛️', name:'Attend Board Meeting', cost:'1⚡', can:() => S.ap >= 1 && !S.planRevealed,
+    run(){ S.ap--; S.planRevealed = true; S.anger = Math.max(0, S.anger - 5);
+      const desc = S.plan.length ? S.plan.map(p => PLAN_DESC[p.kind]).join(', ') : 'nothing — an empty agenda';
+      log(`🏛️ You sat through 3 hours of it. This month's real agenda: <b>${desc}</b>. (−5 😠 for showing up.)`, 'tip'); } },
+  { id:'law',   ico:'⚖️', name:'Retain Lawyer', cost:'1⚡ · $250', can:() => S.ap >= 1 && S.cash >= 250 && !S.lawyer,
+    run(){ S.ap--; S.cash -= 250; S.lawyer = true; S.anger = Math.min(100, S.anger + 10);
+      log('⚖️ You retained Fine, Grievance & Repeat LLP. Violations can now be CONTESTED. The board is livid (+10 😠).', 'tip');
+      if (S.factions){
+        for (const n of S.neighbors) if (n.type === 'friend' && !n.hostile) n.rel = Math.min(3, n.rel + 1);
+        const recruit = S.neighbors.find(n => n.type !== 'deceiver' && !n.alliance && !n.hostile);
+        if (recruit){ recruit.alliance = true; recruit.rel = Math.max(2, recruit.rel);
+          log(`${recruit.ico} <b>${recruit.name}</b> marches over: "They fined my flamingo $900 last spring. I'm WITH you." (New ally!)`, 'good'); }
+        renderStrip();
+      } } },
+  { id:'fireMgmt', ico:'🔥', name:'Fire the Mgmt Company', cost:() => `1⚡ · ${S.petitionNeed} allies`, can:() =>
+      S.ap >= 1 && !!S.mgmtCo && S.neighbors.filter(n => n.alliance && !n.exposed && !n.hostile).length >= S.petitionNeed,
+    run(){
+      S.ap--;
+      const allies = S.neighbors.filter(n => n.alliance && !n.exposed && !n.hostile).length;
+      const refund = S.mgmtCo.drained;
+      S.equity = Math.min(S.eqMax, S.equity + refund);
+      S.dues = Math.max(20, S.dues - 10);
+      S.anger = Math.min(100, S.anger + 10);
+      S.stats.mgmtFired = (S.stats.mgmtFired || 0) + 1;
+      log(`🔥 EMERGENCY MEETING: your ${allies} allies packed the clubhouse with folding chairs and grievances. <b>${S.mgmtCo.name}</b> was terminated by voice vote — their farewell invoice was entered into evidence. Equity clawed back: +${refund} 🏠. The convenience fee dies with them. The board pouts (+10 😠).`, 'good');
+      setTicker('🔥 The management company has been un-hired. The clubhouse smelled like victory and burnt coffee.');
+      S.mgmtCoCooldown = S.month + 6;
+      S.mgmtCo = null;
+      beep(660, 0.1, 'triangle', 0.06); beep(880, 0.15, 'triangle', 0.06);
+    } },
+  { id:'petition', ico:'📢', name:'Petition: Special Meeting', cost:() => `1⚡ · ${S.petitionNeed} allies`, can:() =>
+      S.ap >= 1 && S.factions && S.neighbors.filter(n => n.alliance && !n.exposed && !n.hostile).length >= S.petitionNeed && !S.petitioned,
+    run(){ S.ap--; S.petitioned = true;
+      log('📢 Petition filed! Enough signatures to force a special meeting — right now.', 'tip');
+      openMeeting('📢 THE SPECIAL MEETING', 'You forced this meeting. The board president\'s eye is twitching. The room smells like burnt coffee and fear.'); } },
+];
+function renderActions(){
+  const grid = document.getElementById('actGrid');
+  grid.innerHTML = '';
+  for (const a of ACTIONS){
+    if (a.id === 'petition' && !S.factions) continue;
+    if (a.id === 'fireMgmt' && !S.mgmtCo) continue;
+    if (a.id === 'law' && S.lawyer){
+      const el = document.createElement('button');
+      el.className = 'act'; el.disabled = true;
+      el.innerHTML = `<b>⚖️ Lawyered Up</b><span class="cost">retained</span>`;
+      grid.appendChild(el); continue;
+    }
+    const el = document.createElement('button');
+    el.className = 'act';
+    el.innerHTML = `<b>${a.ico} ${a.name}</b><span class="cost">${typeof a.cost === 'function' ? a.cost() : a.cost}</span>`;
+    el.disabled = S.mode !== 'playing' || !a.can();
+    el.addEventListener('click', () => {
+      if (S.mode !== 'playing' || !a.can()) return;
+      a.run(); beep(520, 0.06, 'triangle', 0.04); render();
+    });
+    grid.appendChild(el);
+  }
+}
+
+// ================= violations UI =================
+function renderViolations(){
+  const box = document.getElementById('vioList');
+  if (!S.violations.length){
+    box.innerHTML = '<div id="noVio">None. Suspicious. They\'re definitely planning something.</div>';
+    return;
+  }
+  box.innerHTML = '';
+  for (const v of S.violations){
+    const el = document.createElement('div');
+    el.className = 'vio' + (v.escalated ? ' escalated' : '');
+    const fixCost = S.freeComply ? 0 : Math.round(v.fine / 2);
+    el.innerHTML = `<div class="vt">${v.escalated ? '🚨 ESCALATED: ' : ''}${v.txt}</div>` +
+      `<div class="meta">Fine if ignored: $${v.fine} · ${v.underAppeal ? '⏳ under appeal — deadline frozen' : '⏰ ' + v.deadline + ' month(s) left'}${v.appealed ? ' · appeal DENIED' : ''}</div>`;
+    const comply = document.createElement('button');
+    comply.className = 'comply';
+    comply.textContent = fixCost === 0 ? '✅ Comply (FREE — loophole!)' : `✅ Comply ($${fixCost})`;
+    comply.disabled = S.mode !== 'playing' || S.cash < fixCost;
+    comply.addEventListener('click', () => {
+      if (S.mode !== 'playing' || S.cash < fixCost) return;
+      S.cash -= fixCost; S.stats.complied++;
+      if (S.freeComply){ S.freeComply = false; log('📋 The drafting-error loophole worked. The board is drafting a correction as we speak.', 'good'); }
+      S.violations = S.violations.filter(x => x !== v);
+      log(`✅ Complied with "${v.txt}" for $${fixCost}. Dignity: slightly dented.`, 'info');
+      beep(440, 0.07, 'triangle', 0.04); render();
+    });
+    const appeal = document.createElement('button');
+    appeal.className = 'contest';
+    appeal.textContent = '📨 Appeal (free)';
+    appeal.title = 'Freezes the deadline one month while "the committee reviews". Appeals are always denied. Always.';
+    appeal.disabled = S.mode !== 'playing' || v.appealed || v.underAppeal;
+    appeal.addEventListener('click', () => {
+      if (S.mode !== 'playing' || v.appealed || v.underAppeal) return;
+      v.underAppeal = true; S.stats.appeals++;
+      log(`📨 Appeal filed on "${v.txt}". The deadline freezes while the committee "carefully reviews" it. (They will deny it.)`, 'info');
+      beep(500, 0.06, 'sine', 0.04); render();
+    });
+    const contest = document.createElement('button');
+    contest.className = 'contest';
+    contest.textContent = '⚖️ Contest ($30 + 1📸)';
+    contest.title = S.lawyer ? 'Your lawyer buries them in paperwork. Consumes 1 evidence.' : 'Requires a retained lawyer.';
+    contest.disabled = S.mode !== 'playing' || !S.lawyer || S.evidence < 1 || S.cash < 30;
+    contest.addEventListener('click', () => {
+      if (S.mode !== 'playing' || !S.lawyer || S.evidence < 1 || S.cash < 30) return;
+      S.cash -= 30; S.evidence--; S.stats.contested++;
+      S.violations = S.violations.filter(x => x !== v);
+      log(`⚖️ CONTESTED "${v.txt}" — your lawyer cited their own bylaws back at them. Citation withdrawn.`, 'good');
+      beep(660, 0.08, 'triangle', 0.05); render();
+    });
+    el.appendChild(comply); el.appendChild(contest); el.appendChild(appeal);
+    box.appendChild(el);
+  }
+}
+
+// ================= neighbors UI =================
+const nstrip = document.getElementById('nstrip');
+function relStars(n){ return '★'.repeat(n.rel) + '☆'.repeat(3 - n.rel); }
+function recordMarks(n){
+  return n.tips.filter(t => t.claim).slice(-5).map(t =>
+    t.resolved ? (t.truthful ? '<span class="T">✓</span>' : '<span class="F">✗</span>') : '<span class="U">?</span>'
+  ).join('');
+}
+function renderStrip(){
+  if (!S.factions){ nstrip.classList.remove('on'); return; }
+  nstrip.classList.add('on');
+  nstrip.innerHTML = '';
+  S.neighbors.forEach((n, i) => {
+    const el = document.createElement('div');
+    el.className = 'nb' + (n.exposed ? ' exposed' : '') + (n.hostile ? ' hostile' : '') + (n.alliance && !n.exposed ? ' ally' : '');
+    const badge = n.exposed ? '🚨' : n.hostile ? '😠' : n.alliance ? '🤝' : n.superInfluencer ? '🌐' : '';
+    el.innerHTML = `<div class="av">${n.ico}</div><span class="nm">${n.name}</span>` +
+      `<div class="rel">${relStars(n)}</div><div class="rec">${recordMarks(n) || '&nbsp;'}</div>` +
+      (badge ? `<div class="badge">${badge}</div>` : '');
+    el.title = n.exposed ? `${n.name} — EXPOSED as a board spy` :
+               n.hostile ? `${n.name} — no longer speaks to you` :
+               `${n.name} — ${REL_NAMES[n.rel]}. ✓/✗ = tip track record. Click to interact.`;
+    el.addEventListener('click', () => openSocial(i));
+    nstrip.appendChild(el);
+  });
+}
+const socialModal = document.getElementById('socialModal');
+function openSocial(i){
+  if (!S || S.mode !== 'playing') return;
+  S.socialTarget = i;
+  S.mode = 'social';
+  renderSocial();
+  socialModal.classList.remove('hidden');
+  beep(700, 0.05, 'sine', 0.03);
+}
+function renderSocial(){
+  const n = S.neighbors[S.socialTarget];
+  document.getElementById('socAv').textContent = n.ico;
+  document.getElementById('socName').textContent = n.name;
+  document.getElementById('socRel').textContent = relStars(n) + '  ' + REL_NAMES[n.rel];
+  const statusBase =
+    n.exposed ? '🚨 EXPOSED board spy. The lemonade was a lie.' :
+    n.hostile ? '😠 Wrongly accused. Will never speak to you again.' :
+    n.bribed && n.rel < 3 ? '🎁 Suspiciously exempted by a recent amendment. Their loyalty is… complicated now.' :
+    n.alliance ? '🤝 Your ally.' : 'Watching your lawn from behind a curtain.';
+  const swayWord = n.sway > 0.3 ? 'their circle leans your way' : n.sway < -0.3 ? 'their circle has heard things about you' : 'their circle is undecided about you';
+  document.getElementById('socStatus').textContent =
+    `${statusBase} Sways ~${n.influence} homes${n.superInfluencer ? ' · 🌐 super-connector, floats through every circle' : ''} — ${swayWord}.`;
+  const logBox = document.getElementById('socLog');
+  logBox.innerHTML = n.tips.length
+    ? n.tips.slice(-6).map(t => {
+        const tag = !t.claim ? '<span class="tag P">—</span>' :
+          t.resolved ? (t.truthful ? '<span class="tag T">✓ TRUE</span>' : '<span class="tag F">✗ LIE</span>') :
+          '<span class="tag P">? mo ' + t.month + '</span>';
+        return `<div class="tipl">${tag}"${t.text}"</div>`;
+      }).join('')
+    : '<i>No conversations yet. Information wins this game.</i>';
+  const mute = n.exposed || n.hostile;
+  document.getElementById('chatBtn').disabled = mute || S.comms < 1 || n.chattedMonth === S.month;
+  document.getElementById('chatBtn').textContent = n.chattedMonth === S.month ? '💬 Chatted this month' : '💬 Chat (1📞)';
+  document.getElementById('helpBtn').disabled = mute || S.comms < 1 || n.rel >= 3;
+  document.getElementById('plantBtn').disabled = mute || S.comms < 1 || n.plantedMonth === S.month;
+  document.getElementById('plantBtn').textContent = n.plantedMonth === S.month ? '📨 Message planted' : '📨 Plant Message (1📞)';
+  document.getElementById('allyBtn').disabled = mute || n.alliance || n.rel < 2 || S.ap < 1;
+  document.getElementById('allyBtn').textContent = n.alliance ? '🤝 Allied' : '🤝 Alliance (1⚡)' + (n.rel < 2 ? ' — need ★★' : '');
+  document.getElementById('accuseBtn').disabled = n.accused || S.ap < 1;
+}
+document.getElementById('chatBtn').addEventListener('click', () => {
+  if (S.socialTarget == null || S.comms < 1) return;
+  const n = S.neighbors[S.socialTarget];
+  if (n.chattedMonth === S.month) return;
+  S.comms--; n.chattedMonth = S.month;
+  const tip = makeTip(n);
+  log(`${n.ico} <b>${n.name}</b>: "${tip.text}"`, 'tip');
+  setTicker(`${n.ico} ${n.name}: "${tip.text}"`);
+  renderSocial(); renderStrip(); render();
+});
+document.getElementById('helpBtn').addEventListener('click', () => {
+  if (S.socialTarget == null || S.comms < 1) return;
+  const n = S.neighbors[S.socialTarget];
+  S.comms--; n.rel = Math.min(3, n.rel + 1); S.rep = Math.min(10, S.rep + 1);
+  log(`🌻 You helped ${n.name} with their yard. +1 relationship, +1 ⭐. ${n.type === 'deceiver' && !n.exposed ? 'They took notes on your tools.' : ''}`, 'good');
+  renderSocial(); renderStrip(); render();
+});
+document.getElementById('plantBtn').addEventListener('click', () => {
+  if (S.socialTarget == null || S.comms < 1) return;
+  const n = S.neighbors[S.socialTarget];
+  if (n.plantedMonth === S.month) return;
+  S.comms--; n.plantedMonth = S.month;
+  S.stats.planted = (S.stats.planted || 0) + 1;
+  if (n.type === 'friend'){
+    n.sway = Math.min(1, n.sway + 0.3);
+    log(`📨 You gave ${n.name} the real story about the board. By Sunday their ${n.influence}-home circle had heard it — accurately, even. (Their bloc warms to you.)`, 'good');
+    if (n.superInfluencer && n.alliance){
+      for (const o of S.neighbors) if (o !== n && !o.exposed && !o.hostile) o.sway = Math.min(1, o.sway + 0.1);
+      log(`🌐 ${n.name} carries it EVERYWHERE — book club, pickleball, the retention-pond committee. Every circle heard your side.`, 'good');
+    }
+  } else if (n.type === 'fence'){
+    if (Math.random() < 0.6){
+      n.sway = Math.min(1, n.sway + 0.15);
+      log(`📨 ${n.name} passed your message along… in a whisper, with plausible deniability. Some of their ${n.influence} homes heard it.`, 'tip');
+    } else {
+      log(`📨 ${n.name} clutched your message like a live grenade and told absolutely no one. "I have a family."`, 'info');
+    }
+  } else {
+    n.sway = Math.max(-1, n.sway - 0.2);
+    S.anger = Math.min(100, S.anger + 3);
+    log(`📨 You planted a message with ${n.name}. It reached their ${n.influence}-home circle… rearranged. Somehow you're the villain in it now, and the board got a copy. (−bloc support, +3 😠)`, 'bad');
+  }
+  renderSocial(); renderStrip(); render();
+});
+document.getElementById('allyBtn').addEventListener('click', () => {
+  if (S.socialTarget == null || S.ap < 1) return;
+  const n = S.neighbors[S.socialTarget];
+  if (n.alliance || n.rel < 2) return;
+  S.ap--; n.alliance = true;
+  if (n.type === 'friend'){
+    log(`🤝 <b>${n.name}</b> is all in: "Us against the board." Expect intel and casseroles.`, 'good');
+  } else if (n.type === 'fence'){
+    const dec = S.neighbors.find(x => x.type === 'deceiver' && !x.exposed);
+    log(dec ? `🤝 <b>${n.name}</b> leans close: "Since we're friends now… I saw <b>${dec.name}</b> having lemonade with the board president. Twice."`
+            : `🤝 <b>${n.name}</b>: "Okay. We're in this together. I'll keep my ears open."`, 'tip');
+  } else {
+    log(`🤝 <b>${n.name}</b> beams: "Wonderful! Tell me EVERYTHING about your yard!" (You feel a draft.)`, 'info');
+  }
+  renderSocial(); renderStrip(); render();
+});
+document.getElementById('accuseBtn').addEventListener('click', () => {
+  if (S.socialTarget == null || S.ap < 1) return;
+  const n = S.neighbors[S.socialTarget];
+  if (n.accused) return;
+  S.ap--; n.accused = true;
+  if (n.type === 'deceiver'){
+    n.exposed = true; n.alliance = false; S.stats.exposed++;
+    S.cash += 75; S.rep = Math.min(10, S.rep + 2); S.anger = Math.min(100, S.anger + 10);
+    log(`🚨 BUSTED! <b>${n.name}</b> was reporting your gnome count to the board all along. +$75 from grateful neighbors, +2 ⭐.`, 'good');
+    beep(980, 0.1, 'square', 0.05);
+  } else {
+    n.hostile = true; n.alliance = false; S.stats.wrongAccusals++;
+    S.rep = Math.max(0, S.rep - 2);
+    for (const o of S.neighbors) if (o !== n) o.rel = Math.max(0, o.rel - 1);
+    log(`😬 <b>${n.name}</b> was innocent. The whole street watched. −2 ⭐, and everyone trusts you a little less.`, 'bad');
+    beep(180, 0.3, 'sawtooth', 0.06);
+  }
+  renderSocial(); renderStrip(); render();
+});
+document.getElementById('socClose').addEventListener('click', () => {
+  socialModal.classList.add('hidden');
+  S.socialTarget = null;
+  if (S.mode === 'social') S.mode = 'playing';
+  render();
+});
+
+// ================= meetings & the recall vote =================
+const meetingModal = document.getElementById('meetingModal');
+function openMeeting(title, intro){
+  S.mode = 'meeting';
+  S.meetingHeld = true;
+  document.getElementById('meetTitle').textContent = title;
+  document.getElementById('meetIntro').textContent = intro;
+  document.getElementById('voteList').classList.add('hidden');
+  document.getElementById('meetResult').classList.add('hidden');
+  document.getElementById('voteBtn').classList.remove('hidden');
+  document.getElementById('meetSkip').classList.remove('hidden');
+  document.getElementById('meetDone').classList.add('hidden');
+  meetingModal.classList.remove('hidden');
+  beep(392, 0.15, 'triangle', 0.05);
+}
+function castVotes(){
+  const votes = [];
+  for (const n of S.neighbors){
+    if (n.exposed){ votes.push({ n, v:'out', why:'escorted out — exposed spy' }); continue; }
+    if (n.hostile){ votes.push({ n, v:'no', why:'still furious about the accusation' }); continue; }
+    if (n.type === 'deceiver'){ votes.push({ n, v:'no', why:'"the board does WONDERFUL work"' }); continue; }
+    if (n.bribed && n.rel < 3){ votes.push({ n, v:'abstain', why:'"they exempted my gazebo… I just can\'t"' }); continue; }
+    if (n.type === 'friend'){
+      votes.push(n.rel >= 1 ? { n, v:'yes', why:'"been waiting YEARS for this"' }
+                            : { n, v:'abstain', why:'barely knows you' });
+    } else { // fence
+      const needEv = S.comps < 92 ? 2 : 3; // falling home values give the scared some courage
+      if (n.rel >= 2 && S.evidence >= needEv && S.rep >= 5) votes.push({ n, v:'yes', why:S.comps < 92 ? 'falling comps finally scared them MORE than the board does' : 'your evidence gave them courage' });
+      else if (n.rel >= 2) votes.push({ n, v:'abstain', why:'wants to help… but too scared without hard evidence' });
+      else votes.push({ n, v:'abstain', why:'stares at the floor' });
+    }
+  }
+  return votes;
+}
+document.getElementById('voteBtn').addEventListener('click', () => {
+  if (!S || S.mode !== 'meeting') return;
+  const votes = castVotes();
+  const icon = { yes:'✅', no:'❌', abstain:'😶', out:'🚪' };
+  // ballots come from the WHOLE community: primaries, their influence blocs, and the unaffiliated
+  const compsBonus = S.comps < 85 ? 0.15 : S.comps < 92 ? 0.08 : 0;
+  let yes = 1, no = 0; // your own ballot
+  const blocLines = [];
+  for (const v of votes){
+    const n = v.n;
+    const sway = Math.max(-1, Math.min(1, n.sway || 0));
+    let frac = v.v === 'yes' ? 0.55 + 0.3 * sway
+             : v.v === 'abstain' ? 0.35 + 0.3 * sway
+             : v.v === 'out' ? 0.5 + 0.25 * sway
+             : 0.15 + 0.2 * Math.max(0, sway);
+    frac = Math.max(0, Math.min(0.95, frac + compsBonus));
+    const y = Math.round((n.influence || 0) * frac);
+    yes += y; no += (n.influence || 0) - y;
+    if (v.v === 'yes') yes += 1; else if (v.v === 'no') no += 1;
+    blocLines.push(`<div style="font-size:12px;color:#c9d6b4;">└ ${n.name}'s circle (${n.influence || 0} homes): <b>${y}</b> yes</div>`);
+  }
+  const un = S.unaffiliated || 0;
+  const unY = Math.round(un * Math.max(0, Math.min(0.9, 0.25 + S.rep / 10 * 0.35 + compsBonus)));
+  yes += unY; no += un - unY;
+  document.getElementById('voteList').innerHTML =
+    votes.map((v, i) =>
+      `<div>${icon[v.v]} <b>${v.n.name}</b> — ${v.v.toUpperCase()} <span style="color:#c9d6b4">(${v.why})</span>${blocLines[i]}</div>`
+    ).join('') +
+    `<div>📊 Unaffiliated homes (${un}): <b>${unY}</b> yes <span style="color:#c9d6b4">(your ⭐ reputation${compsBonus ? ' + falling-comps fury' : ''})</span></div>` +
+    `<div style="text-align:center;font-weight:bold;margin-top:6px;">YES ${yes} — NO ${no} (of ${S.homes || yes + no} ballots)</div>`;
+  document.getElementById('voteList').classList.remove('hidden');
+  document.getElementById('voteBtn').classList.add('hidden');
+  document.getElementById('meetSkip').classList.add('hidden');
+  const res = document.getElementById('meetResult');
+  res.classList.remove('hidden');
+  document.getElementById('meetDone').classList.remove('hidden');
+  if (yes > no){
+    res.textContent = '🎉 THE MOTION CARRIES! The board is DISSOLVED!';
+    res.style.color = '#8fd14f';
+    S.pendingWin = true;
+    beep(523,0.15,'triangle',0.06); setTimeout(()=>beep(659,0.15,'triangle',0.06),150); setTimeout(()=>beep(784,0.3,'triangle',0.06),300);
+  } else {
+    res.textContent = `❌ The motion fails (${yes}–${no}). The board president smiles like a lizard. (+20 😠)`;
+    res.style.color = '#ff8c8c';
+    S.anger = Math.min(100, S.anger + 20);
+    S.petitioned = false; // the fight continues — you can petition again once you regroup
+    log(`🗳️ Recall FAILED ${yes}–${no}. The board will remember this.`, 'bad');
+    beep(220,0.3,'sawtooth',0.06);
+  }
+});
+document.getElementById('meetSkip').addEventListener('click', () => {
+  if (!S || S.mode !== 'meeting') return;
+  meetingModal.classList.add('hidden');
+  S.mode = 'playing';
+  log('🗳️ You sat quietly. The board approved new fonts for violation letters.', 'info');
+  render();
+});
+document.getElementById('meetDone').addEventListener('click', () => {
+  if (!S || S.mode !== 'meeting') return;
+  meetingModal.classList.add('hidden');
+  if (S.pendingWin) return winRecall();
+  S.mode = 'playing';
+  render();
+});
+
+// ================= endings =================
+function statLine(){
+  const st = S.stats;
+  let s = `Complied: <b>${st.complied}</b> · Contested: <b>${st.contested}</b> · Liens: <b>${st.liens}</b> · Assessed: <b>$${st.assessed}</b> · Appeals denied: <b>${st.appeals}</b>/${st.appeals} · Bylaws amended: <b>${st.amendments}</b>` +
+    (st.mgmtFired ? ` · 🔥 Mgmt companies fired: <b>${st.mgmtFired}</b>` : '') +
+    (st.planted ? ` · 📨 Messages planted: <b>${st.planted}</b>` : '') +
+    ` · 📈 Final comps: <b>${Math.round(S.comps ?? 100)}%</b> (${(S.sales || []).length} sales tracked)`;
+  if (S.factions) s += `<br>🤝 Allies: <b>${S.neighbors.filter(n=>n.alliance&&!n.exposed&&!n.hostile).length}</b> · 🚨 Spies exposed: <b>${st.exposed}</b>/${S.neighbors.filter(n=>n.type==='deceiver').length} · 😬 Wrong accusations: <b>${st.wrongAccusals}</b> · 💬 Intel: <b>${st.tipsTrue}</b> true / <b>${st.tipsFalse}</b> lies`;
+  return s;
+}
+function finalScore(bonus){
+  const st = S.stats;
+  return Math.max(0, Math.round(
+    S.equity * 2 + S.cash / 5 + S.condition / 2 + S.commons / 4 + S.rep * 10
+    + S.neighbors.filter(n => n.alliance && !n.exposed && !n.hostile).length * 25
+    + st.exposed * 40 - st.liens * 20 - st.wrongAccusals * 15 + (bonus || 0)));
+}
+function scoreLine(bonus){
+  const sc = finalScore(bonus);
+  const grade = sc >= 600 ? 'S — HOA SLAYER' : sc >= 450 ? 'A — Neighborhood Legend'
+    : sc >= 300 ? 'B — Respected Holdout' : sc >= 180 ? 'C — Survived, Barely' : 'D — Beige-Adjacent';
+  return `<br><br>🏆 FINAL SCORE: <b>${sc}</b> · Grade: <b>${grade}</b>`;
+}
+function ending(title, html){
+  clearSave();
+  document.getElementById('endTitle').textContent = title;
+  document.getElementById('endText').innerHTML = html;
+  document.getElementById('endModal').classList.remove('hidden');
+}
+function winRecall(){
+  S.mode = 'won';
+  ending('🎉 THE BOARD IS DISSOLVED!',
+    `Month ${S.month}: the recall carried, and the ${S.hoaName || 'HOA'} board is history. The president's gavel was auctioned for charity. The pool remains closed, but now it's <i>everyone's</i> closed pool — and ${S.playerName || 'you'} made it happen.<br><br>` +
+    `Final equity: <b>${Math.round(S.equity)}</b> · ${statLine()}${scoreLine(200)}<br><br>Plant whatever you want. Forever.`);
+}
+function sellOut(){
+  S.mode = 'over';
+  ending('🏷️ SOLD — ON YOUR TERMS',
+    `Month ${S.month}: the sign went up, the offers came in, and ${S.playerName || 'you'} cashed out <b>${Math.round(S.equity)}</b> equity — leaving ${S.hoaName || 'the HOA'} to its empire of mulch. The buyers seem nice. They have a flamingo. They have no idea.<br><br>` +
+    `${statLine()}${scoreLine(0)}`);
+  beep(392,0.2,'triangle',0.05);
+}
+function lose(){
+  S.mode = 'over';
+  let betrayal = '';
+  if (S.factions){
+    const t = S.neighbors.find(n => n.alliance && n.type === 'deceiver' && !n.exposed);
+    if (t) betrayal = `<br><br>${t.ico} <b>${t.name}</b> waves from the board's victory picnic. They were a spy the whole time.`;
+  }
+  ending('🔨 FORECLOSED!',
+    `Month ${S.month}: the ${S.diff.label} board of ${S.hoaName || 'your HOA'} drained ${S.playerName ? S.playerName + "'s" : 'your'} equity and took the house. A beige-approved family moves in Tuesday.` +
+    betrayal + `<br><br>${statLine()}${scoreLine(0)}`);
+  beep(220,0.4,'sawtooth',0.07);
+}
+
+// ================= auto-advance =================
+let autoTimer = null, autoLeft = 0;
+function cancelAuto(){
+  if (autoTimer){ clearInterval(autoTimer); autoTimer = null; }
+  const b = document.getElementById('endBtn');
+  if (b.textContent !== 'End Month ▶') b.textContent = 'End Month ▶';
+}
+function maybeAuto(){
+  const b = document.getElementById('endBtn');
+  if (!S || S.mode !== 'playing' || S.ap > 0 || S.holdMonth){
+    if (autoTimer && (!S || S.mode !== 'playing' || S.ap > 0)) cancelAuto();
+    return;
+  }
+  if (autoTimer){ b.textContent = `✋ Hold (auto in ${autoLeft}s)`; return; }
+  autoLeft = 4;
+  b.textContent = `✋ Hold (auto in ${autoLeft}s)`;
+  autoTimer = setInterval(() => {
+    if (!S || S.mode !== 'playing' || S.ap > 0 || S.holdMonth){ cancelAuto(); return; }
+    autoLeft--;
+    if (autoLeft <= 0){ cancelAuto(); endMonth(); }
+    else document.getElementById('endBtn').textContent = `✋ Hold (auto in ${autoLeft}s)`;
+  }, 1000);
+}
+
+// ================= render =================
+function render(){
+  if (!S) return;
+  document.getElementById('monthLbl').textContent = `📅 Month ${S.month}`;
+  document.getElementById('cashLbl').textContent = `💵 $${S.cash}`;
+  document.getElementById('eqLbl').textContent = Math.max(0, Math.round(S.equity));
+  document.getElementById('condLbl').textContent = S.condition + '%';
+  document.getElementById('angerLbl').textContent = S.anger;
+  document.getElementById('evLbl').textContent = S.evidence;
+  document.getElementById('repLbl').textContent = S.rep;
+  document.getElementById('comLbl').textContent = S.commons + '%';
+  document.getElementById('commsLbl').textContent = `${S.comms ?? 0}/${S.commsMax ?? 8}`;
+  document.getElementById('apLbl').textContent = `⚡ ${S.ap}/${S.apMax}`;
+  const comps = Math.round(S.comps ?? 100);
+  document.getElementById('compsBar').style.width = Math.max(0, Math.min(100, (comps - 70) / 45 * 100)) + '%';
+  const cv2 = document.getElementById('compsVal');
+  cv2.textContent = comps + '%';
+  cv2.style.color = comps >= 100 ? 'var(--green)' : comps >= 90 ? 'var(--gold)' : 'var(--red)';
+  document.getElementById('endBtn').disabled = S.mode !== 'playing';
+  maybeAuto();
+  document.getElementById('eqBar').style.width = Math.max(0, S.equity / S.eqMax * 100) + '%';
+  document.getElementById('eqVal').textContent = Math.max(0, Math.round(S.equity)) + '/' + S.eqMax;
+  document.getElementById('condBar').style.width = S.condition + '%';
+  document.getElementById('condVal').textContent = S.condition + '%';
+  document.getElementById('angerBar').style.width = S.anger + '%';
+  document.getElementById('angerVal').textContent = S.anger + '/100';
+  document.getElementById('ruleCt').textContent = S.rules.length;
+  if (S.rules.length){
+    document.getElementById('rulesBox').innerHTML = S.rules.map(r => `<div>• ${r}</div>`).join('');
+  }
+  renderViolations();
+  renderActions();
+}
+
+// ================= setup =================
+const REGIME_SLIDERS = { sPetty:'petty', sFines:'fines', sDues:'dues', sMercy:'mercy', sGrudge:'grudge' };
+let applyingPreset = false;
+function updateMeter(){
+  for (const [id, key] of Object.entries(REGIME_SLIDERS)){
+    document.getElementById('o' + id.slice(1)).textContent = document.getElementById(id).value;
+  }
+  document.getElementById('oHomes').textContent = document.getElementById('sHomes').value + ' homes';
+  document.getElementById('oYears').textContent = document.getElementById('sYears').value + ' years old';
+  const cfg = buildConfig();
+  const color = cfg.score < 20 ? '#8fd14f' : cfg.score < 40 ? '#b8d14f' : cfg.score < 60 ? '#ffd24a' : cfg.score < 80 ? '#ff9a4f' : '#ff5c5c';
+  const label = `HOA Livability: <b>${cfg.liv}</b> · ${cfg.homes} homes, ${cfg.years} yrs<br>${cfg.livDesc}`;
+  for (const suffix of ['', '2']){
+    const fill = document.getElementById('diffFill' + suffix);
+    const lbl = document.getElementById('diffLabel' + suffix);
+    if (!fill || !lbl) continue;
+    fill.style.width = Math.max(4, cfg.score) + '%';
+    fill.style.background = color;
+    lbl.innerHTML = label;
+  }
+}
+document.getElementById('customBtn').addEventListener('click', () => {
+  document.getElementById('customModal').classList.remove('hidden');
+  updateMeter();
+  beep(600, 0.05, 'sine', 0.03);
+});
+document.getElementById('customDone').addEventListener('click', () => {
+  document.getElementById('customModal').classList.add('hidden');
+  updateMeter();
+  beep(500, 0.05, 'sine', 0.03);
+});
+document.getElementById('regimeRow').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  chosenRegime = chip.dataset.r;
+  const p = REGIME_PRESETS[chosenRegime];
+  applyingPreset = true;
+  for (const [id, key] of Object.entries(REGIME_SLIDERS)) document.getElementById(id).value = p[key];
+  applyingPreset = false;
+  for (const el of document.querySelectorAll('#regimeRow .chip')) el.classList.toggle('sel', el === chip);
+  updateMeter();
+  beep(600, 0.05, 'sine', 0.03);
+});
+for (const id of [...Object.keys(REGIME_SLIDERS), 'sHomes', 'sYears']){
+  document.getElementById(id).addEventListener('input', () => {
+    if (!applyingPreset && REGIME_SLIDERS[id]){
+      chosenRegime = 'custom'; // hand-tuned trauma
+      for (const el of document.querySelectorAll('#regimeRow .chip')) el.classList.remove('sel');
+    }
+    updateMeter();
+  });
+}
+updateMeter();
+document.getElementById('hoaDice').addEventListener('click', () => {
+  document.getElementById('hoaName').value = randomHoaName();
+  beep(700, 0.05, 'sine', 0.03);
+});
+document.getElementById('hoaName').value = randomHoaName();
+document.getElementById('startBtn').addEventListener('click', () => {
+  const playerName = esc(document.getElementById('playerName').value.trim()).slice(0, 20) || 'Alex';
+  const hoaName = esc(document.getElementById('hoaName').value.trim()).slice(0, 28) || randomHoaName();
+  S = newGame(buildConfig());
+  S.playerName = playerName;
+  S.hoaName = hoaName;
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('endModal').classList.add('hidden');
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('rulesBox').innerHTML = '<div style="color:#8a9a78;font-style:italic;">Just the original 214-page rulebook. So far.</div>';
+  renderStrip();
+  renderBoard();
+  // meet the board (reversed so it reads top-down in the prepend-ordered log)
+  [...S.board].reverse().forEach(m =>
+    log(`${m.arch.ico} <b>${m.name}</b>${m.president ? ' 👑 (President)' : ''} — ${m.arch.title}. ${m.arch.desc}`, 'info'));
+  log(`🏛️ <b>MEET YOUR BOARD</b> — ${S.size.label}, ${S.age.label}. ${DIFF_FLAVOR[S.diffKey]}`, 'tip');
+  log(`📊 <b>HOA LIVABILITY ASSESSMENT</b>: ${S.livLabel} — ${S.livDesc}`, 'tip');
+  if (S.age.legacy) log(`📜 ${S.age.legacy} legacy rules are already on the books. They predate you. They will outlive you.`, 'bad');
+  log(`🏡 <b>${S.playerName}</b>, welcome to <b>${S.hoaName}</b>. Your closing gift: a 214-page rulebook and a laminated card of the approved beiges.`, 'tip');
+  setTicker(`🏘️ ${S.hoaName}: ${S.neighbors.length} neighbors watch from behind curtains. Some know things. Some are wearing a wire. Spend your ⚡ well, ${S.playerName}.`);
+  syncAiBtn();
+  startMonth();
+  openWelcome();
+  beep(523, 0.1, 'triangle', 0.05);
+});
+document.getElementById('endBtn').addEventListener('click', () => {
+  if (autoTimer){
+    S.holdMonth = true;
+    cancelAuto();
+    setTicker('✋ Auto-advance held — respond to violations at your leisure, then end the month yourself.');
+    render();
+    return;
+  }
+  cancelAuto();
+  endMonth();
+});
+document.getElementById('againBtn').addEventListener('click', () => {
+  document.getElementById('endModal').classList.add('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+  refreshResume();
+});
+refreshResume();
+window.addEventListener('pageshow', refreshResume);
+document.getElementById('musicBtn').addEventListener('click', () => Music.toggle());
+document.addEventListener('click', () => { if (Music.on) Music.start(); }); // autoplay rules: first gesture starts the band
+syncMusicBtn();
+</script>
+</body>
+</html>
