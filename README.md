@@ -1,5 +1,7 @@
 # 🏠 HOA Havoc
 
+*A game by Jeffrey Farkas and BigSpoke AI.*
+
 A turn-based game of suburban survival. Your board is coming for your equity. Your neighbors know things — some of them are even telling the truth.
 
 **Play it: https://USERNAME.github.io/hoa-havoc/**
@@ -21,3 +23,9 @@ Single self-contained HTML file. No dependencies, no build step, no tracking. Wo
 ## Running it locally
 
 Open `index.html` in any browser. That's the whole procedure.
+
+## Copyright
+
+Copyright © 2026 Jeffrey Farkas and BigSpoke AI. All rights reserved.
+
+The source is public so the game can be hosted and played — it is not open source. Viewing and personal play are fine; copying, redistributing, rehosting, creating derivative works, or any commercial use require written permission. See [LICENSE](LICENSE).

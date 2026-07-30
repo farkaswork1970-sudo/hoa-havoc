@@ -1,4 +1,13 @@
 <!DOCTYPE html>
+<!--
+  HOA HAVOC — A Turn-Based Game of Suburban Survival
+  Copyright © 2026 Jeffrey Farkas and BigSpoke AI. All rights reserved.
+
+  This game, including its source code, written content, game systems, and
+  design, is the authored work of Jeffrey Farkas and BigSpoke AI.
+  Unauthorized copying, redistribution, or derivative works are not permitted
+  without written permission. See LICENSE.
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -219,6 +228,7 @@
 </style>
 </head>
 <body>
+<!-- HOA HAVOC — © 2026 Jeffrey Farkas and BigSpoke AI. All rights reserved. -->
 <div id="wrap">
   <div id="topbar">
     <span class="stat" id="monthLbl">📅 Month 1</span>
@@ -295,6 +305,7 @@
     <button class="btn" id="startBtn">Move In ▶</button>
     <button class="btn law hidden" id="resumeBtn">💾 Resume</button>
     <button class="btn sm grey" id="menuTutBtn">📖 How to Play</button>
+    <p class="small" style="margin-top:14px;opacity:.75;">© 2026 Jeffrey Farkas &amp; BigSpoke AI · All rights reserved</p>
   </div>
 </div>
 
@@ -474,7 +485,7 @@ const TUTORIAL_STEPS = [
   { t:'🏘️ Neighbors', b:'Every neighbor is secretly a truthful <b>friend</b>, a scared <b>fence-sitter</b>, or a <b>deceiver</b> reporting to the board. All of them offer intel about the board\'s secret monthly plan — deceivers\' first tip is TRUE to earn your trust.<br><br>Watch the <b>✓/✗ record</b> on their card — but carefully: friends are occasionally <i>honestly wrong</i>, and good spies are right most of the time. Expect a year of chatter before you can truly sort the street. 🚨 <b>Accuse</b> only with a pattern, not a single ✗.<br><br>Every neighbor also <b>sways a circle of households</b> (shown in their dossier) — and 🌐 super-connectors float through every circle: message carriers as allies, wide-reach spies otherwise. 📨 <b>Plant messages</b> (1📞) to win blocs before a vote — through the wrong person, your words come back rearranged. And neighbors <b>sell and move</b>: their replacement inherits the circle with an unknown allegiance.' },
   { t:'🏛️ The Board', b:'Your board members are people — terrible people. Each has an archetype (📏 Enforcer, 🧮 Treasurer-for-Life, 📜 Parliamentarian, 📢 Megaphone, 🕰️ Founder, 🏗️ Declarant) and <b>pushes their own obsessions onto the monthly agenda</b>.<br><br>Read the roster panel: an Enforcer-heavy board means keep the lawn tight; a Founder/Parliamentarian board means constant bylaw amendments. Every board action in the log is signed by its author.' },
   { t:'🗳️ Meetings & the Recall', b:'The <b>annual meeting</b> comes every 12th month. With enough allies you can 📢 <b>petition</b> a special meeting early (re-usable after a failed vote).<br><br>The vote is <b>community-wide</b>: every home casts a ballot. Primaries vote their conscience (friends need to know you; fence-sitters need ★★ trust, evidence, and ⭐5+ rep; unexposed deceivers vote no) — and each one <b>delivers their influence circle</b>, scaled by how much you\'ve swayed it. Unaffiliated homes follow your reputation. Falling 📈 comps make every group angrier at the board. Win the majority of ballots.<br><br>⚠️ And if the board ever hires a <b>management company</b>, everyone\'s equity bleeds monthly — rally enough allies and 🔥 fire them to claw back every point they drained.' },
-  { t:'🤖 AI & 💾 Saving', b:'The <b>🤖 AI assistant</b> is a deal with the devil: ON, you get a monthly strategic advisor that reads the field and sometimes leaks the board\'s real plans — but <b>everyone gets AI</b>: the board acts more often, files algorithmic 3 AM citations, and "optimizes" your dues. Toggle it anytime; decide if the intel is worth the arms race.<br><br>💾 The game <b>autosaves every month</b> — close the tab whenever; the menu will offer to resume. Good luck. The board already knows you\'re reading this.' },
+  { t:'🤖 AI & 💾 Saving', b:'The <b>🤖 AI assistant</b> is a deal with the devil: ON, you get a monthly strategic advisor that reads the field and sometimes leaks the board\'s real plans — but <b>everyone gets AI</b>: the board acts more often, files algorithmic 3 AM citations, and "optimizes" your dues. Toggle it anytime; decide if the intel is worth the arms race.<br><br>💾 The game <b>autosaves every month</b> — close the tab whenever; the menu will offer to resume. Good luck. The board already knows you\'re reading this.<br><br><span style="opacity:.7;font-size:12.5px;">HOA Havoc — © 2026 Jeffrey Farkas &amp; BigSpoke AI. All rights reserved.</span>' },
 ];
 
 const VIOLATIONS = [
