@@ -767,6 +767,106 @@ const SLIDER_COPY = {
     'Thirty-eight years. The founder still holds his seat, and the retaining wall is bowing.',
     'Fifty years. Six inherited rules, a codified fine schedule, and 1985 plumbing.'] },
 };
+const THEMES = [
+  { key:'geese', emoji:'🪿', name:'The Retention Pond Geese',
+    hook:'The board has been at war with eleven geese since 2019 and has not won a single engagement.',
+    ticker:['The geese are back on the retention pond. The board counts them weekly and disputes its own count.', 'A resident was chased on the pond loop. The incident report lists the goose as party unknown.', 'The coyote decoy arrived Tuesday. By Friday the geese were nesting behind the coyote decoy.', 'Goose deterrence is now its own budget line. It exceeds the line for irrigation repair.'],
+    violations:['Bread and cracked corn deposited on the pond bank at the north bench', 'Goose droppings on the shared walk abutting your lot', 'Lawn maintained at a length known to attract waterfowl grazing'],
+    rules:['Resolution 104: lots adjoining the retention pond bear the cost of goose deterrence at owner expense.', 'Resolution 109: the pond bank shall be planted in tall grasses and shall not be mown by residents.'],
+    newsletter:['The pond geese are not pets, not livestock, and not, as one household insists, basically ours.', 'Residents continue to ask what is being done about the geese. The answer has not changed since 2019.'],
+    welcomePS:'P.S. Use the north side of the pond. The geese hold the south side, and the board has chosen not to contest it.' },
+  { key:'cat', emoji:'🐈', name:'The Cat Behind the Clubhouse',
+    hook:'A feral cat nobody owns is claimed by six households and has been given four different names.',
+    ticker:['The cat behind the clubhouse turned up at two doors on one evening, on streets that are not speaking.', 'The cat now answers to Biscuit, Duchess, Mr. Peebles, and, on one street, the tenant.', 'A heated shelter has appeared behind the fence line. It was not submitted for architectural review.', 'The board has opened a file on the cat. The file lists an address, and the address is the clubhouse.'],
+    violations:['Unapproved structure: insulated animal shelter, 3 by 2 feet', 'Harboring an animal not listed on your household pet registration', 'Live trap set on common ground without notice to the Grounds Committee'],
+    rules:['Resolution 112: residents shall not name, claim, or represent to others any animal not on the pet roll.', 'Resolution 117: structures built to shelter an animal require review and an abutting-owner waiver.'],
+    newsletter:['Four households have listed the same cat on their pet registration. Only one of them can be correct.', 'The cat is not an amenity, is not insured, and is not, as several emails have claimed, the community\'s.'],
+    welcomePS:'P.S. If a gray cat appears on your porch at dusk it is not lost, it is not yours, and two neighbors are watching.' },
+  { key:'mailbox', emoji:'📮', name:'The Leaning Mailbox on Larkspur',
+    hook:'A car took the mailbox at 6 Larkspur in 2019 and the post has leaned at the same angle ever since.',
+    ticker:['The mailbox at 6 Larkspur still leans. It was 38 degrees in 2019 and it is 38 degrees now.', 'The bucket of concrete holding the Larkspur post is called, in the minutes, the temporary solution.', 'The board has requested the 2019 accident report from the county. The county has asked why.', 'There is now a standing agenda item called Larkspur. It has only ever concerned the one mailbox.'],
+    violations:['Mailbox post out of vertical by more than five degrees', 'Temporary repair remaining in place beyond one calendar year', 'Reflective numerals absent from the street-facing side of the box'],
+    rules:['Resolution 121: mailbox posts shall stand plumb, in cedar, in the shade of stain adopted in 1996.', 'Resolution 126: damaged boxes shall be restored within thirty days of the damage, regardless of fault.'],
+    newsletter:['The Standards Committee notes that a mailbox may be entirely functional and still be a problem.', 'One post on Larkspur has now run in six straight newsletters. We look forward to the seventh.'],
+    welcomePS:'P.S. There is a leaning mailbox on Larkspur. Do not offer to straighten it. Three residents before you offered.' },
+  { key:'boat', emoji:'⛵', name:'The Boat at 14 Sandpiper',
+    hook:'A twenty-four-foot cabin cruiser has sat on a trailer in a driveway for three years and has never touched water.',
+    ticker:['The boat at 14 Sandpiper has not been in water since 2022. Its registration expired the year after.', 'The boat trailer overhangs the sidewalk by eleven inches. A resident has photographed all eleven.', 'A petition asks whether a boat on a trailer is a vehicle, a structure, or a hobby. Signatures: 31.', 'The board\'s new definition of the word driveway runs two pages and mentions the boat nine times.'],
+    violations:['Recreational vessel stored in view of the street beyond seventy-two hours', 'Boat trailer tongue extending eleven inches over a public sidewalk', 'Vessel cover secured with rope in a color not listed in Appendix C'],
+    rules:['Resolution 129: no vessel may remain on a lot beyond 72 hours unless actively undergoing repair.', 'Resolution 134: a boat is a structure for setback purposes and a vehicle for parking purposes.'],
+    newsletter:['Driveways are for cars. The board thanks the ninety-one households this does not concern.', 'The tarp on Sandpiper has been re-tied. Re-tying is not, for these purposes, the same as compliance.'],
+    welcomePS:'P.S. If a neighbor asks your opinion of the boat at 14 Sandpiper, there is no neutral answer. Choose early.' },
+  { key:'flagpole', emoji:'🏳️', name:'The Flagpole at 42 Wren Court',
+    hook:'A twenty-five-foot flagpole went up on a Saturday without review, and its halyard clangs on windy nights.',
+    ticker:['The flagpole at 42 Wren Court is 25 feet. The bylaws contemplate 20. Nobody contemplated 25.', 'The halyard clangs on windy nights. Four households have begun keeping a log of the wind.', 'A resident proposes measuring the pole\'s shadow in order to establish it as a structure.', 'The board has asked whether a flagpole has a setback. It asked the county, the state, and a lawyer.'],
+    violations:['Freestanding pole exceeding twenty feet without an engineered footing', 'Halyard hardware producing sound audible at the property line', 'Ground spotlight illuminating a neighboring bedroom window after dark'],
+    rules:['Resolution 138: freestanding poles shall not exceed twenty feet, measured from finished grade.', 'Resolution 143: pole halyards shall be sleeved, taped, or otherwise silenced between dusk and dawn.'],
+    newsletter:['Nobody disputes anyone\'s patriotism. The board disputes the footing, the height, and the clanging.', 'Permanent installations require review, including the ones that go up on a Saturday.'],
+    welcomePS:'P.S. On windy nights you will hear the halyard at 42 Wren Court. Four households keep a log, and you will be asked to sign.' },
+  { key:'garage', emoji:'🚪', name:'The Open Garage Door',
+    hook:'Nobody can prove what is in the Delgado garage, and that is precisely the problem.',
+    ticker:['The Delgado garage door has been open since Tuesday. Two people drove past slowly to confirm.', 'Accounts of the Delgado garage differ. One says boxes to the ceiling. One says a second refrigerator.', 'A proposal would require a curtain across any garage whose door must remain open for work.', 'The question of what a garage is has been referred to counsel, who has asked for a site visit.'],
+    violations:['Garage door open 41 minutes with no vehicle entering or exiting', 'Garage interior visible from the sidewalk; contents described as stacked', 'Second refrigerator observed in garage during an open-door period'],
+    rules:['Resolution 147: garage doors shall stay closed except during loading, unloading, or vehicle transit.', 'Resolution 152: any garage door open beyond ten minutes shall be logged by the Compliance Secretary.'],
+    newsletter:['Several garages remain open into the evening. The board is not naming households. The board has a list.', 'The garage is a storage area, not a room, and should not be furnished as one.'],
+    welcomePS:'P.S. Your garage faces the community path. Residents will form an opinion about its contents within your first week.' },
+  { key:'speedbump', emoji:'🚧', name:'The Speed Bump Question',
+    hook:'Eleven years of meetings about one stretch of road, and the road remains exactly as it was.',
+    ticker:['The speed bump question is back before the board for the fourteenth meeting running.', 'A resident timed cars on Cobbler Lane with a stopwatch and produced nine pages of findings.', 'The traffic subcommittee has split into two traffic subcommittees that no longer speak.', 'A homeowner painted an unauthorized bump on the pavement. It is being studied rather than removed.'],
+    violations:['Vehicle observed traveling 19 mph in a posted 15 mph community', 'Unapproved traffic signage installed at the end of a private driveway', 'Pavement marking applied to a common street without engineering review'],
+    rules:['Resolution 155: the speed bump study is extended eighteen months pending the results of further study.', 'Resolution 160: the community speed limit is hereby reduced to 12 mph on all interior streets.'],
+    newsletter:['Residents have been patient on the speed bump matter for eleven years. Patience is again requested.', 'Someone is still taking the corner at Cobbler and Ash at speed. The board knows the make and the color.'],
+    welcomePS:'P.S. Do not raise the speed bump at your first meeting. Raise it at your third, once you know who sits where.' },
+  { key:'parking', emoji:'🛻', name:'The Guest Parking Placard',
+    hook:'There are four visitor spaces and a waiting list that predates the current board.',
+    ticker:['Two of the four visitor spaces have held the same sedan since the second week of March.', 'Guest placards are now numbered, laminated, and, as of last month, recorded against a plate number.', 'A resident is parked on the street holding a space for a contractor arriving on the 19th.', 'The board is exploring assigned street parking, which no bylaw permits and no one has stopped.'],
+    violations:['Vehicle parked on the street more than 12 consecutive hours', 'Guest placard displayed in a resident-owned vehicle', 'Contractor vehicle occupying a visitor space across a holiday weekend'],
+    rules:['Resolution 164: overnight street parking requires a placard, issued Wednesdays between 4 and 5 p.m.', 'Resolution 169: visitor spaces are limited to four hours and may not be used on consecutive days.'],
+    newsletter:['Visitor parking is for visitors. The board is aware that this sentence has not previously worked.', 'One vehicle has now held a visitor space for 61 days. Its owner has been written to twice.'],
+    welcomePS:'P.S. Street parking requires a placard. Placards are issued Wednesdays by someone who leaves at 4:45.' },
+  { key:'mulch', emoji:'🪵', name:'The Mulch Question',
+    hook:'The board approved exactly one mulch color and half the neighborhood ordered the other one.',
+    ticker:['Two truckloads arrived on Elm in a red-brown that is not the approved brown.', 'Samples are being compared in a shoebox that now lives permanently at the clubhouse.', 'A resident brought a color meter to the meeting and was thanked for his time.', 'The supplier says the approved shade was discontinued in 2019. This has not been accepted.'],
+    violations:['Bed mulch applied in a shade outside the approved brown range', 'Mulch depth measured at four inches at the bed edge', 'Prior year\'s mulch not removed before application of new mulch'],
+    rules:['Resolution 173: bed mulch shall be natural hardwood in the approved brown, two to three inches deep.', 'Resolution 178: dyed and rubber coverings are prohibited in front beds absent a written variance.'],
+    newsletter:['Mulch refresh is due in April. The approved shade has not changed and is not going to change.', 'The household that mulched twice this spring is asked to consider the matter settled.'],
+    welcomePS:'P.S. Bring a mulch sample to the clubhouse before ordering. Bring the sample, not a photograph of the sample.' },
+  { key:'curtains', emoji:'🪟', name:'The Liner Standard',
+    hook:'Every street-facing window must read white from the curb, and one house has a bedsheet.',
+    ticker:['A second-floor window on Birch has been covered with a bedsheet since the closing date.', 'The board has clarified that a folded towel is not a window treatment.', 'Nine street-facing windows were assessed from the curb on Sunday. No findings were read out.', 'The liner standard now extends to the transom above the front entry and to stairwell glass.'],
+    violations:['Street-facing window treatment not reading white or off-white from the curb', 'Temporary covering displayed beyond the sixty-day move-in allowance', 'Foil, cardboard, or fabric affixed directly to window glass'],
+    rules:['Resolution 182: window treatments visible from the street shall present white or off-white outward.', 'Resolution 187: temporary coverings are permitted for sixty days after closing and may not be renewed.'],
+    newsletter:['The liner standard covers blinds, drapes, shades, and anything a resident is calling a curtain.', 'One household has asked whether a bedsheet counts as off-white. The board has replied at length.'],
+    welcomePS:'P.S. Whatever hangs in your street-facing windows must show white to the street. The back of it counts.' },
+];
+const IDLE_TICKER = [
+  'The neighborhood group chat has 412 unread messages. None of them concern you yet.',
+  'Two households began mowing at the same hour on the same day. Neither will yield.',
+  'A pallet of pavers appeared on a front lawn on Friday. No permit had been filed by Monday.',
+  'An alarm has been sounding since Sunday. The house appears to be occupied.',
+  'A survey stake turned up on a back property line. Nobody on that street ordered a survey.',
+  'A washing machine sat at the curb for nine days, then left in the night. No one saw the truck.',
+  'The entrance sign was rewrapped in a font the previous board would not have approved.',
+  'The thermostat in the meeting room is in a locked box. Three residents have keys and none will say who.',
+  'The landscaping contract was renewed without discussion, as it has been every year since 2011.',
+  'The welcome committee has one member. She has opinions about the other applicants.',
+  'The reserve study has been moved to next quarter for the fourth quarter running.',
+  'Two board seats are open. The same two people have expressed interest in both of them.',
+  'A new family toured the corner lot. Nobody mentioned the drainage easement.',
+  'The board met for three hours in a room with no posted agenda, and adjourned without one.',
+];
+
+// Each game picks one running obsession. It seeds the banner, the citations, the resolutions and
+// the newsletter, so two games at the same difficulty still read as different neighbourhoods.
+// themedPool blends the general pool with the active theme's items, weighted so the obsession
+// recurs often enough to feel like a running joke without crowding everything else out.
+function themedPool(kind, base){
+  const t = (typeof S !== 'undefined' && S) ? S.theme : null;
+  if (!t || !t[kind] || !t[kind].length) return [...base];
+  const out = [...base];
+  for (let i = 0; i < 2; i++) out.push(...t[kind]);   // the obsession gets extra tickets in the draw
+  return out;
+}
 const AMENITY_STRIFE_TOTAL = AMENITIES.reduce((a, x) => a + x.strife, 0);
 function amenityDues(a){ return Math.max(2, Math.round(a.duesAdd * 0.6)); }
 function livScore(homes, years, r, amenStrife){
@@ -844,14 +944,26 @@ const VIOLATIONS = [
   'Residual holiday spirit detected in March',
 ];
 const RULES_PASSED = [
-  'Resolution 88-B: all gnomes must now be licensed AND insured.',
-  'Resolution 91: pickup trucks reclassified as "farm equipment". Banned.',
-  'Resolution 94: basketball hoops are officially "street menaces".',
-  'Resolution 97: koi ponds require an Aquatic Livestock Permit.',
-  'Resolution 101: holiday lights banned 11 months per year.',
-  'Resolution 104: lawn ornaments capped at zero (0) per lawn.',
-  'Resolution 108: all fences must be exactly fence-colored.',
-  'Resolution 112: bird baths must submit weekly water samples.',
+  'Resolution 191: driveways shall be sealed every third year by a vendor from the approved list of one.',
+  'Resolution 194: dues are payable on the first. The grace period is discontinued, retroactively.',
+  'Resolution 197-B: firepits are open flame and require proof of insurance naming the association.',
+  'Resolution 201: basement egress wells shall be fitted with clear domes and inspected each spring.',
+  'Resolution 205: pool keys are issued one per household, a household being whatever the tax record says.',
+  'Resolution 208: photographs taken by residents are accepted as evidence. Photographs of the board are not.',
+  'Resolution 212: gutters shall be cleaned twice yearly, with receipts filed with the compliance chair.',
+  'Resolution 216: residents shall file their travel dates so the board may monitor unattended lots.',
+  'Resolution 219-A: the quorum for the annual meeting is redefined as whoever attends the annual meeting.',
+  'Resolution 223: complaints must be submitted on the current form. The form is revised each quarter.',
+  'Resolution 227: sidewalk chalk is a temporary alteration of a common surface and requires prior review.',
+  'Resolution 230: correspondence to the board shall be by mail. The email address remains published.',
+  'Resolution 234: wreaths are seasonal decor and may be displayed fourteen days per season, inclusive.',
+  'Resolution 238-C: house paint shall differ from both adjacent homes and from the home\'s previous color.',
+  'Resolution 241: yard waste bags shall be paper, closed at the top, and set out no earlier than 6 a.m.',
+  'Resolution 245: the amenity gate shall be locked at dusk, with the sole key held by the Grounds Chair.',
+  'Resolution 249: dogs over forty pounds require a temperament letter from a party the board finds licensed.',
+  'Resolution 252: firewood may be stacked for use but may not be arranged for effect.',
+  'Resolution 256: the community bulletin board is now moderated; postings require a resident sponsor.',
+  'Resolution 261: the annual meeting will be held annually, last year notwithstanding.',
 ];
 const RUMORS = [
   'your koi are unlicensed and "possibly foreign"',
@@ -932,12 +1044,26 @@ function buildConfig(){
     tierIdx:LIV_TIERS.indexOf(lt), liv:`${lt.t} (${score}/100)`, livDesc:lt.d };
 }
 const LEGACY_RULES = [
-  'Legacy rule (1987): garage doors may be open no longer than 90 seconds.',
-  'Legacy rule (1992): curtains visible from the street must be "off-white or regret-beige".',
-  'Legacy rule (1979): no vehicle may bear a bumper sticker of any kind or opinion.',
-  'Legacy rule (1984): lemonade stands require a Commercial Beverage Permit.',
-  'Legacy rule (1990): satellite dishes are "an admission of failure". Banned.',
-  'Legacy rule (1988): hammocks imply idleness. Banned.',
+  'Legacy rule (1974): front walkways shall be edged to a depth of one inch and are inspected each May.',
+  'Legacy rule (1976): window air conditioning units are permitted on the north elevation only, and only in July.',
+  'Legacy rule (1977): sidewalks shall be shoveled within six hours of a snowfall, including overnight.',
+  'Legacy rule (1978): screen doors shall be full-view, self-closing, and shall not be permitted to slam.',
+  'Legacy rule (1979): exterior hoses shall be coiled clockwise and stored behind approved screening.',
+  'Legacy rule (1980): concrete stoops shall be painted gray, in the gray specified by an appendix nobody can locate.',
+  'Legacy rule (1981): awnings shall be canvas, shall be striped, and shall be retracted between November and March.',
+  'Legacy rule (1982): clotheslines may be used on Tuesdays only, and only behind the dwelling.',
+  'Legacy rule (1983): the rear third of every lot is a natural area and may not be improved, mown, or enclosed.',
+  'Legacy rule (1985): removal of any tree requires written board approval, whether or not the tree is alive.',
+  'Legacy rule (1986): swing sets shall be wooden, shall be brown, and shall stand behind the rear building line.',
+  'Legacy rule (1987): rubbish containers shall be screened from the alley. The community has no alley.',
+  'Legacy rule (1989): hedges bordering a sidewalk shall not exceed 42 inches, as measured in August.',
+  'Legacy rule (1991): street-facing shutters shall be operable, and shall not be operated.',
+  'Legacy rule (1993): fence pickets shall face outward, the finished side belonging to the adjoining lot.',
+  'Legacy rule (1996): downspouts shall discharge onto the owner\'s lot, and the water shall remain there.',
+  'Legacy rule (1999): above-ground pools are classified as temporary structures and prohibited on that basis.',
+  'Legacy rule (2001): solar panels are permitted where not visible from any street, walk, or neighboring lot.',
+  'Legacy rule (2003): artificial turf is permitted provided it is mowed on the schedule of natural grass.',
+  'Legacy rule (2004): address plaques shall use a serif typeface; italics require written approval.',
 ];
 const INFRA_EVENTS = [
   () => { const amt = Math.round(50 * S.age.assessMult); charge(amt, 'an emergency assessment'); S.stats.assessed += amt;
@@ -1457,6 +1583,11 @@ function makeBoard(size, age){
     favorMonth:-1, endorseMonth:-1, digMonth:-1,
   }));
 }
+// decks, not counters: each game deals its own order and never repeats an item until the deck runs out
+function drawRule(){
+  if (!S.ruleDeck || !S.ruleDeck.length) S.ruleDeck = shuffle(themedPool('rules', RULES_PASSED));
+  return S.ruleDeck.pop();
+}
 function activeBoard(){ return S.board.filter(m => !m.removed); }
 function friendlyBoard(){ return activeBoard().filter(m => m.insurgent || m.ally || m.trust >= 2); }
 function renderBoard(){
@@ -1488,6 +1619,13 @@ function renderBoard(){
     el.style.cssText = 'margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;cursor:default;';
     el.innerHTML = `🏊 <b>Amenities you pay for</b><br><span class="bd">${mine.map(a => a.ico + ' ' + a.name).join(' · ')}</span>`;
     el.title = mine.map(a => `${a.name}: +$${amenityDues(a)}/mo`).join('\n');
+    box.appendChild(el);
+  }
+  if (S.theme){
+    const el = document.createElement('div');
+    el.className = 'bm';
+    el.style.cssText = 'margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;cursor:default;';
+    el.innerHTML = `${S.theme.emoji} <b>The running dispute:</b> ${S.theme.name}<br><span class="bd">${S.theme.hook}</span>`;
     box.appendChild(el);
   }
   if (S.livLabel){
@@ -1627,7 +1765,7 @@ document.getElementById('bmComplaintBtn').addEventListener('click', () => {
     S.anger = Math.min(100, S.anger + 20);
     log(`⚖️ Your complaint against <b>${m.name}</b> was reviewed by a committee chaired by… <b>${m.name}</b>. Dismissed as "vexatious". (+20 😠)`, 'bad');
     if (Math.random() < 0.6){
-      issueViolation(pick(VIOLATIONS), '— retaliation, obviously');
+      issueViolation(pick(themedPool('violations', VIOLATIONS)), '— retaliation, obviously');
       log(`😤 A citation arrived the same afternoon. Coincidence, surely.`, 'bad');
     }
     beep(180, 0.3, 'sawtooth', 0.06);
@@ -1694,6 +1832,7 @@ function checkBoardControl(){
 function newGame(cfg){
   const d = cfg.diff, age = cfg.age, size = cfg.size;
   vioId = 0;
+  const theme = (typeof THEMES !== 'undefined' && THEMES.length) ? pick(THEMES) : null;
   const neighbors = makeNeighbors(size.neighbors, cfg.homes);
   const unaffiliated = Math.max(0, cfg.homes - 1 - neighbors.length - neighbors.reduce((a, n) => a + n.influence, 0));
   return {
@@ -1707,7 +1846,8 @@ function newGame(cfg){
     condition:70, anger:0, evidence:0, rep:5, dues:d.dues,
     commons:age.commonsStart, otStreak:0, workedOT:false, otBonus:false, lastYardSale:-9, holdMonth:false,
     fineBonus:age.fineAdd, freeComply:false,
-    violations:[], rules:LEGACY_RULES.slice(0, age.legacy), neighbors,
+    violations:[], rules:shuffle([...LEGACY_RULES]).slice(0, age.legacy), neighbors,
+    theme, ruleDeck:null, idleDeck:null, lastTickerMonth:-1,
     board:makeBoard(size, age),
     voteNeed:Math.ceil(size.neighbors / 2), petitionNeed:size.petition, ai:false,
     mgmtCo:null, mgmtCoCooldown:0,
@@ -1733,7 +1873,19 @@ function logMonth(){
   el.textContent = `— Month ${S.month} —`;
   document.getElementById('log').prepend(el);
 }
-function setTicker(t){ document.getElementById('ticker').textContent = t; }
+function setTicker(t){
+  document.getElementById('ticker').textContent = t;
+  if (typeof S !== 'undefined' && S) S.lastTickerMonth = S.month;   // a real event claimed the banner
+}
+// in a month where nothing claimed the banner, the neighbourhood talks among itself
+function idleTicker(){
+  if (!S || S.lastTickerMonth === S.month) return;
+  if (!S.idleDeck || !S.idleDeck.length){
+    S.idleDeck = shuffle(themedPool('ticker', typeof IDLE_TICKER !== 'undefined' ? IDLE_TICKER : []));
+    if (!S.idleDeck.length) return;
+  }
+  document.getElementById('ticker').textContent = (S.theme ? S.theme.emoji + ' ' : '🏘️ ') + S.idleDeck.pop();
+}
 
 // ================= money =================
 // dues can only climb so far before enough owners actually turn up to vote one down
@@ -1943,7 +2095,7 @@ function boardPhase(){
   for (const p of S.plan){
     const who = p.by ? `${p.by.arch.ico} ${p.by.name}: ` : '';
     if (p.kind === 'violation'){
-      const reason = pick(VIOLATIONS);
+      const reason = pick(themedPool('violations', VIOLATIONS));
       const fine = Math.round((40 + Math.random() * 50) * (S.diff.fineMult + S.fineBonus));
       S.violations.push({ id:++vioId, txt:reason, fine, deadline:S.diff.deadline, escalated:false });
       cue('citation');
@@ -1997,11 +2149,11 @@ function boardPhase(){
         S.rules.push(txt); lines.push(`${who}📋 BYLAWS AMENDED: ${txt} The board hasn't noticed. Yet.`);
       }
     } else if (p.kind === 'rule'){
-      const r = RULES_PASSED[S.rules.length % RULES_PASSED.length];
+      const r = drawRule();
       S.rules.push(r); cue('newRule');
       lines.push(`${who}📜 NEW RULE PASSED: ${r}`);
       if (Math.random() < 0.4){
-        issueViolation(pick(VIOLATIONS), 'under the new rule');
+        issueViolation(pick(themedPool('violations', VIOLATIONS)), 'under the new rule');
         lines.push(`…and naturally, you're already in violation of it.`);
       }
     } else if (p.kind === 'rumor'){
@@ -2016,7 +2168,7 @@ function boardPhase(){
     }
   }
   if (leak){
-    issueViolation(pick(VIOLATIONS), '(oddly specific)');
+    issueViolation(pick(themedPool('violations', VIOLATIONS)), '(oddly specific)');
     lines.push(`🕵️ A citation arrived describing your backyard in detail no drone could see. Someone you trust is talking to the board.`);
   }
   if (S.improvedThisMonth && Math.random() < 0.35 + S.anger / 250){
@@ -2080,7 +2232,7 @@ function startMonth(){
   S.cash += S.diff.income;
   charge(S.dues, 'HOA dues');
   log(`💵 Paycheck +$${S.diff.income} · HOA dues −$${Math.round(S.dues)}.`, 'info');
-  if (Math.random() < 0.35) log(`📰 ${pick(PA_NEWSLETTER)}`, 'info');
+  if (Math.random() < 0.35) log(`📰 ${pick(themedPool('newsletter', PA_NEWSLETTER))}`, 'info');
   if (Math.random() < 0.4){
     const ev = pick(MARKET_EVENTS);
     S.equity = Math.min(S.eqMax, S.equity + ev.eq);
@@ -2182,6 +2334,7 @@ function startMonth(){
   } else if (!maybeDispute() && S.factions && Math.random() < S.size.outreach){
     neighborOutreach();
   }
+  idleTicker();
   render();
   saveGame();
 }
@@ -2411,7 +2564,8 @@ function openWelcome(){
   welcomeReturnMode = S.mode;
   S.mode = 'welcome';
   document.getElementById('welcomeTitle').textContent = letter.t;
-  document.getElementById('welcomeBody').innerHTML = letter.b(S.playerName || 'Neighbor', S.hoaName || 'your HOA');
+  document.getElementById('welcomeBody').innerHTML = letter.b(S.playerName || 'Neighbor', S.hoaName || 'your HOA')
+    + (S.theme ? `<br><br><span style="opacity:.85">${S.theme.welcomePS}</span>` : '');
   document.getElementById('welcomeModal').classList.remove('hidden');
   beep(523, 0.12, 'triangle', 0.05);
 }
@@ -3213,6 +3367,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
     log(`${m.arch.ico} <b>${m.name}</b>${m.president ? ' 👑 (President)' : ''} — ${m.arch.title}. ${m.arch.desc}`, 'info'));
   log(`🏛️ <b>MEET YOUR BOARD</b> — ${S.size.label}, ${S.age.label}. ${DIFF_FLAVOR[S.diffKey]}`, 'tip');
   log(`📊 <b>HOA LIVABILITY ASSESSMENT</b>: ${S.livLabel} — ${S.livDesc}`, 'tip');
+  if (S.theme) log(`${S.theme.emoji} <b>THE THING THIS NEIGHBOURHOOD CANNOT DROP</b> — ${S.theme.name}. ${S.theme.hook}`, 'tip');
   if (S.age.legacy) log(`📜 ${S.age.legacy} legacy rules are already on the books. They predate you. They will outlive you.`, 'bad');
   log(`🏡 <b>${S.playerName}</b>, welcome to <b>${S.hoaName}</b>. Your closing gift: a 214-page rulebook and a laminated card of the approved beiges.`, 'tip');
   setTicker(`🏘️ ${S.hoaName}: ${S.neighbors.length} neighbors watch from behind curtains. Some know things. Some are wearing a wire. Spend your ⚡ well, ${S.playerName}.`);
