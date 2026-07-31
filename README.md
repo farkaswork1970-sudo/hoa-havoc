@@ -4,7 +4,7 @@
 
 A turn-based game of suburban survival. Your board is coming for your equity. Your neighbors know things — some of them are even telling the truth.
 
-**Play it: https://USERNAME.github.io/hoa-havoc/**
+**Play it: https://farkaswork1970-sudo.github.io/hoa-havoc/**
 
 ## What it is
 
