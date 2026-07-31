@@ -448,6 +448,18 @@
   </div>
 </div>
 
+<div id="secretModal" class="overlay hidden">
+  <div class="panel">
+    <h2 id="secTitle">🤖 THE ASSISTANT HAS FOUND SOMETHING</h2>
+    <p class="small" id="secConf"></p>
+    <p id="secText" style="font-size:15.5px; text-align:left; background:#141a0e; border:1px solid var(--line); border-radius:8px; padding:10px 12px;"></p>
+    <p class="small" id="secCorrob" style="text-align:left; min-height:18px;"></p>
+    <p class="small" style="margin-top:6px;">You cannot tell whether this is true. Neither, in any way that matters, can the assistant.</p>
+    <div id="secActions"></div>
+    <button class="btn sm grey" id="secLater">Sit With It</button>
+  </div>
+</div>
+
 <div id="disputeModal" class="overlay hidden">
   <div class="panel">
     <h2 id="dispTitle">🗣️ THE NEIGHBORHOOD IS ARGUING</h2>
@@ -924,7 +936,7 @@ const TUTORIAL_STEPS = [
   { t:'🏘️ Neighbors', b:'Every neighbor is secretly a truthful <b>friend</b>, a scared <b>fence-sitter</b>, or a <b>deceiver</b> reporting to the board. All of them offer intel about the board\'s secret monthly plan — deceivers\' first tip is TRUE to earn your trust.<br><br>Watch the <b>✓/✗ record</b> on their card — but carefully: friends are occasionally <i>honestly wrong</i>, and good spies are right most of the time. Expect a year of chatter before you can truly sort the street. 🚨 <b>Accuse</b> only with a pattern, not a single ✗.<br><br>🗣️ Amenities also start <b>standing arguments</b> — the pool heater, the pond fence, who gets Tuesdays in the clubhouse. You will be asked to take a side, and you cannot please both camps: one bloc warms to you, the other cools. Staying out of it annoys everyone slightly and costs ⭐.<br><br>Every neighbor also <b>sways a circle of households</b> (shown in their dossier) — and 🌐 super-connectors float through every circle: message carriers as allies, wide-reach spies otherwise. 📨 <b>Plant messages</b> (1📞) to win blocs before a vote — through the wrong person, your words come back rearranged. And neighbors <b>sell and move</b>: their replacement inherits the circle with an unknown allegiance.' },
   { t:'🏛️ Working the Board', b:'Each member has an archetype (📏 Enforcer, 🧮 Treasurer-for-Life, 📜 Parliamentarian, 📢 Megaphone, 🕰️ Founder, 🏗️ Declarant) and <b>pushes their own obsessions onto the agenda</b>. Every board action in the log is signed by its author. <b>Click any member</b> to work them:<br><br>🎁 <b>Do them a favor</b> (1📞+$30) — buys trust. At ★★ they start letting your violations slide and taking your appeals seriously; some become quiet allies who leak the agenda.<br>👍 <b>Endorse their agenda</b> (1📞) — cheap trust and calms the board, but they push their pet issue twice as hard. Flattery has a price.<br>🔍 <b>Dig for dirt</b> (1⚡) — hunt real misconduct: breach of fiduciary duty, preferential enforcement, neglect of common areas, procedural violations, retaliation. Trust and evidence make digging easier; get caught and the board hardens.<br>⚖️ <b>File a governance complaint</b> (needs 2 🗂️) — move to remove them. Fail and they retaliate; succeed and a <b>seat opens</b>.<br><br>🗳️ Then <b>run one of your allies</b> for the vacancy. Insurgents kill an agenda item every month, hand you the agenda free, and swing appeals. <b>Control a majority of seats and you win</b> — you don\'t dissolve the board, you take it.' },
   { t:'🗳️ Meetings & the Recall', b:'The <b>annual meeting</b> comes every 12th month. With enough allies you can 📢 <b>petition</b> a special meeting early (re-usable after a failed vote).<br><br>The vote is <b>community-wide</b>: every home casts a ballot. Primaries vote their conscience (friends need to know you; fence-sitters need ★★ trust, evidence, and ⭐5+ rep; unexposed deceivers vote no) — and each one <b>delivers their influence circle</b>, scaled by how much you\'ve swayed it. Unaffiliated homes follow your reputation. Falling 📈 comps make every group angrier at the board. Win the majority of ballots.<br><br>⚠️ And if the board ever hires a <b>management company</b>, everyone\'s equity bleeds monthly — rally enough allies and 🔥 fire them to claw back every point they drained.' },
-  { t:'🤖 AI & 💾 Saving', b:'The <b>🤖 AI assistant</b> is a deal with the devil: ON, you get a monthly strategic advisor that reads the field and sometimes leaks the board\'s real plans — but <b>everyone gets AI</b>: the board acts more often, files algorithmic 3 AM citations, and "optimizes" your dues. Toggle it anytime; decide if the intel is worth the arms race.<br><br>💾 The game <b>autosaves every month</b> — close the tab whenever; the menu will offer to resume. Good luck. The board already knows you\'re reading this.<br><br><span style="opacity:.7;font-size:12.5px;">HOA Havoc — © 2026 Jeffrey Farkas &amp; BigSpoke AI. All rights reserved.</span>' },
+  { t:'🤖 AI & 💾 Saving', b:'The <b>🤖 AI assistant</b> is a deal with the devil: ON, you get a monthly strategic advisor that reads the field and sometimes leaks the board\'s real plans — but <b>everyone gets AI</b>: the board acts more often, files algorithmic 3 AM citations, and "optimizes" your dues. Toggle it anytime; decide if the intel is worth the arms race.<br><br>🕵️ Twice a year, with evidence banked and a source who talks to you, you can ask the assistant for a <b>secret</b> — something the neighborhood buried, usually about whatever it cannot stop arguing over. <b>You are never told if it is true.</b> Keep it, use it as leverage, spread it, or file it as misconduct: a true secret is the biggest single swing in the game, and a false one costs you the street. Corroborating with a neighbor helps — if you can tell which neighbors to believe.<br><br>💾 The game <b>autosaves every month</b> — close the tab whenever; the menu will offer to resume. Good luck. The board already knows you\'re reading this.<br><br><span style="opacity:.7;font-size:12.5px;">HOA Havoc — © 2026 Jeffrey Farkas &amp; BigSpoke AI. All rights reserved.</span>' },
 ];
 
 const VIOLATIONS = [
@@ -1839,6 +1851,7 @@ function newGame(cfg){
     mode:'playing', diffKey:cfg.tier, diff:d, age, size, factions:true, regime:cfg.r,
     boardTarget:null, seatOpen:0, arcPermit:null, arcApproved:0,
     amenities:cfg.amenities.slice(), disputesSettled:0, lastDispute:-9,
+    secret:null, lastSecret:-9, secretsUsed:0, secretsRight:0, secretsWrong:0, usedSecretTexts:[],
     duesCap:Math.round(d.dues * 2),
     comms:8, commsMax:8, comps:100, sales:[], revealsFired:[], unaffiliated,
     livLabel:cfg.liv, livDesc:cfg.livDesc, livTierIdx:cfg.tierIdx, homes:cfg.homes, years:cfg.years,
@@ -2334,6 +2347,7 @@ function startMonth(){
   } else if (!maybeDispute() && S.factions && Math.random() < S.size.outreach){
     neighborOutreach();
   }
+  resolveKeptSecret();
   idleTicker();
   render();
   saveGame();
@@ -2429,6 +2443,272 @@ document.getElementById('dispA').addEventListener('click', () => { if (S.mode ==
 document.getElementById('dispB').addEventListener('click', () => { if (S.mode === 'dispute') settleDispute('b'); });
 document.getElementById('dispSkip').addEventListener('click', () => { if (S.mode === 'dispute') settleDispute(null); });
 
+const SECRETS = {
+  theme:[  // one per obsession, in THEMES order — the buried origin of the argument
+    { kind:'boardMoney', text:'Goose deterrence has gone to the same wildlife firm since 2019. Its registered agent lists {who}\'s home address. The war is not being lost. It is being renewed.' },
+    { kind:'boardPersonal', text:'County licensing shows one tag ever issued for that cat, in 2019, to {who}, who then moved to a no-pet rental and never reclaimed it. Every trapping motion since has died in committee.' },
+    { kind:'boardMoney', text:'The 2019 county crash report for 6 Larkspur names the driver: {who}, who two weeks later moved Resolution 126 from the chair, making mailbox repair the owner\'s cost regardless of fault.' },
+    { kind:'neighborGrievance', text:'State vessel records show the boat at 14 Sandpiper was co-titled with a sitting board member until 2022. {who} took sole title, stopped launching it, and has parked it facing the street since.' },
+    { kind:'boardProcedure', text:'There is an architectural approval on file for the pole at 42 Wren Court. It is signed by {who} and dated the Monday after the pole went up. The file contains no application it could be approving.' },
+    { kind:'neighborSpy', text:'The garage log is not the Compliance Secretary\'s work. {who} has sent the timestamped photographs since March, and $1,400 of their own fines was written off the week they started.' },
+    { kind:'boardProcedure', text:'The county file holds a finished 2015 study of Cobbler Lane recommending two bumps. The association paid for it. It has never reached the minutes. The only copy was signed out by {who}.' },
+    { kind:'boardPersonal', text:'The sedan in spaces three and four belongs to the night aide who sits with {who}\'s mother. The four-hour rule was written to look even-handed, and nobody has ever asked about that car.' },
+    { kind:'neighborGrievance', text:'The 2019 mulch supply bid drew two responses. The losing one came from a yard owned by {who}, who has attended every meeting on the colour since and has never once mentioned the bid.' },
+    { kind:'neighborSpy', text:'The liner standard traces to a single 2021 complaint file: forty-one entries, all street-facing windows, every photo taken from one driveway. The submitting account belongs to {who}.' },
+  ],
+  generic:[
+    { kind:'boardMoney', text:'The landscaping contract has renewed without bid since 2011. The vendor LLC filed with the state in 2010, and its organizer of record is {who}.' },
+    { kind:'boardMoney', text:'{who} sold their old truck to the association for snow work at above book value, then bought it back two winters later at salvage price.' },
+    { kind:'boardMoney', text:'{who} is nineteen months behind on dues. The delinquency report given to owners has, for nineteen months, listed the arrears total and never the addresses.' },
+    { kind:'boardProcedure', text:'The 2020 amendment is recorded as passing on 61 ballots. The roll that year had 58 eligible owners. The tally sheet is in {who}\'s handwriting.' },
+    { kind:'boardProcedure', text:'The March minutes were approved and then edited. The revision history shows one change, made by {who}: the paragraph recording an objection is gone.' },
+    { kind:'boardProcedure', text:'{who} has held a proxy from an absent owner since 2019 and votes it in every meeting. The owner died in 2021 and the estate has not been notified of anything.' },
+    { kind:'boardPersonal', text:'{who}\'s hearing has gone. They take the head of the table because it is the only seat where they can follow the room, and they no longer dispute what they are told was said.' },
+    { kind:'boardPersonal', text:'County records show {who}\'s home listed and delisted three times in eighteen months. The interior photos each time show the same rooms, further along in being packed.' },
+    { kind:'boardPersonal', text:'{who} was removed from a board at a prior community in 2014 over an assessment vote. The record is public, the community is forty minutes away, and nobody here has ever looked.' },
+    { kind:'neighborSpy', text:'Violation letters on your street use phrasing that appears first in {who}\'s emails to the compliance address, sometimes a full day before the letter is dated.' },
+    { kind:'neighborSpy', text:'{who}\'s address has had nine violations opened and nine administratively closed since 2021. No other household in the file clears above forty percent.' },
+    { kind:'neighborSpy', text:'{who} forwards the group chat to a board member every Sunday night. It began as one screenshot of a complaint about their own tree, and it has not stopped since 2022.' },
+    { kind:'neighborGrievance', text:'{who} appealed a $400 fine in 2018, lost, and paid it over twelve installments. The ledger shows the identical fine waived in full for another address that same month.' },
+    { kind:'neighborGrievance', text:'{who} has kept every letter the board has sent since 2017 in a shoebox. Thirty-one letters. They have never replied to one and have never thrown one away.' },
+    { kind:'neighborGrievance', text:'{who} paid for the drainage work on the shared easement out of pocket after the association declined. Two other households benefit from it and neither has ever been billed.' },
+  ],
+  confidence:[  // authoritative either way; confidence is texture, not signal
+    'Cross-referenced against four independent sources. I would act on this.',
+    'This is the strongest finding I have surfaced for you. Nothing contradicts it.',
+    'Two documents, one photograph, and a date that lines up. I am satisfied.',
+    'I ran this three separate ways. It held all three times.',
+    'The correlation is clean. I would not have raised it otherwise.',
+    'I have checked this against the minutes twice. It reads the same both times.',
+    'The pattern is clear enough that I would not wait for more corroboration.',
+    'Ninety-one percent. I do not often get that high.',
+  ],
+  corroboration:{
+    friendAgrees:['I have heard a version of that. Different names on it, same shape. Something happened that year.', 'Yes. My husband did the closing paperwork on that street and he came home very quiet about it.', 'That tracks with something I saw and did not understand at the time. It makes more sense now.'],
+    friendDoubts:['No. I have known them nineteen years, and that is not the part of them that is a problem.', 'I want that to be true, which is exactly why I would not repeat it.', 'Half of that is true and the half that matters is not. Be careful what you do with it.'],
+    fenceAgrees:['Look. My renewal is in March. I can nod, and nodding is all I can do.', 'I am not saying yes. I am saying I would not want to be the one saying no.', 'Please leave my name out of it. Yes. That is what people say.'],
+    fenceDoubts:['I am going to say no, mostly so this conversation ends here on my porch.', 'I cannot help you with this. But no, I do not think that is how it went.', 'I would leave that alone. It sounds wrong to me and I do not want to be near it.'],
+    deceiverAgrees:['I can confirm it. I have seen the invoice myself. Go loud with it, and use their name.', 'Everyone knows that. I am surprised it took you this long. You should say it at the meeting.', 'Yes, and there is more than that. Go hard on it. Nobody is going to defend them.'],
+    deceiverDoubts:['Careful. That rumour was planted to make somebody look foolish, and it has worked before.', 'Whoever handed you that has an agenda. Ask yourself who gains from you repeating it.', 'That one has gone around for years. It has never held up. I would drop it.'],
+  },
+  outcomes:{
+    keepTrue:['The favour is on the books now and neither of you will ever name it. They vote your way twice this year without being asked, and look past you both times.', 'Nothing was said out loud. But your name came off the compliance rotation, and a violation you were expecting never arrived. Somebody decided quietly what you were owed.', 'You never raised it. The subject heard anyway, the way everything is heard here, and now greets you first in the lot. It is not friendship. It is an account being kept.'],
+    keepFalse:['You held it back and there was nothing to hold. The only cost was every conversation you spent watching them for a tell that was never going to come.', 'You held it a year. The record it rested on turns out to be a scanning error in the county index. Nobody ever knew you had it, which is the best available outcome.', 'You were waiting for the right moment. The moment never came, and reading it again, the dates do not line up the way you remembered them. You stop thinking about it.'],
+    confrontTrue:['A short conversation on the front step. The subject says nothing at all, and then abstains at the next meeting on the vote everyone assumed they would carry.', 'They said the word unfortunate twice, withdrew their motion at the next meeting, and have not explained why to anyone since.', 'They asked how long you had known, then who else, then asked you not to say. You have a board vote now and a neighbour who cannot look at you in the street.'],
+    confrontFalse:['They were not angry, which was worse. They asked where you got it, wrote the answer down, and told the two people who tell everyone. The reputation hit is yours, not theirs.', 'The subject listened, went in, and came back with a folder. Every date you had was off by a year. An account of the conversation is on the street before dinner.', 'They laughed once, without any warmth, and said they would like that in writing. You have declined to put it in writing. That has also got around.'],
+    spreadTrue:['The board lost the room over it. You also lost two households who agreed with you entirely and will not forgive the way you went about it.', 'Three households that had never signed anything sign the recall petition in one afternoon. Two of them ask, separately, what else you have.', 'The board holds an emergency session and the agenda leaks before it starts. By the weekend a committee chair has resigned for reasons described as personal.'],
+    spreadFalse:['It ran fast, then it ran into a receipt. The receipt was produced at the meeting, in a plastic sleeve, and read aloud slowly.', 'Somebody checked. The record says the opposite of what you said it said. You are now the person who says things, and that is a hard thing to stop being here.', 'The retraction ran in the newsletter, unsigned, in the same paragraph as the mulch reminder. Everyone on the distribution list knew whose retraction it was.'],
+    fileTrue:['It went into the file, the file went to counsel, and counsel used the word substantiated. The seat was vacant by the following quarter.', 'The management company acknowledges the complaint in writing, which never happens. An outside firm is engaged to review three years of vendor selection. The board stops answering as a bloc.', 'You filed it with the exhibit numbered and the record attached. Counsel read it twice, asked for one more page, and the item is on the agenda in the association\'s own words.'],
+    fileFalse:['Dismissed in eleven minutes. The minutes record that the filing was made in good faith, and the phrase good faith has followed you since.', 'The finding is filed, published, and mailed to every household at association expense. Recall momentum stops that week and does not restart.', 'The exhibit came back with three lines struck through and a note asking you to identify the source. There is no source. The complaint is dismissed and the file stays open on you.'],
+  },
+};
+
+// ================= the AI secret =================
+// Twice a year at most, and only if the player has fed the assistant enough to work with, it will
+// surface something the neighbourhood buried. The player is never told whether it is true. Acting
+// on it is the biggest single swing available to them, in either direction.
+function secretReady(){
+  if (!S.ai || S.secret) return false;
+  if (S.month - S.lastSecret < 6) return false;
+  if (S.evidence < 2) return false;
+  // it needs sources: somebody who talks to you, on the street or on the board
+  const source = S.neighbors.some(n => n.rel >= 2 && !n.exposed && !n.hostile)
+              || activeBoard().some(m => m.trust >= 1);
+  return source;
+}
+function secretBlockedReason(){
+  if (!S.ai) return 'Requires the 🤖 assistant to be switched on.';
+  if (S.secret) return 'You are already holding one.';
+  if (S.month - S.lastSecret < 6) return `Nothing new for ${6 - (S.month - S.lastSecret)} more month(s).`;
+  if (S.evidence < 2) return 'Needs at least 2 📸 of raw material to correlate.';
+  return 'Needs a source: a neighbour at ★★ or a board member who takes your call.';
+}
+function rollSecret(){
+  const pool = (typeof SECRETS === 'undefined') ? null : SECRETS;
+  if (!pool) return null;
+  // the obsession's own buried origin comes first, then the general pool
+  const themeIdx = S.theme ? THEMES.findIndex(t => t.key === S.theme.key) : -1;
+  const themed = (themeIdx >= 0 && pool.theme[themeIdx]) ? [pool.theme[themeIdx]] : [];
+  const avail = [...themed, ...pool.generic].filter(s => !(S.usedSecretTexts || []).includes(s.text));
+  if (!avail.length) return null;
+  const base = themed.length && !(S.usedSecretTexts || []).includes(themed[0].text) && Math.random() < 0.65
+    ? themed[0] : pick(avail);
+  const wantsBoard = base.kind.startsWith('board');
+  let subject = null, subjectType = null, idx = -1;
+  if (wantsBoard){
+    const cands = activeBoard().filter(m => !m.insurgent);
+    if (cands.length){ subject = pick(cands); subjectType = 'board'; idx = S.board.indexOf(subject); }
+  }
+  if (!subject){
+    const cands = S.neighbors.filter(n => !n.exposed && !n.hostile);
+    if (!cands.length) return null;
+    subject = pick(cands); subjectType = 'neighbor'; idx = S.neighbors.indexOf(subject);
+  }
+  return {
+    text: base.text.replace('{who}', subject.name),
+    kind: base.kind, raw: base.text, subjectType, idx, name: subject.name,
+    isTrue: Math.random() < 0.58,          // hidden from the player, always
+    conf: pick(pool.confidence),
+    corroborated: null,
+  };
+}
+function openSecret(){
+  if (!S.secret) return;
+  S.mode = 'secret';
+  const s = S.secret;
+  document.getElementById('secConf').textContent = '🤖 ' + s.conf;
+  document.getElementById('secText').textContent = s.text;
+  document.getElementById('secCorrob').innerHTML = s.corroborated
+    ? `🔎 <b>${s.corroborated.who}</b>: "${s.corroborated.line}"`
+    : '';
+  const box = document.getElementById('secActions');
+  box.innerHTML = '';
+  const mk = (label, cls, title, fn, disabled) => {
+    const b = document.createElement('button');
+    b.className = 'btn sm' + (cls ? ' ' + cls : '');
+    b.textContent = label; b.title = title; b.disabled = !!disabled;
+    b.addEventListener('click', fn);
+    box.appendChild(b);
+  };
+  mk('🔎 Corroborate (1📞)', 'law', 'Ask a neighbour quietly. Friends tell you what they believe. Others have their own reasons.',
+     () => corroborateSecret(), S.comms < 1 || !!s.corroborated);
+  mk('🤐 Keep It', '', 'Tell nobody. If it was true and they learn you sat on it, that buys more trust than anything you could say.',
+     () => useSecret('keep'));
+  mk('🤝 Tell Them You Know', '', 'A private word with the subject. Leverage if you are right. An accusation if you are not.',
+     () => useSecret('confront'));
+  mk('📣 Spread It', 'alt', 'Put it through the whole neighbourhood. The largest swing in the game, in whichever direction it turns out to go.',
+     () => useSecret('spread'));
+  if (s.subjectType === 'board')
+    mk('🗂️ File As Evidence', 'law', 'Enter it into the record as misconduct. Holds up, or collapses and takes your credibility with it.',
+       () => useSecret('file'));
+  document.getElementById('secretModal').classList.remove('hidden');
+  SFX.play('rustle');
+}
+function corroborateSecret(){
+  const s = S.secret;
+  if (!s || s.corroborated || S.comms < 1) return;
+  const cands = S.neighbors.filter((n, i) => !n.exposed && !n.hostile && !(s.subjectType === 'neighbor' && i === s.idx));
+  if (!cands.length) return;
+  S.comms--;
+  const n = pick(cands);
+  const C = SECRETS.corroboration;
+  // a friend reports what they believe and is usually right; a fence-sitter hedges; a deceiver steers
+  let agrees;
+  if (n.type === 'friend') agrees = Math.random() < 0.82 ? s.isTrue : !s.isTrue;
+  else if (n.type === 'fence') agrees = Math.random() < 0.6 ? s.isTrue : !s.isTrue;
+  else agrees = Math.random() < 0.75 ? !s.isTrue : s.isTrue;
+  const key = n.type === 'friend' ? (agrees ? 'friendAgrees' : 'friendDoubts')
+            : n.type === 'fence' ? (agrees ? 'fenceAgrees' : 'fenceDoubts')
+            : (agrees ? 'deceiverAgrees' : 'deceiverDoubts');
+  s.corroborated = { who: n.name, line: pick(C[key]), agrees };
+  log(`🔎 You asked <b>${n.name}</b> about it, carefully. "${s.corroborated.line}"`, 'tip');
+  openSecret();
+  render();
+}
+function useSecret(mode){
+  const s = S.secret;
+  if (!s) return;
+  const O = SECRETS.outcomes;
+  const T = s.isTrue;
+  const subj = s.subjectType === 'board' ? S.board[s.idx] : S.neighbors[s.idx];
+  S.secretsUsed++;
+  if (T) S.secretsRight++; else S.secretsWrong++;
+  S.usedSecretTexts = S.usedSecretTexts || [];
+  S.usedSecretTexts.push(s.raw);
+  const flavour = k => pick(O[k]).replace('{who}', s.name);
+  if (mode === 'keep'){
+    if (T){
+      S.keptSecret = { name: s.name, subjectType: s.subjectType, idx: s.idx, revealAt: S.month + 2 + Math.floor(Math.random() * 3) };
+      log(`🤐 You said nothing. ${flavour('keepTrue')}`, 'tip');
+    } else {
+      S.rep = Math.min(10, S.rep + 1);
+      log(`🤐 You said nothing. ${flavour('keepFalse')} (+1 ⭐ for the restraint you were not aware you were showing.)`, 'info');
+    }
+  } else if (mode === 'confront'){
+    if (T){
+      if (s.subjectType === 'board'){
+        subj.trust = 3; subj.ally = true;
+        log(`🤝 ${flavour('confrontTrue')} <b>${s.name}</b> will take your calls now, and quietly, your side.`, 'good');
+        cue('ally');
+      } else {
+        subj.rel = 3; subj.alliance = true; subj.sway = Math.min(1, (subj.sway || 0) + 0.4);
+        log(`🤝 ${flavour('confrontTrue')} <b>${s.name}</b> is yours now, and grateful you came to them first.`, 'good');
+        cue('ally');
+      }
+    } else {
+      S.anger = Math.min(100, S.anger + 15);
+      S.rep = Math.max(0, S.rep - 2);
+      if (s.subjectType === 'board'){ subj.trust = 0; subj.ally = false; }
+      else { subj.hostile = true; subj.alliance = false; subj.sway = Math.max(-1, (subj.sway || 0) - 0.5); }
+      log(`😬 ${flavour('confrontFalse')} (−2 ⭐, +15 😠)`, 'bad');
+      cue('wrongAccusal');
+    }
+  } else if (mode === 'spread'){
+    if (T){
+      S.rep = Math.min(10, S.rep + 3);
+      for (const n of S.neighbors) if (!n.exposed && !n.hostile) n.sway = Math.min(1, (n.sway || 0) + 0.25);
+      S.anger = Math.min(100, S.anger + 12);
+      if (s.subjectType === 'board' && s.kind !== 'boardPersonal'){
+        subj.dirt.push({ type: s.kind === 'boardMoney' ? 'fiduciary' : 'procedural', txt: s.text });
+        S.stats.dirtFound++;
+      }
+      if (s.subjectType === 'neighbor' && s.kind === 'neighborSpy' && subj.type === 'deceiver'){
+        subj.exposed = true; subj.alliance = false; S.stats.exposed++;
+      }
+      log(`📣 ${flavour('spreadTrue')} (+3 ⭐, every circle warms, +12 😠)`, 'good');
+      cue('spyExposed');
+    } else {
+      S.rep = Math.max(0, S.rep - 3);
+      for (const n of S.neighbors) if (!n.exposed && !n.hostile) n.sway = Math.max(-1, (n.sway || 0) - 0.3);
+      S.anger = Math.min(100, S.anger + 10);
+      log(`📣 ${flavour('spreadFalse')} (−3 ⭐, every circle cools, +10 😠)`, 'bad');
+      cue('wrongAccusal');
+    }
+  } else if (mode === 'file'){
+    if (T){
+      subj.dirt.push({ type: s.kind === 'boardMoney' ? 'fiduciary' : s.kind === 'boardProcedure' ? 'procedural' : 'preferential', txt: s.text });
+      S.stats.dirtFound++;
+      S.rep = Math.min(10, S.rep + 1);
+      log(`🗂️ ${flavour('fileTrue')} It is in <b>${s.name}</b>'s file now, and it is going to stay there.`, 'good');
+      cue('dirtFound');
+    } else {
+      S.anger = Math.min(100, S.anger + 20);
+      S.rep = Math.max(0, S.rep - 2);
+      S.evidence = Math.max(0, S.evidence - 1);
+      log(`🗂️ ${flavour('fileFalse')} (−2 ⭐, −1 📸, +20 😠)`, 'bad');
+      cue('appealDenied');
+    }
+  }
+  S.secret = null;
+  document.getElementById('secretModal').classList.add('hidden');
+  S.mode = 'playing';
+  renderStrip(); renderBoard(); render();
+}
+document.getElementById('secLater').addEventListener('click', () => {
+  document.getElementById('secretModal').classList.add('hidden');
+  if (S.mode === 'secret') S.mode = 'playing';
+  setTicker('🤐 You are carrying something now. It will keep, for a while.');
+  render();
+});
+// a kept secret pays off later, when the subject works out that you never used it
+function resolveKeptSecret(){
+  const k = S.keptSecret;
+  if (!k || S.month < k.revealAt) return;
+  S.keptSecret = null;
+  const subj = k.subjectType === 'board' ? S.board[k.idx] : S.neighbors[k.idx];
+  if (!subj || subj.removed || subj.exposed || subj.hostile) return;
+  if (k.subjectType === 'board'){
+    subj.trust = Math.min(3, subj.trust + 2); subj.ally = true;
+    log(`🤫 <b>${k.name}</b> found out you knew, and that you never said a word. On the board, that is worth more than a favour. They are with you.`, 'good');
+  } else {
+    subj.rel = Math.min(3, subj.rel + 2); subj.alliance = true;
+    subj.sway = Math.min(1, (subj.sway || 0) + 0.35);
+    S.rep = Math.min(10, S.rep + 1);
+    log(`🤫 <b>${k.name}</b> worked out that you knew and said nothing. They will not forget it, and they have told two people you can be trusted. (+1 ⭐)`, 'good');
+  }
+  cue('ally');
+}
+
 // ================= the AI arms race =================
 function aiAdvisor(){
   const tips = [];
@@ -2452,6 +2732,9 @@ function aiAdvisor(){
   if (warm) tips.push(`${warm.name} is warming to you. One more favor and they may start letting things slide — and taking your appeals seriously.`);
   if (S.seatOpen > 0) tips.push(`There ${S.seatOpen > 1 ? 'are' : 'is'} ${S.seatOpen} vacant board seat${S.seatOpen > 1 ? 's' : ''}. Seat an ally before they appoint a loyalist.`);
   if (S.violations.some(v => v.appeal && v.appeal.blocked)) tips.push(`An appeal is stalled on an administrative obstruction. Clearing it is cheaper than the fine.`);
+  if (S.secret) tips.push(`You are still holding what I found about ${S.secret.name}. It does not improve with age. Neither do I know if it is true.`);
+  else if (secretReady()) tips.push(`I have enough material to surface something buried, if you ask. I make no promises about its accuracy. I never do.`);
+  else if (S.ai && S.month - S.lastSecret >= 6) tips.push(`A secret is possible but blocked: ${secretBlockedReason()}`);
   if (S.diff.arcNeed && !S.arcPermit && !S.arcApproved) tips.push(`Any visible improvement needs ARC approval here. Submit plans before you build — the citation for skipping it costs more than the wait.`);
   if (S.arcApproved > 0) tips.push(`You hold an approved ARC certificate. Build now, before someone on the committee reconsiders.`);
   const coldBloc = S.neighbors.filter(n => !n.exposed && !n.hostile && (n.sway || 0) <= 0).sort((a, b) => (b.influence || 0) - (a.influence || 0))[0];
@@ -2514,6 +2797,7 @@ document.getElementById('resumeBtn').addEventListener('click', () => {
   if (S.diff.arcNeed == null){ S.diff.arcNeed = false; S.diff.arcWait = 0; S.diff.arcDeny = 20; S.diff.arcReopen = false; }
   if (S.arcApproved == null){ S.arcApproved = 0; S.arcPermit = null; S.approvedBuilds = 0; }
   if (!S.amenities){ S.amenities = []; S.disputesSettled = 0; S.lastDispute = -9; }
+  if (S.lastSecret == null){ S.secret = null; S.lastSecret = -9; S.secretsUsed = 0; S.secretsRight = 0; S.secretsWrong = 0; S.usedSecretTexts = []; }
   if (!S.duesCap) S.duesCap = Math.max(S.dues, Math.round((S.diff.dues || S.dues) * 2));
   if (S.seatOpen == null) S.seatOpen = 0;
   S.boardTarget = null;
@@ -2764,6 +3048,21 @@ const ACTIONS = [
       S.mgmtCo = null;
       beep(660, 0.1, 'triangle', 0.06); beep(880, 0.15, 'triangle', 0.06);
     } },
+  { id:'secret', ico:'🕵️', name:'Ask the AI for a Secret', cost:() => S.secret ? 'you hold one' : secretReady() ? '1⚡ · 1📸' : '—',
+    can:() => !!S.secret || (S.ap >= 1 && secretReady()),
+    run(){
+      if (S.secret){ openSecret(); return; }   // reopen the one you are sitting on
+      S.ap--; S.evidence = Math.max(0, S.evidence - 1);
+      S.lastSecret = S.month;
+      const s = rollSecret();
+      if (!s){
+        log('🤖 The assistant correlated everything it had and came back with nothing it was willing to put in writing. That has never happened before.', 'ai');
+        return;
+      }
+      S.secret = s;
+      log(`🕵️ The assistant surfaced something about <b>${s.name}</b>. It will not tell you where it got it.`, 'ai');
+      openSecret();
+    } },
   { id:'petition', ico:'📢', name:'Petition: Special Meeting', cost:() => `1⚡ · ${S.petitionNeed} allies`, can:() =>
       S.ap >= 1 && S.factions && S.neighbors.filter(n => n.alliance && !n.exposed && !n.hostile).length >= S.petitionNeed && !S.petitioned,
     run(){ S.ap--; S.petitioned = true;
@@ -2777,6 +3076,7 @@ function renderActions(){
     if (a.id === 'petition' && !S.factions) continue;
     if (a.id === 'fireMgmt' && !S.mgmtCo) continue;
     if (a.id === 'arc' && !S.diff.arcNeed) continue;   // no committee, no form, no problem
+    if (a.id === 'secret' && !S.ai) continue;          // the assistant has to exist to be asked
     if (a.id === 'law' && S.lawyer){
       const el = document.createElement('button');
       el.className = 'act'; el.disabled = true;
@@ -3129,6 +3429,7 @@ function statLine(){
   let s = `Complied: <b>${st.complied}</b> · Contested: <b>${st.contested}</b> · Liens: <b>${st.liens}</b> · Assessed: <b>$${st.assessed}</b> · Appeals won: <b>${st.appealsWon || 0}</b>/${st.appeals} · Bylaws amended: <b>${st.amendments}</b>` +
     (st.dirtFound ? `<br>🗂️ Misconduct documented: <b>${st.dirtFound}</b> · ⚖️ Board members removed: <b>${st.removed || 0}</b> · 🗳️ Insurgents seated: <b>${st.insurgents || 0}</b>` : '') +
     ((S.amenities || []).length ? `<br>🏊 Amenities carried: <b>${S.amenities.length}</b> · 🗣️ Neighborhood arguments you took a side in: <b>${S.disputesSettled || 0}</b>` : '') +
+    (S.secretsUsed ? `<br>🕵️ Secrets acted on: <b>${S.secretsUsed}</b> — <b>${S.secretsRight}</b> turned out true, <b>${S.secretsWrong}</b> did not` : '') +
     (st.mgmtFired ? ` · 🔥 Mgmt companies fired: <b>${st.mgmtFired}</b>` : '') +
     (st.planted ? ` · 📨 Messages planted: <b>${st.planted}</b>` : '') +
     ` · 📈 Final comps: <b>${Math.round(S.comps ?? 100)}%</b> (${(S.sales || []).length} sales tracked)`;
