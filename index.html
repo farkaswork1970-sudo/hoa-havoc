@@ -527,8 +527,26 @@
       <div class="sliders">
         <label><span id="lHomes">🏘️ Community size</span> <output id="oHomes">90 homes</output><input type="range" id="sHomes" min="30" max="150" step="5" value="90"><span class="hint" id="hHomes"></span></label>
         <label><span id="lYears">📅 How long this has festered</span> <output id="oYears">25 years old</output><input type="range" id="sYears" min="5" max="50" value="25"><span class="hint" id="hYears"></span></label>
+        <label><span id="lOcc">🔑 Who actually lives here</span> <output id="oOcc">10%</output><input type="range" id="sOcc" min="0" max="60" step="5" value="10"><span class="hint" id="hOcc"></span></label>
+        <label><span id="lReserve">🏦 What the reserve holds</span> <output id="oReserve">40%</output><input type="range" id="sReserve" min="5" max="100" step="5" value="40"><span class="hint" id="hReserve"></span></label>
+        <label><span id="lCohesion">👋 Does anyone wave</span> <output id="oCohesion">50</output><input type="range" id="sCohesion" min="0" max="100" value="50"><span class="hint" id="hCohesion"></span></label>
       </div>
-      <p class="small" style="text-align:left;margin:10px 0 0;">Size sets how many neighbors you get, how many seats the board has, and how many votes a recall needs. Age sets how many absurd rules predate you, how decayed the commons start, how often the old infrastructure fails, and whether a developer's man or an entrenched founder runs the place.</p>
+      <div class="selhead">WHAT YOU ACTUALLY OWN</div>
+      <div class="chiprow" id="homeRow">
+        <div class="chip sel" data-t="0"><b>🏡 Detached</b></div>
+        <div class="chip" data-t="1"><b>🏘️ Patio</b></div>
+        <div class="chip" data-t="2"><b>🧱 Townhome</b></div>
+        <div class="chip" data-t="3"><b>🏢 Condo</b></div>
+      </div>
+      <span class="hint" id="hHome" style="display:block;text-align:left;font-size:10.5px;color:#8a9a78;font-style:italic;margin:2px 0 4px;"></span>
+      <div class="selhead">WHO'S HOME AT 2 P.M.</div>
+      <div class="chiprow" id="dayRow">
+        <div class="chip" data-w="0"><b>🌙 Ghost town till six</b></div>
+        <div class="chip sel" data-w="1"><b>💻 Mixed shifts</b></div>
+        <div class="chip" data-w="2"><b>🔭 Home and watching</b></div>
+      </div>
+      <span class="hint" id="hDay" style="display:block;text-align:left;font-size:10.5px;color:#8a9a78;font-style:italic;margin:2px 0 4px;"></span>
+      <p class="small" style="text-align:left;margin:10px 0 0;">Size sets neighbors, board seats, and recall votes needed. Age sets legacy rules, commons decay, and who chairs the board. Rentals shrink the electorate you can reach — absentee ballots follow property values, not you (until you write to the landlords). The reserve absorbs assessments at its funded share. What you own decides who owns your roof. Cohesion sets how many homes listen to anybody. And who's home at 2 p.m. decides how fast you get cited — and how fast you gather proof.</p>
     </div>
     <div class="pane hidden" id="paneAmenities">
       <p class="small" style="text-align:left;margin:0 0 6px;">Each one adds dues, wears the commons, and starts an argument you will be asked to take a side in.</p>
@@ -799,6 +817,24 @@ const SLIDER_COPY = {
     'Ninety homes. Five neighbors you know, thirty who know your driveway.',
     '120 homes. Five seats, a management company, and a recall that needs real turnout.',
     '150 homes. A gate code, a resident portal, and a majority you have to knock for.'] },
+  occ: { label:'🔑 Who actually lives here', bands:[
+    'Every deed matches a driveway. The annual meeting needs extra chairs.',
+    'Two rentals, both tidy. One landlord mails a proxy and, at Christmas, a candle.',
+    'The Hendersons left; three LLCs arrived. One filed a change-of-address to Phoenix.',
+    'Whole streets answer to LLCs with pastoral names. The tenants wave; they can\'t vote.',
+    'The newsletter mails to registered agents in three states. Nobody local reads it.'] },
+  reserve: { label:'🏦 What the reserve holds', bands:[
+    'Fourteen hundred dollars and a pledge from the 2019 board. The roof is from 1994.',
+    'One pool pump away from a special assessment. The pump is nine years old.',
+    'The reserve study says "aspirational" twice and "deferred" eleven times.',
+    'Enough for the roof or the road, and the board keeps choosing neither.',
+    'Fully funded. Dues sting, the audits are clean, and the treasurer is insufferable.'] },
+  cohesion: { label:'👋 Does anyone wave', bands:[
+    'Nobody waves. The last block party is remembered mainly for how it ended.',
+    'Garage doors drop before the engine stops. The sidewalk belongs to the dogs.',
+    'Nods at the mailboxes. Names are known for adjacent houses only.',
+    'Most people wave. Two streets exchange holiday cards on an agreed schedule.',
+    'There is a meal train. You were added to it before the truck was unloaded.'] },
   years: { label:'📅 How long this has festered', bands:[
     'Five years old. The developer still controls the board. Half the lots are dirt.',
     'Fifteen years. Two odd rules on the books; nobody remembers voting for either one.',
@@ -908,12 +944,19 @@ function themedPool(kind, base){
 }
 const AMENITY_STRIFE_TOTAL = AMENITIES.reduce((a, x) => a + x.strife, 0);
 function amenityDues(a){ return Math.max(2, Math.round(a.duesAdd * 0.6)); }
-function livScore(homes, years, r, amenStrife){
-  return Math.round(
+function livScore(homes, years, r, amenStrife, cx){
+  const c = cx || { occ:0, res:1, coh:0.5, t:0, w:0.5 };
+  const raw =
     (homes - 30) / 120 * 14 + (years - 5) / 45 * 14
     + r.petty / 100 * 18 + r.fines / 100 * 11 + r.dues / 100 * 6
     + (100 - r.mercy) / 100 * 8 + r.grudge / 100 * 9 + (r.arc || 0) / 100 * 8
-    + (amenStrife || 0) / AMENITY_STRIFE_TOTAL * 12);
+    + (amenStrife || 0) / AMENITY_STRIFE_TOTAL * 12
+    + c.occ / 0.6 * 8                    // absentee ownership shrinks the reachable electorate
+    + (1 - (c.res - 0.05) / 0.95) * 9    // a starved reserve turns every bill into a crisis
+    + (c.t / 3) * 6                      // shared walls multiply everything else's reach
+    + (1 - c.coh) * 7                    // cold streets are reputation-only terrain
+    + c.w * 5;                           // watchers cost more than the slow petitions save
+  return Math.round(raw * 100 / 135);
 }
 function livTier(score){ return LIV_TIERS.find(t => score < t.max) || LIV_TIERS[LIV_TIERS.length - 1]; }
 // pick the description band matching where the handle actually sits (0..1 across the slider's range)
@@ -1030,6 +1073,18 @@ const REVEALS = [
   { after:12, txt:'The reserve fund was invested in the president\'s nephew\'s kombucha brand. It did not ferment well. Comps −3%.', fx(){ S.comps = Math.max(70, S.comps - 3); } },
 ];
 const REL_NAMES = ['Stranger', 'Acquaintance', 'Confidant', 'Inner Circle'];
+const HOME_TYPES = [
+  { t:0, hint:'Detached homes on real lots. Your roof is yours, and so is everything under it.' },
+  { t:1, hint:'Patio homes, ten feet apart. You can hear a sneeze. The fence line is a legal document.' },
+  { t:2, hint:'Townhomes. You share a wall, a master policy, and an opinion about the flag.' },
+  { t:3, hint:'Condo flats. The association owns your roof, your pipes, and the hallway smell.' },
+];
+const DAYTIMES = [
+  { w:0, hint:'Empty by 8:40. A violation could sunbathe on your roof for a month unobserved.' },
+  { w:0.5, hint:'Mixed shifts. Somebody sees most things, eventually, and mentions them selectively.' },
+  { w:1, hint:'Everyone is home, and every window works. Your trash cans have been timed.' },
+];
+let chosenHome = 0, chosenDay = 1;
 // every mechanical knob derives continuously from the sliders — the world IS the settings
 function buildConfig(){
   const homes = +document.getElementById('sHomes').value;
@@ -1039,6 +1094,12 @@ function buildConfig(){
     dues:+document.getElementById('sDues').value, mercy:+document.getElementById('sMercy').value,
     grudge:+document.getElementById('sGrudge').value, arc:+document.getElementById('sArc').value,
   };
+  const occ = +document.getElementById('sOcc').value / 100;            // investor share 0..0.6
+  const reserve = +document.getElementById('sReserve').value / 100;    // funded 0.05..1
+  const coh = +document.getElementById('sCohesion').value / 100;       // cohesion 0..1
+  const t = chosenHome;                                                // 0 detached .. 3 condo
+  const w = DAYTIMES[chosenDay].w;                                     // watcher density 0/0.5/1
+  const cf = t / 3;
   const a = (years - 5) / 45, z = (homes - 30) / 120; // 0..1 age & size factors
   const neighbors = 4 + Math.round(z * 4);
   const size = {
@@ -1076,10 +1137,16 @@ function buildConfig(){
   const amenStrife = amenities.reduce((s, a) => s + a.strife, 0);
   diff.dues += amenities.reduce((s, a) => s + amenityDues(a), 0);
   age.commonsDecay = Math.min(9, age.commonsDecay + amenities.reduce((s, a) => s + a.drain, 0) * 0.15);
-  const score = livScore(homes, years, r, amenStrife);
+  diff.dues += Math.round(cf * 22);                                   // the envelope rides the dues line
+  if (t >= 2) diff.arcNeed = true;                                     // nothing exterior is yours to touch
+  diff.arcDeny = Math.min(85, diff.arcDeny + Math.round(cf * 15));
+  diff.deadline += (w === 0 ? 1 : 0);                                  // nobody reported it yet
+  if (reserve < 0.5) diff.dues += Math.round(10 + (0.5 - reserve) / 0.45 * 30);  // the catch-up line
+  const score = livScore(homes, years, r, amenStrife, { occ, res:reserve, coh, t, w });
   const tier = score < 40 ? 'easy' : score < 70 ? 'medium' : 'expert';
   const lt = livTier(score);
   return { homes, years, r, size, age, diff, amenities:amenities.map(a => a.key), score, tier,
+    occ, reserve, coh, hometype:t, daytime:w,
     tierIdx:LIV_TIERS.indexOf(lt), liv:`${lt.t} (${score}/100)`, livDesc:lt.d };
 }
 const LEGACY_RULES = [
@@ -1581,7 +1648,7 @@ let S = null;
 let chosenRegime = 'stickler';
 let vioId = 0;
 
-function makeNeighbors(count, homes){
+function makeNeighbors(count, homes, poolMult){
   const names = shuffle([...FIRST_NAMES]).slice(0, count);
   // guarantee one of each type; distribute the rest in a fixed rotation, then shuffle
   const extras = ['friend','deceiver','fence','deceiver','friend'];
@@ -1590,7 +1657,7 @@ function makeNeighbors(count, homes){
   const superIdx = new Set(shuffle([...Array(count).keys()]).slice(0, count >= 7 ? 2 : 1));
   const weights = names.map((_, i) => superIdx.has(i) ? 2.6 : 0.6 + Math.random() * 0.9);
   const wSum = weights.reduce((a, b) => a + b, 0);
-  const blocPool = Math.max(0, homes - 1 - count) * 0.75; // ~75% of homes listen to somebody
+  const blocPool = Math.max(0, homes - 1 - count) * (poolMult == null ? 0.75 : poolMult); // cohesion and rentals set how many homes listen to anybody
   return names.map((nm, i) => ({
     name:nm, ico:pick(NEIGHBOR_ICONS), type:types[i],
     superInfluencer:superIdx.has(i), influence:Math.max(1, Math.round(blocPool * weights[i] / wSum)), sway:0,
@@ -1872,7 +1939,8 @@ function newGame(cfg){
   const d = cfg.diff, age = cfg.age, size = cfg.size;
   vioId = 0;
   const theme = (typeof THEMES !== 'undefined' && THEMES.length) ? pick(THEMES) : null;
-  const neighbors = makeNeighbors(size.neighbors, cfg.homes);
+  const poolMult = (0.55 + 0.35 * (cfg.coh ?? 0.5)) * (1 - 0.6 * (cfg.occ ?? 0));
+  const neighbors = makeNeighbors(size.neighbors, cfg.homes, poolMult);
   const unaffiliated = Math.max(0, cfg.homes - 1 - neighbors.length - neighbors.reduce((a, n) => a + n.influence, 0));
   return {
     mode:'playing', diffKey:cfg.tier, diff:d, age, size, factions:true, regime:cfg.r,
@@ -1888,6 +1956,9 @@ function newGame(cfg){
     fineBonus:age.fineAdd, freeComply:false,
     violations:[], rules:shuffle([...LEGACY_RULES]).slice(0, age.legacy), neighbors,
     theme, ruleDeck:null, idleDeck:null, lastTickerMonth:-1,
+    occ:cfg.occ ?? 0, reserve:cfg.reserve ?? 0.5, cohesion:cfg.coh ?? 0.5,
+    hometype:cfg.hometype ?? 0, daytime:cfg.daytime ?? 0.5,
+    assessMult2:1 + 0.6 * ((cfg.hometype ?? 0) / 3), wroteLandlords:false, reserveStudySeen:false,
     board:makeBoard(size, age),
     voteNeed:Math.ceil(size.neighbors / 2), petitionNeed:size.petition, ai:false,
     mgmtCo:null, mgmtCoCooldown:0,
@@ -1939,6 +2010,14 @@ function raiseDues(amount, why){
   return true;
 }
 function charge(amount, why){
+  if (/assessment/i.test(why || '')){
+    amount = Math.round(amount * (S.assessMult2 || 1));
+    const absorbed = Math.round(amount * (S.reserve ?? 0));
+    if (absorbed > 0){
+      amount -= absorbed;
+      log(`🏦 The reserve absorbed $${absorbed} of it${(S.reserve ?? 0) >= 0.7 ? ' — funded reserves, the one boring virtue' : '; the shortfall came to the homeowners'}.`, amount === 0 ? 'good' : 'info');
+    }
+  }
   // cash first; shortfall taps home equity ($10 = 1 equity)
   const fromCash = Math.min(S.cash, amount);
   S.cash -= fromCash;
@@ -2281,9 +2360,12 @@ function startMonth(){
   // round on assignment: the decay is fractional (amenities add tenths) and would otherwise
   // leak floating-point noise like 53.900000000000006 into every display and log line
   S.commons = Math.max(0, Math.round(S.commons - S.age.commonsDecay));
-  if (S.commons < 40){ S.equity -= 2; log(`🌳 The commons look post-apocalyptic (${Math.round(S.commons)}%). The whole street's equity sags: −2 🏠.`, 'bad'); }
-  else if (S.commons >= 70){ S.equity = Math.min(S.eqMax, S.equity + 1); log(`🌳 The commons look great (${Math.round(S.commons)}%) — thanks to you, mostly. +1 🏠.`, 'good'); }
-  if (Math.random() < S.age.infra) pick(INFRA_EVENTS)();
+  if ((S.reserve ?? 0) > 0.7) S.commons = Math.min(100, S.commons + 2);   // a funded reserve quietly fixes things
+  const cplF = (S.hometype ?? 0) / 3;
+  const cplDrop = Math.round(2 + 3 * cplF), cplGain = Math.round(1 + cplF);
+  if (S.commons < 40){ S.equity -= cplDrop; log(`🌳 The commons look post-apocalyptic (${Math.round(S.commons)}%). ${cplF > 0.5 ? 'And the commons is your building.' : 'The whole street\'s equity sags:'} −${cplDrop} 🏠.`, 'bad'); }
+  else if (S.commons >= 70){ S.equity = Math.min(S.eqMax, S.equity + cplGain); log(`🌳 The commons look great (${Math.round(S.commons)}%) — thanks to you, mostly. +${cplGain} 🏠.`, 'good'); }
+  if (Math.random() < S.age.infra * (1 + 0.75 * cplF)) pick(INFRA_EVENTS)();
   amenityPhase();
   // the management company: every HOA's final boss
   if (S.mgmtCo){
@@ -2331,12 +2413,30 @@ function startMonth(){
       log(`🕳️ THINGS YOU DIDN'T KNOW: ${r.txt}`, 'bad');
     }
   }
+  // an investor street generates its own paperwork — occasionally in your favour
+  if ((S.occ || 0) >= 0.3 && Math.random() < 0.15){
+    if (S.evidence < 5){ S.evidence++; log('📸 A violation landed on a rental — overgrown, uncited for weeks, then cited hard. You photographed the double standard. +1 📸.', 'tip'); }
+    else log('🚧 Another citation at a rental. The tenants shrug; the landlord\'s registered agent will read it in May.', 'info');
+  }
+  // a starved reserve leaks evidence and drags the street
+  if ((S.reserve ?? 0.5) < 0.3){
+    if (!S.reserveStudySeen && S.month >= 4 && Math.random() < 0.25){
+      S.reserveStudySeen = true;
+      S.evidence = Math.min(5, S.evidence + 2);
+      S.anger = Math.min(100, S.anger + 5);
+      log('🏦 A copy of the reserve study the board never circulated reached you in a plain envelope. It says "insolvent by 2031". +2 📸, +5 😠.', 'tip');
+    }
+    if (S.month % 3 === 0){
+      S.comps = Math.max(70, S.comps - 1.5);
+      log('🏦 Another delinquency lien recorded this quarter. The comparables noticed even if the newsletter did not.', 'bad');
+    }
+  }
   // turnover: someone always leaves eventually — faster when values fall
   for (let i = 0; i < S.neighbors.length; i++){
-    const chance = 0.02 + (S.comps < 92 ? 0.03 : 0) + (S.comps < 85 ? 0.03 : 0);
+    const chance = 0.02 + (S.occ ?? 0) * 0.10 + (S.comps < 92 ? 0.03 : 0) + (S.comps < 85 ? 0.03 : 0);
     if (Math.random() < chance){ replaceNeighbor(i); break; }
   }
-  S.condition = Math.max(0, S.condition - (S.diffKey === 'expert' ? 8 : 5));
+  S.condition = Math.max(0, Math.round(S.condition - (S.diffKey === 'expert' ? 8 : 5) * (1 - 0.5 * ((S.hometype ?? 0) / 3))));
   if (S.condition >= 70){ S.equity = Math.min(S.eqMax, S.equity + 2); }
   else if (S.condition < 40){ S.equity -= 3; log('🏚️ Peeling paint and a sad lawn: −3 🏠 equity.', 'bad'); }
   if (S.equity <= 0){ render(); return lose(); }
@@ -2371,7 +2471,7 @@ function startMonth(){
   }
   if (S.month % ANNUAL === 0 && S.factions && S.mode === 'playing'){
     openMeeting('🗳️ THE ANNUAL MEETING', `The ${S.hoaName || 'HOA'} faithful assemble. Folding chairs. Burnt coffee. The board smirks behind a folding table. This is your moment, ${S.playerName || 'neighbor'} — call for the recall vote, or sit quietly another year?`);
-  } else if (!maybeDispute() && S.factions && Math.random() < S.size.outreach){
+  } else if (!maybeDispute() && S.factions && Math.random() < S.size.outreach * (0.85 + (S.daytime ?? 0.5) * 0.3)){
     neighborOutreach();
   }
   resolveKeptSecret();
@@ -2452,7 +2552,8 @@ function settleDispute(sideKey){
   if (sideKey){
     const opt = a.dispute[sideKey];
     for (const n of win) n.sway = Math.min(1, n.sway + 0.3);
-    for (const n of lose) n.sway = Math.max(-1, n.sway - 0.25);
+    const losePen = 0.15 + 0.15 * (1 - (S.cohesion ?? 0.5));
+    for (const n of lose) n.sway = Math.max(-1, n.sway - losePen);
     S.disputesSettled++;
     log(`🗣️ <b>${a.name}</b> — you sided with ${opt.side}. ${opt.flavor}`, 'tip');
     setTicker(`🗣️ You picked a side on the ${a.name.toLowerCase()}. ${win.length} households approve; ${lose.length} do not.`);
@@ -2826,6 +2927,8 @@ document.getElementById('resumeBtn').addEventListener('click', () => {
   if (!S.amenities){ S.amenities = []; S.disputesSettled = 0; S.lastDispute = -9; }
   if (S.lastSecret == null){ S.secret = null; S.lastSecret = -9; S.secretsUsed = 0; S.secretsRight = 0; S.secretsWrong = 0; S.usedSecretTexts = []; }
   if (!S.duesCap) S.duesCap = Math.max(S.dues, Math.round((S.diff.dues || S.dues) * 2));
+  if (S.occ == null){ S.occ = 0; S.reserve = 0.5; S.cohesion = 0.5; S.hometype = 0; S.daytime = 0.5;
+    S.assessMult2 = 1; S.wroteLandlords = false; S.reserveStudySeen = false; }
   if (S.seatOpen == null) S.seatOpen = 0;
   S.boardTarget = null;
   for (const m of S.board){
@@ -3071,7 +3174,8 @@ const ACTIONS = [
     run(){ S.ap--; S.cash -= 40; S.commons = Math.min(100, S.commons + 15); S.rep = Math.min(10, S.rep + 1);
       log(`🌳 You fixed the playground swing and mowed the median (+15%). The newsletter credits "board initiative". +1 ⭐ anyway.`, 'good'); } },
   { id:'doc',   ico:'📸', name:'Document Everything', cost:'1⚡', can:() => S.ap >= 1 && S.evidence < 5,
-    run(){ S.ap--; S.evidence++; SFX.play('camera');
+    run(){ S.ap--; S.evidence = Math.min(5, S.evidence + ((S.daytime ?? 0.5) === 1 ? 2 : 1)); SFX.play('camera');
+      if ((S.daytime ?? 0.5) === 1 && S.evidence < 5) log('🔭 Someone was watching, of course — a second affidavit arrived unsolicited.', 'tip');
       log(pick([
         '📸 Photographed the board president\'s own dead lawn. +1 evidence.',
         '📸 Copied the meeting minutes nobody was supposed to see. +1 evidence.',
@@ -3123,9 +3227,15 @@ const ACTIONS = [
       log(`🕵️ The assistant surfaced something about <b>${s.name}</b>. It will not tell you where it got it.`, 'ai');
       openSecret();
     } },
-  { id:'petition', ico:'📢', name:'Petition: Special Meeting', cost:() => `1⚡ · ${S.petitionNeed} allies`, can:() =>
-      S.ap >= 1 && S.factions && S.neighbors.filter(n => n.alliance && !n.exposed && !n.hostile).length >= S.petitionNeed && !S.petitioned,
-    run(){ S.ap--; S.petitioned = true;
+  { id:'landlords', ico:'🔑', name:'Write to the Landlords', cost:'2📞 · rep 5+', can:() =>
+      S.comms >= 2 && S.rep >= 5 && (S.occ || 0) >= 0.15 && !S.wroteLandlords,
+    run(){ S.comms -= 2; S.wroteLandlords = true;
+      log('🔑 You wrote to every registered agent on file — a two-page letter about board spending, comparables, and their asset. Three replied. One called. The absentee ballots follow YOU now.', 'good');
+      cue('ally'); } },
+  { id:'petition', ico:'📢', name:'Petition: Special Meeting', cost:() => `${(S.daytime ?? 0.5) === 0 ? 2 : 1}⚡ · ${S.petitionNeed} allies`, can:() =>
+      S.ap >= ((S.daytime ?? 0.5) === 0 ? 2 : 1) && S.factions && S.neighbors.filter(n => n.alliance && !n.exposed && !n.hostile).length >= S.petitionNeed && !S.petitioned,
+    run(){ S.ap -= ((S.daytime ?? 0.5) === 0 ? 2 : 1); S.petitioned = true;
+      if ((S.daytime ?? 0.5) === 0) log('📢 Gathering signatures took two evenings of knocking on doors nobody answers until six.', 'info');
       log('📢 Petition filed! Enough signatures to force a special meeting — right now.', 'tip');
       openMeeting('📢 THE SPECIAL MEETING', 'You forced this meeting. The board president\'s eye is twitching. The room smells like burnt coffee and fear.'); } },
 ];
@@ -3136,6 +3246,7 @@ function renderActions(){
     if (a.id === 'petition' && !S.factions) continue;
     if (a.id === 'fireMgmt' && !S.mgmtCo) continue;
     if (a.id === 'arc' && !S.diff.arcNeed) continue;   // no committee, no form, no problem
+    if (a.id === 'landlords' && ((S.occ || 0) < 0.15 || S.wroteLandlords)) continue;
     if (a.id === 'secret' && !S.ai) continue;          // the assistant has to exist to be asked
     if (a.id === 'law' && S.lawyer){
       const el = document.createElement('button');
@@ -3301,6 +3412,10 @@ document.getElementById('chatBtn').addEventListener('click', () => {
   const n = S.neighbors[S.socialTarget];
   if (n.chattedMonth === S.month) return;
   S.comms--; n.chattedMonth = S.month;
+  if ((S.cohesion ?? 0.5) >= 0.67 && n.tips.length === 0 && n.rel < 3){
+    n.rel++;
+    log(`👋 ${n.name} talked to you like you had lived here for years. Around here, people do. (+1 rel)`, 'good');
+  }
   const tip = makeTip(n);
   log(`${n.ico} <b>${n.name}</b>: "${tip.text}"`, 'tip');
   setTicker(`${n.ico} ${n.name}: "${tip.text}"`);
@@ -3410,7 +3525,8 @@ function castVotes(){
                             : { n, v:'abstain', why:'barely knows you' });
     } else { // fence
       const needEv = S.comps < 92 ? 2 : 3; // falling home values give the scared some courage
-      if (n.rel >= 2 && S.evidence >= needEv && S.rep >= 5) votes.push({ n, v:'yes', why:S.comps < 92 ? 'falling comps finally scared them MORE than the board does' : 'your evidence gave them courage' });
+      const repNeed = (S.cohesion ?? 0.5) < 0.34 ? 6 : (S.cohesion ?? 0.5) <= 0.66 ? 5 : 4;
+      if (n.rel >= 2 && S.evidence >= needEv && S.rep >= repNeed) votes.push({ n, v:'yes', why:S.comps < 92 ? 'falling comps finally scared them MORE than the board does' : 'your evidence gave them courage' });
       else if (n.rel >= 2) votes.push({ n, v:'abstain', why:'wants to help… but too scared without hard evidence' });
       else votes.push({ n, v:'abstain', why:'stares at the floor' });
     }
@@ -3438,14 +3554,23 @@ document.getElementById('voteBtn').addEventListener('click', () => {
     if (v.v === 'yes') yes += 1; else if (v.v === 'no') no += 1;
     blocLines.push(`<div style="font-size:12px;color:#c9d6b4;">└ ${n.name}'s circle (${n.influence || 0} homes): <b>${y}</b> yes</div>`);
   }
-  const un = S.unaffiliated || 0;
+  let un = S.unaffiliated || 0;
+  const absHomes = S.wroteLandlords ? 0 : Math.min(un, Math.round((S.homes || 0) * (S.occ || 0)));
+  un -= absHomes;
   const unY = Math.round(un * Math.max(0, Math.min(0.9, 0.25 + S.rep / 10 * 0.35 + compsBonus)));
   yes += unY; no += un - unY;
+  let absLine = '';
+  if (absHomes > 0){
+    const aFrac = Math.max(0.05, Math.min(0.85, 0.15 + Math.max(0, 100 - (S.comps || 100)) / 30 * 0.5));
+    const aY = Math.round(absHomes * aFrac * 0.5), aN = Math.round(absHomes * (1 - aFrac) * 0.5);
+    yes += aY; no += aN;
+    absLine = `<div>🔑 Absentee landlords (${absHomes} homes, half-weight proxies): <b>${aY}</b> yes <span style="color:#c9d6b4">(they vote the comparables, not you)</span></div>`;
+  }
   document.getElementById('voteList').innerHTML =
     votes.map((v, i) =>
       `<div>${icon[v.v]} <b>${v.n.name}</b> — ${v.v.toUpperCase()} <span style="color:#c9d6b4">(${v.why})</span>${blocLines[i]}</div>`
     ).join('') +
-    `<div>📊 Unaffiliated homes (${un}): <b>${unY}</b> yes <span style="color:#c9d6b4">(your ⭐ reputation${compsBonus ? ' + falling-comps fury' : ''})</span></div>` +
+    `<div>📊 Unaffiliated homes (${un}): <b>${unY}</b> yes <span style="color:#c9d6b4">(your ⭐ reputation${compsBonus ? ' + falling-comps fury' : ''}${S.wroteLandlords ? ' — includes the landlords you wrote to' : ''})</span></div>` + absLine +
     `<div style="text-align:center;font-weight:bold;margin-top:6px;">YES ${yes} — NO ${no} (of ${S.homes || yes + no} ballots)</div>`;
   document.getElementById('voteList').classList.remove('hidden');
   document.getElementById('voteBtn').classList.add('hidden');
@@ -3634,6 +3759,11 @@ function updateMeter(){
   }
   document.getElementById('oHomes').textContent = document.getElementById('sHomes').value + ' homes';
   document.getElementById('oYears').textContent = document.getElementById('sYears').value + ' years old';
+  document.getElementById('oOcc').textContent = document.getElementById('sOcc').value + '% rentals';
+  document.getElementById('oReserve').textContent = document.getElementById('sReserve').value + '% funded';
+  document.getElementById('oCohesion').textContent = document.getElementById('sCohesion').value;
+  const hh = document.getElementById('hHome'); if (hh) hh.textContent = HOME_TYPES[chosenHome].hint;
+  const hd = document.getElementById('hDay'); if (hd) hd.textContent = DAYTIMES[chosenDay].hint;
   // each hint follows its own handle
   for (const [key, copy] of Object.entries(SLIDER_COPY)){
     const cap = key.charAt(0).toUpperCase() + key.slice(1);
@@ -3673,6 +3803,22 @@ document.getElementById('setupTabs').addEventListener('click', e => {
   for (const p of document.querySelectorAll('#customModal .pane')) p.classList.toggle('hidden', p.id !== tab.dataset.p);
   beep(560, 0.04, 'sine', 0.025);
 });
+document.getElementById('homeRow').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  chosenHome = +chip.dataset.t;
+  for (const el of document.querySelectorAll('#homeRow .chip')) el.classList.toggle('sel', el === chip);
+  updateMeter();
+  beep(600, 0.05, 'sine', 0.03);
+});
+document.getElementById('dayRow').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  chosenDay = +chip.dataset.w;
+  for (const el of document.querySelectorAll('#dayRow .chip')) el.classList.toggle('sel', el === chip);
+  updateMeter();
+  beep(600, 0.05, 'sine', 0.03);
+});
 document.getElementById('customBtn').addEventListener('click', () => {
   document.getElementById('customModal').classList.remove('hidden');
   renderAmenities();
@@ -3696,7 +3842,7 @@ document.getElementById('regimeRow').addEventListener('click', e => {
   updateMeter();
   beep(600, 0.05, 'sine', 0.03);
 });
-for (const id of [...Object.keys(REGIME_SLIDERS), 'sHomes', 'sYears']){
+for (const id of [...Object.keys(REGIME_SLIDERS), 'sHomes', 'sYears', 'sOcc', 'sReserve', 'sCohesion']){
   document.getElementById(id).addEventListener('input', () => {
     if (!applyingPreset && REGIME_SLIDERS[id]){
       chosenRegime = 'custom'; // hand-tuned trauma
@@ -3734,6 +3880,8 @@ document.getElementById('startBtn').addEventListener('click', () => {
   setTicker(`🏘️ ${S.hoaName}: ${S.neighbors.length} neighbors watch from behind curtains. Some know things. Some are wearing a wire. Spend your ⚡ well, ${S.playerName}.`);
   syncAiBtn();
   startMonth();
+  if ((S.cohesion ?? 0.5) >= 0.8){ S.rep = Math.min(10, S.rep + 1); log('🥘 A casserole arrived before the truck was unloaded, with a card signed by a street. (+1 ⭐)', 'good'); }
+  else if ((S.cohesion ?? 0.5) <= 0.2){ log('📬 Your welcome was a form letter about bin placement, addressed to "Resident".', 'info'); }
   openWelcome();
   beep(523, 0.1, 'triangle', 0.05);
 });
