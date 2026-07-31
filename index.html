@@ -2789,7 +2789,7 @@ function finalScore(bonus){
 function scoreLine(bonus){
   const sc = finalScore(bonus);
   const grade = sc >= 600 ? 'S — HOA SLAYER' : sc >= 450 ? 'A — Neighborhood Legend'
-    : sc >= 300 ? 'B — Respected Holdout' : sc >= 180 ? 'C — Survived, Barely' : 'D — Beige-Adjacent';
+    : sc >= 300 ? 'B — Respected Holdout' : sc >= 180 ? 'C — Survived, Barely' : 'D — Model Resident';
   return `<br><br>🏆 FINAL SCORE: <b>${sc}</b> · Grade: <b>${grade}</b>`;
 }
 function ending(title, html){
@@ -2819,7 +2819,7 @@ function lose(){
     if (t) betrayal = `<br><br>${t.ico} <b>${t.name}</b> waves from the board's victory picnic. They were a spy the whole time.`;
   }
   ending('🔨 FORECLOSED!',
-    `Month ${S.month}: the ${S.diff.label} board of ${S.hoaName || 'your HOA'} drained ${S.playerName ? S.playerName + "'s" : 'your'} equity and took the house. A beige-approved family moves in Tuesday.` +
+    `Month ${S.month}: the ${S.diff.label} board of ${S.hoaName || 'your HOA'} drained ${S.playerName ? S.playerName + "'s" : 'your'} equity and took the house. The new owners submitted their exterior paint samples with the offer. The board has never been happier.` +
     betrayal + `<br><br>${statLine()}${scoreLine(0)}`);
   beep(220,0.4,'sawtooth',0.07);
 }
