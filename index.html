@@ -194,8 +194,29 @@
   .chip span{color:#c9d6b4; font-size:10.5px; display:block; margin-top:2px; line-height:1.3;}
   .chip.sel{border-color:var(--gold); box-shadow:0 0 8px rgba(255,210,74,.4);}
   #boardBox{font-size:12.5px;}
-  #boardBox .bm{margin-bottom:6px; line-height:1.35;}
+  #boardBox .bm{
+    margin-bottom:6px; line-height:1.35; padding:4px 6px; border-radius:7px;
+    border:1px solid transparent; cursor:pointer;
+  }
+  #boardBox .bm:hover{border-color:#7a9455; background:#22301b;}
   #boardBox .bd{color:#c9d6b4; font-size:11.5px;}
+  #boardBox .tr{color:var(--gold); letter-spacing:1px;}
+  #boardBox .dt{color:#ffb0a6;}
+  #boardBox .bm.gone{opacity:.45; cursor:default;}
+  #boardBox .bm.gone:hover{border-color:transparent; background:none;}
+  #boardBox .bm.ins{border-color:#5a965a; background:#1f2e1f;}
+  #boardBox .bm.seat{border:1px dashed var(--gold); color:var(--gold);}
+  #bmDirt{
+    text-align:left; background:#141a0e; border:1px solid var(--line); border-radius:8px;
+    padding:8px 12px; font-size:12.5px; max-height:150px; overflow-y:auto; margin:8px 0;
+  }
+  #bmDirt .tipl{margin-top:5px; line-height:1.35;}
+  #bmRole{color:var(--gold); font-size:13px;}
+  #bmStatus{font-size:12.5px; color:#c9d6b4;}
+  #seatList{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:10px 0;}
+  .vio .appeal{background:#6a5a8a; color:#efe6ff;}
+  .vio .stage{color:#c9b8e0; font-size:11.5px; font-style:italic; margin:3px 0;}
+  .vio .block{color:#ffc9a6; font-size:12px; margin:3px 0;}
   #boardList, #voteList{text-align:left; font-size:13.5px; line-height:1.5; margin:10px 0;}
   #boardList div{margin-bottom:6px; padding:6px 10px; background:#1d2716; border-radius:8px; border:1px solid var(--line);}
   #voteList div{margin-bottom:4px; padding:5px 10px; background:#1d2716; border-radius:8px; border:1px solid var(--line);}
@@ -374,6 +395,37 @@
   </div>
 </div>
 
+<div id="bmModal" class="overlay hidden">
+  <div class="panel">
+    <div id="socHead">
+      <div id="bmAv">📏</div>
+      <div style="flex:1">
+        <div id="bmName">Eugenia</div>
+        <div id="bmRole"></div>
+        <div id="bmStatus"></div>
+      </div>
+    </div>
+    <div id="bmDirt"></div>
+    <div>
+      <button class="btn sm" id="bmFavorBtn">🎁 Do Them a Favor</button>
+      <button class="btn sm" id="bmEndorseBtn">👍 Endorse Their Agenda</button>
+      <button class="btn sm law" id="bmDigBtn">🔍 Dig for Dirt</button>
+      <button class="btn sm alt" id="bmComplaintBtn">⚖️ File Governance Complaint</button>
+    </div>
+    <p class="small" id="bmHint" style="margin-top:8px;"></p>
+    <button class="btn sm grey" id="bmClose">Close</button>
+  </div>
+</div>
+
+<div id="seatModal" class="overlay hidden">
+  <div class="panel">
+    <h2>🗳️ SEAT AN INSURGENT</h2>
+    <p id="seatText"></p>
+    <div id="seatList"></div>
+    <button class="btn sm grey" id="seatClose">Not Yet</button>
+  </div>
+</div>
+
 <div id="customModal" class="overlay hidden">
   <div class="panel">
     <h2>⚙️ DESCRIBE YOUR HOA</h2>
@@ -494,9 +546,9 @@ const TUTORIAL_STEPS = [
   { t:'🎯 The Goal', b:'Nobody just leaves an HOA. There are exactly three exits:<br><br>🎉 <b>Win</b> — vote the board out of existence at a meeting.<br>🔨 <b>Lose</b> — your 🏠 equity hits zero and the bank takes the house.<br>🏷️ <b>Sell</b> — your choice, anytime you still have equity. Not a victory, not a defeat; the board simply outlives you.<br><br>There is no timer — the siege continues until one of the three happens. Every ending shows your <b>final score</b>: equity, cash, allies, exposed spies, and reputation all count.' },
   { t:'📊 Your Stats', b:'💵 <b>Cash</b> — pays for everything; dues drain it monthly.<br>🏠 <b>Equity</b> — your health bar. Liens, blight, and market shocks eat it.<br>🛠️ <b>Condition</b> — decays every month. Below 50% inspections cite you; below 40% equity rots. At 80%+ you get <b>+1⚡</b>.<br>😠 <b>Board anger</b> — angrier boards act more each month.<br>📸 <b>Evidence</b> — fuels legal contests AND gives scared neighbors courage to vote.<br>⭐ <b>Reputation</b> — at 8+ you get <b>+1⚡</b>; fence-sitters won\'t back a nobody.<br>🌳 <b>Commons</b> — the board lets them rot, dragging everyone\'s equity. Fix them yourself.<br>📞 <b>Communication</b> — a separate, generous budget for chats, favors, and planted messages. Talk is cheap; use lots of it.<br>📈 <b>Comparables</b> — the neighborhood\'s tracked sale prices. Your equity drifts with them, and falling comps radicalize everyone against the board.' },
   { t:'⚡ Actions', b:'🌱 <b>Mow</b> before inspections — check your board for an Enforcer.<br>💼 <b>Overtime</b> pays more each consecutive month ($80→$160), double in 🔥 crunch months.<br>🏷️ <b>Yard Sale</b> scales with reputation.<br>📸 <b>Document</b> early — you\'ll want 3+ evidence at every vote.<br>🏛️ <b>Attend the meeting</b> to learn the board\'s true monthly plan. Costs 1⚡; never lies.<br>🔨 <b>Improvements</b> boost equity but neighbors report "unapproved construction".<br>⚖️ <b>The lawyer</b> unlocks contests and shakes up alliances.' },
-  { t:'📋 Violations', b:'Citations have deadlines. Miss one: the fine is charged and it <b>escalates</b> (doubled). Miss again: <b>lien</b>, −15 equity.<br><br>✅ <b>Comply</b> — pay half the fine, done.<br>⚖️ <b>Contest</b> — needs the lawyer, $30, and 1📸. Always wins.<br>📨 <b>Appeal</b> — free, freezes the deadline a month while "the committee reviews". It is <b>always denied</b> ("Appeal denied: your tone."). Use it purely to buy time.' },
+  { t:'📋 Violations', b:'Citations have deadlines. Miss one: the fine is charged and it <b>escalates</b> (doubled). Miss again: <b>lien</b>, −15 equity.<br><br>✅ <b>Comply</b> — pay half the fine, done.<br>⚖️ <b>Contest</b> — needs the lawyer, $30, and 1📸. Always wins.<br>📨 <b>Appeal</b> — costs 1📞 and freezes the deadline while it grinds through <b>filing → review → hearing</b>. Expect obstructions: superseded forms, "lost" submissions, notarization fees, hearings rescheduled because the chair "had a thing". Each one must be cleared before the appeal moves.<br><br>Appeals <b>can be won</b> — the odds are shown live. They rise with 📸 evidence, a lawyer, your ⭐ reputation, allies, and above all <b>friends on the board</b>. They fall with board anger, and a petty, grudge-holding board denies almost everything. On a tyrannical setting, don\'t appeal without an insider.' },
   { t:'🏘️ Neighbors', b:'Every neighbor is secretly a truthful <b>friend</b>, a scared <b>fence-sitter</b>, or a <b>deceiver</b> reporting to the board. All of them offer intel about the board\'s secret monthly plan — deceivers\' first tip is TRUE to earn your trust.<br><br>Watch the <b>✓/✗ record</b> on their card — but carefully: friends are occasionally <i>honestly wrong</i>, and good spies are right most of the time. Expect a year of chatter before you can truly sort the street. 🚨 <b>Accuse</b> only with a pattern, not a single ✗.<br><br>Every neighbor also <b>sways a circle of households</b> (shown in their dossier) — and 🌐 super-connectors float through every circle: message carriers as allies, wide-reach spies otherwise. 📨 <b>Plant messages</b> (1📞) to win blocs before a vote — through the wrong person, your words come back rearranged. And neighbors <b>sell and move</b>: their replacement inherits the circle with an unknown allegiance.' },
-  { t:'🏛️ The Board', b:'Your board members are people — terrible people. Each has an archetype (📏 Enforcer, 🧮 Treasurer-for-Life, 📜 Parliamentarian, 📢 Megaphone, 🕰️ Founder, 🏗️ Declarant) and <b>pushes their own obsessions onto the monthly agenda</b>.<br><br>Read the roster panel: an Enforcer-heavy board means keep the lawn tight; a Founder/Parliamentarian board means constant bylaw amendments. Every board action in the log is signed by its author.' },
+  { t:'🏛️ Working the Board', b:'Each member has an archetype (📏 Enforcer, 🧮 Treasurer-for-Life, 📜 Parliamentarian, 📢 Megaphone, 🕰️ Founder, 🏗️ Declarant) and <b>pushes their own obsessions onto the agenda</b>. Every board action in the log is signed by its author. <b>Click any member</b> to work them:<br><br>🎁 <b>Do them a favor</b> (1📞+$30) — buys trust. At ★★ they start letting your violations slide and taking your appeals seriously; some become quiet allies who leak the agenda.<br>👍 <b>Endorse their agenda</b> (1📞) — cheap trust and calms the board, but they push their pet issue twice as hard. Flattery has a price.<br>🔍 <b>Dig for dirt</b> (1⚡) — hunt real misconduct: breach of fiduciary duty, preferential enforcement, neglect of common areas, procedural violations, retaliation. Trust and evidence make digging easier; get caught and the board hardens.<br>⚖️ <b>File a governance complaint</b> (needs 2 🗂️) — move to remove them. Fail and they retaliate; succeed and a <b>seat opens</b>.<br><br>🗳️ Then <b>run one of your allies</b> for the vacancy. Insurgents kill an agenda item every month, hand you the agenda free, and swing appeals. <b>Control a majority of seats and you win</b> — you don\'t dissolve the board, you take it.' },
   { t:'🗳️ Meetings & the Recall', b:'The <b>annual meeting</b> comes every 12th month. With enough allies you can 📢 <b>petition</b> a special meeting early (re-usable after a failed vote).<br><br>The vote is <b>community-wide</b>: every home casts a ballot. Primaries vote their conscience (friends need to know you; fence-sitters need ★★ trust, evidence, and ⭐5+ rep; unexposed deceivers vote no) — and each one <b>delivers their influence circle</b>, scaled by how much you\'ve swayed it. Unaffiliated homes follow your reputation. Falling 📈 comps make every group angrier at the board. Win the majority of ballots.<br><br>⚠️ And if the board ever hires a <b>management company</b>, everyone\'s equity bleeds monthly — rally enough allies and 🔥 fire them to claw back every point they drained.' },
   { t:'🤖 AI & 💾 Saving', b:'The <b>🤖 AI assistant</b> is a deal with the devil: ON, you get a monthly strategic advisor that reads the field and sometimes leaks the board\'s real plans — but <b>everyone gets AI</b>: the board acts more often, files algorithmic 3 AM citations, and "optimizes" your dues. Toggle it anytime; decide if the intel is worth the arms race.<br><br>💾 The game <b>autosaves every month</b> — close the tab whenever; the menu will offer to resume. Good luck. The board already knows you\'re reading this.<br><br><span style="opacity:.7;font-size:12.5px;">HOA Havoc — © 2026 Jeffrey Farkas &amp; BigSpoke AI. All rights reserved.</span>' },
 ];
@@ -614,13 +666,50 @@ const INFRA_EVENTS = [
           log('⛲ The entrance fountain (installed 1985) now makes a coughing sound (−5% 🌳). A committee has been formed.', 'bad'); },
 ];
 const BOARD_ARCHS = {
-  enforcer:        { ico:'📏', title:'The Enforcer',        desc:'Owns a laser grass-gauge. Files citations recreationally.', kinds:['violation','inspection'] },
-  treasurer:       { ico:'🧮', title:'Treasurer-for-Life',  desc:'Money has been "finding itself missing" since 2009. Loves an assessment.', kinds:['assessment','duesHike'] },
-  parliamentarian: { ico:'📜', title:'The Parliamentarian', desc:'Quotes Robert\'s Rules at children. Amends bylaws for sport.', kinds:['rule','amend'] },
-  megaphone:       { ico:'📢', title:'The Megaphone',       desc:'Runs three community Facebook groups. All of them hostile.', kinds:['rumor','rule'] },
-  founder:         { ico:'🕰️', title:'The Founder',         desc:'President since the Reagan administration. Considers the bylaws "his".', kinds:['amend','duesHike'] },
-  declarant:       { ico:'🏗️', title:'The Declarant',       desc:'Works for the developer. Technically owns the retention pond.', kinds:['assessment','violation'] },
+  enforcer:        { ico:'📏', title:'The Enforcer',        desc:'Owns a laser grass-gauge. Files citations recreationally.', kinds:['violation','inspection'], dirt:['preferential','retaliation'] },
+  treasurer:       { ico:'🧮', title:'Treasurer-for-Life',  desc:'Money has been "finding itself missing" since 2009. Loves an assessment.', kinds:['assessment','duesHike'], dirt:['fiduciary','neglect'] },
+  parliamentarian: { ico:'📜', title:'The Parliamentarian', desc:'Quotes Robert\'s Rules at children. Amends bylaws for sport.', kinds:['rule','amend'], dirt:['procedural','preferential'] },
+  megaphone:       { ico:'📢', title:'The Megaphone',       desc:'Runs three community Facebook groups. All of them hostile.', kinds:['rumor','rule'], dirt:['retaliation','procedural'] },
+  founder:         { ico:'🕰️', title:'The Founder',         desc:'President since the Reagan administration. Considers the bylaws "his".', kinds:['amend','duesHike'], dirt:['fiduciary','procedural'] },
+  declarant:       { ico:'🏗️', title:'The Declarant',       desc:'Works for the developer. Technically owns the retention pond.', kinds:['assessment','violation'], dirt:['fiduciary','neglect'] },
 };
+const MISCONDUCT = {
+  fiduciary:    { ico:'🧾', label:'Breach of Fiduciary Duty', finds:[
+    'reserve funds routed through a landscaping LLC registered to their cousin',
+    'a $4,200 "consulting" invoice signed by the person who received it',
+    'the clubhouse repair contract awarded without a single competing bid',
+    'a community credit card with eleven charges at a steakhouse'] },
+  preferential: { ico:'🎭', label:'Preferential Enforcement', finds:[
+    'not one citation ever issued on their own street — in nine years',
+    'their brother-in-law\'s boat, parked in plain view since March, uncited',
+    'three violations quietly voided for households that voted correctly',
+    'a "courtesy warning" list that contains only their bridge club'] },
+  neglect:      { ico:'🌳', label:'Neglect of Common Areas', finds:[
+    'the reserve study they buried, recommending repairs never scheduled',
+    'pool inspection reports unopened in a drawer since 2021',
+    'the playground condemned by an inspector, then quietly un-condemned',
+    'landscaping invoices paid for work photographs prove never happened'] },
+  procedural:   { ico:'📜', label:'Procedural Violation of the Bylaws', finds:[
+    'an amendment passed with no notice to owners and no quorum present',
+    'minutes altered after approval — the strikethroughs are still visible',
+    'a vote taken by text message, which the bylaws expressly forbid',
+    'an executive session used to decide matters requiring an open vote'] },
+  retaliation:  { ico:'😤', label:'Retaliatory Enforcement', finds:[
+    'every citation against you issued within 48 hours of a complaint you filed',
+    'an email saying "let\'s find something on that one" — with your address',
+    'a fine schedule applied to complainants at double the posted rate',
+    'the inspection route redrawn to pass your house four times a week'] },
+};
+const APPEAL_STALLS = [
+  { txt:'Form 27-B was superseded by Form 27-B(rev) while you were completing it.', fix:'📎 Refile (1📞)', need:'comms' },
+  { txt:'The committee "could not locate" your submission. Resubmit — the original, in triplicate.', fix:'📎 Resubmit (1📞)', need:'comms' },
+  { txt:'An administrative review fee applies. Of course it does.', fix:'💸 Pay $25', need:'cash', amt:25 },
+  { txt:'They require the photos you already submitted, but printed in color.', fix:'💸 Pay $15', need:'cash', amt:15 },
+  { txt:'Your hearing was rescheduled. The chair had "a thing".', fix:'😑 Wait', need:null },
+  { txt:'Quorum was not met — except for the vote to reschedule, which passed unanimously.', fix:'😑 Wait', need:null },
+  { txt:'The hearing requires a notarized statement of the obvious.', fix:'💸 Pay $20', need:'cash', amt:20 },
+];
+const APPEAL_STAGES = ['—', 'Filed — awaiting acknowledgment', 'Under review by the committee', 'Hearing scheduled', 'At the hearing'];
 const BOARD_NAMES = ['Hargrove','Prudence','Willoughby','Doris','Chet','Eugenia','Mort','Balthazar'];
 const HOA_ADJ = ['Pleasant','Whispering','Rolling','Stately','Harmony','Quail Hollow','Golden Pond','Eagle Crest','Tranquil','Regal','Sunny Glen','Copper Kettle'];
 const HOA_NOUN = ['Meadows','Pines','Estates','Commons','Glen','Acres','Landing','Preserve','Villas','Crossing','Bluffs','Hollow'];
@@ -893,15 +982,236 @@ function makeBoard(size, age){
   const names = shuffle([...BOARD_NAMES]);
   const archKeys = ['enforcer','treasurer','parliamentarian','megaphone','enforcer'].slice(0, size.boardCount);
   if (age.special) archKeys[0] = age.special; // the president reflects the community's age
-  return archKeys.map((k, i) => ({ name:names[i], arch:BOARD_ARCHS[k], president:i === 0 }));
+  return archKeys.map((k, i) => ({
+    name:names[i], arch:BOARD_ARCHS[k], president:i === 0,
+    trust:0, dirt:[], ally:false, insurgent:false, removed:false, endorsed:false,
+    favorMonth:-1, endorseMonth:-1, digMonth:-1,
+  }));
 }
+function activeBoard(){ return S.board.filter(m => !m.removed); }
+function friendlyBoard(){ return activeBoard().filter(m => m.insurgent || m.ally || m.trust >= 2); }
 function renderBoard(){
   const box = document.getElementById('boardBox');
-  box.innerHTML = S.board.map(m =>
-    `<div class="bm" title="${DIFF_FLAVOR[S.diffKey]}">${m.arch.ico} <b>${m.name}</b>${m.president ? ' 👑' : ''} — ${m.arch.title}` +
-    `<br><span class="bd">${m.arch.desc}</span></div>`
-  ).join('') +
-  (S.livLabel ? `<div class="bm" style="margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;">📊 <b>Livability:</b> ${S.livLabel}<br><span class="bd">${S.livDesc || ''}</span></div>` : '');
+  box.innerHTML = '';
+  S.board.forEach((m, i) => {
+    const el = document.createElement('div');
+    el.className = 'bm' + (m.removed ? ' gone' : '') + (m.insurgent ? ' ins' : '');
+    const badge = m.removed ? ' 🚫' : m.insurgent ? ' 🗳️' : m.ally ? ' 🤝' : m.president ? ' 👑' : '';
+    const stars = m.removed ? '' : ` <span class="tr">${'★'.repeat(m.trust)}${'☆'.repeat(3 - m.trust)}</span>`;
+    const dirt = m.dirt.length ? ` <span class="dt">🗂️${m.dirt.length}</span>` : '';
+    el.innerHTML = `${m.arch.ico} <b>${m.name}</b>${badge}${stars}${dirt} — ${m.removed ? '<i>removed from the board</i>' : m.arch.title}` +
+      `<br><span class="bd">${m.removed ? 'The seat sits empty. For now.' : m.arch.desc}</span>`;
+    el.title = m.removed ? `${m.name} was removed.` : `${m.name} — click to work them: favors, endorsements, or dig for misconduct.`;
+    if (!m.removed) el.addEventListener('click', () => openBoardMember(i));
+    box.appendChild(el);
+  });
+  if (S.seatOpen > 0){
+    const el = document.createElement('div');
+    el.className = 'bm seat';
+    el.innerHTML = `🗳️ <b>${S.seatOpen} open seat${S.seatOpen > 1 ? 's' : ''}</b><br><span class="bd">Click to run one of your allies for the vacancy.</span>`;
+    el.addEventListener('click', openSeatModal);
+    box.appendChild(el);
+  }
+  if (S.livLabel){
+    const el = document.createElement('div');
+    el.className = 'bm';
+    el.style.cssText = 'margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;';
+    el.innerHTML = `📊 <b>Livability:</b> ${S.livLabel}<br><span class="bd">${S.livDesc || ''}</span>`;
+    box.appendChild(el);
+  }
+}
+
+// ================= working the board =================
+function digOdds(m){
+  return Math.max(10, Math.min(85, 38 + S.evidence * 5 + m.trust * 12 + (S.lawyer ? 10 : 0) - S.regime.grudge * 0.1));
+}
+function removalOdds(m){
+  const allies = S.neighbors.filter(n => n.alliance && !n.exposed && !n.hostile).length;
+  let p = 12 + m.dirt.length * 16 + allies * 5 + S.rep * 2 + friendlyBoard().length * 10 + (S.lawyer ? 12 : 0);
+  p -= S.anger * 0.12;
+  p -= (S.regime.petty + S.regime.grudge) / 200 * 22;
+  if (m.president) p -= 12;                       // presidents are harder to dislodge
+  return Math.max(3, Math.min(90, Math.round(p)));
+}
+function openBoardMember(i){
+  if (!S || S.mode !== 'playing') return;
+  S.boardTarget = i;
+  S.mode = 'board-member';
+  renderBoardMember();
+  document.getElementById('bmModal').classList.remove('hidden');
+  beep(620, 0.05, 'sine', 0.03);
+}
+function renderBoardMember(){
+  const m = S.board[S.boardTarget];
+  document.getElementById('bmAv').textContent = m.arch.ico;
+  document.getElementById('bmName').textContent = m.name + (m.president ? ' 👑' : '');
+  document.getElementById('bmRole').innerHTML = `<span style="color:var(--gold)">${'★'.repeat(m.trust)}${'☆'.repeat(3-m.trust)}</span> ${m.arch.title}`;
+  document.getElementById('bmStatus').textContent =
+    m.insurgent ? 'Your insurgent. Votes your way and slows the board from inside.' :
+    m.ally ? 'Quietly on your side. They will advocate for you behind closed doors.' :
+    m.trust >= 2 ? 'Warm toward you. Cites you less, and might just take your call.' :
+    m.trust === 1 ? 'Cordial. Remembers your name, mostly favorably.' :
+    'Regards you as a line item.';
+  const dirtBox = document.getElementById('bmDirt');
+  dirtBox.innerHTML = m.dirt.length
+    ? '<b>🗂️ Dossier</b>' + m.dirt.map(d => `<div class="tipl">${MISCONDUCT[d.type].ico} <b>${MISCONDUCT[d.type].label}</b> — ${d.txt}</div>`).join('')
+    : '<i>No documented misconduct yet. Everyone has something.</i>';
+  const favorCost = 30;
+  const fav = document.getElementById('bmFavorBtn');
+  fav.disabled = S.comms < 1 || S.cash < favorCost || m.trust >= 3 || m.favorMonth === S.month;
+  fav.textContent = m.trust >= 3 ? '🎁 Fully Charmed' : `🎁 Do Them a Favor (1📞 · $${favorCost})`;
+  const end = document.getElementById('bmEndorseBtn');
+  end.disabled = S.comms < 1 || m.trust >= 3 || m.endorseMonth === S.month;
+  end.textContent = '👍 Endorse Their Agenda (1📞)';
+  const dig = document.getElementById('bmDigBtn');
+  dig.disabled = S.ap < 1 || m.digMonth === S.month;
+  dig.textContent = `🔍 Dig for Dirt (1⚡ · ~${digOdds(m)}%)`;
+  const comp = document.getElementById('bmComplaintBtn');
+  comp.disabled = S.ap < 1 || m.dirt.length < 2;
+  comp.textContent = m.dirt.length < 2 ? '⚖️ File Complaint (need 2 🗂️)' : `⚖️ File Governance Complaint (1⚡ · ~${removalOdds(m)}%)`;
+  document.getElementById('bmHint').textContent = m.insurgent
+    ? 'This seat is yours. Control a majority of seats and the board is effectively yours.'
+    : 'Favors and endorsements buy trust — but endorsing pushes their pet agenda harder. Trust makes digging easier; two pieces of misconduct let you move for removal.';
+}
+document.getElementById('bmClose').addEventListener('click', () => {
+  document.getElementById('bmModal').classList.add('hidden');
+  S.boardTarget = null;
+  if (S.mode === 'board-member') S.mode = 'playing';
+  renderBoard(); render();
+});
+document.getElementById('bmFavorBtn').addEventListener('click', () => {
+  if (S.boardTarget == null || S.comms < 1 || S.cash < 30) return;
+  const m = S.board[S.boardTarget];
+  if (m.trust >= 3 || m.favorMonth === S.month) return;
+  S.comms--; S.cash -= 30; m.trust = Math.min(3, m.trust + 1); m.favorMonth = S.month;
+  log(`🎁 You ${pick(['dropped off a pie for', 'fixed the sticky gate for', 'watched the dog for', 'brought in the trash cans for'])} <b>${m.name}</b>. ` +
+      `They were charmed despite themselves. (trust ★${m.trust})`, 'good');
+  if (m.trust >= 2 && !m.ally && Math.random() < 0.4){
+    m.ally = true;
+    log(`🤝 <b>${m.name}</b> lowers their voice: "Between us — some of what this board does isn't right." You have a friend on the inside.`, 'tip');
+  }
+  renderBoardMember(); renderBoard(); render();
+});
+document.getElementById('bmEndorseBtn').addEventListener('click', () => {
+  if (S.boardTarget == null || S.comms < 1) return;
+  const m = S.board[S.boardTarget];
+  if (m.trust >= 3 || m.endorseMonth === S.month) return;
+  S.comms--; m.trust = Math.min(3, m.trust + 1); m.endorseMonth = S.month; m.endorsed = true;
+  S.anger = Math.max(0, S.anger - 4);
+  log(`👍 You told <b>${m.name}</b> you're fully behind their vision for the community. They glowed. ` +
+      `(trust ★${m.trust}, −4 😠) — they will now push <i>${PLAN_DESC[m.arch.kinds[0]]}</i> harder, which is the price of flattery.`, 'info');
+  renderBoardMember(); renderBoard(); render();
+});
+document.getElementById('bmDigBtn').addEventListener('click', () => {
+  if (S.boardTarget == null || S.ap < 1) return;
+  const m = S.board[S.boardTarget];
+  if (m.digMonth === S.month) return;
+  S.ap--; m.digMonth = S.month;
+  const odds = digOdds(m);
+  if (Math.random() * 100 < odds){
+    const type = pick(m.arch.dirt);
+    const pool = MISCONDUCT[type].finds.filter(f => !m.dirt.some(d => d.txt === f));
+    if (pool.length){
+      const txt = pick(pool);
+      m.dirt.push({ type, txt });
+      S.stats.dirtFound++;
+      log(`🔍 You found something on <b>${m.name}</b>: ${MISCONDUCT[type].ico} <b>${MISCONDUCT[type].label}</b> — ${txt}. (🗂️ ${m.dirt.length} on file)`, 'good');
+      beep(880, 0.08, 'triangle', 0.05);
+    } else {
+      log(`🔍 Nothing new on <b>${m.name}</b> — you already have everything the records will give up.`, 'info');
+    }
+  } else {
+    log(`🔍 You spent the afternoon in the records room and found nothing on <b>${m.name}</b>. The minutes are suspiciously tidy.`, 'info');
+    if (Math.random() < 0.35 && m.trust < 2){
+      S.anger = Math.min(100, S.anger + 8);
+      log(`👀 Worse — someone saw you requesting those files. The board is on alert. (+8 😠)`, 'bad');
+    }
+  }
+  renderBoardMember(); renderBoard(); render();
+});
+document.getElementById('bmComplaintBtn').addEventListener('click', () => {
+  if (S.boardTarget == null || S.ap < 1) return;
+  const m = S.board[S.boardTarget];
+  if (m.dirt.length < 2) return;
+  S.ap--;
+  const odds = removalOdds(m);
+  const kinds = [...new Set(m.dirt.map(d => MISCONDUCT[d.type].label))].join(' and ');
+  if (Math.random() * 100 < odds){
+    m.removed = true; m.ally = false; m.insurgent = false;
+    S.seatOpen++; S.stats.removed++;
+    S.rep = Math.min(10, S.rep + 2);
+    S.anger = Math.min(100, S.anger + 15);
+    log(`⚖️ <b>REMOVED.</b> Your complaint against <b>${m.name}</b> for ${kinds} was too documented to bury. ` +
+        `They resigned "to spend time with family" in a statement nobody believed. +2 ⭐, and a seat is now vacant.`, 'good');
+    setTicker(`⚖️ ${m.name} is off the board. The remaining members are looking at their own filing cabinets.`);
+    beep(660, 0.1, 'triangle', 0.06); setTimeout(()=>beep(880, 0.18, 'triangle', 0.06), 120);
+  } else {
+    S.anger = Math.min(100, S.anger + 20);
+    log(`⚖️ Your complaint against <b>${m.name}</b> was reviewed by a committee chaired by… <b>${m.name}</b>. Dismissed as "vexatious". (+20 😠)`, 'bad');
+    if (Math.random() < 0.6){
+      issueViolation(pick(VIOLATIONS), '— retaliation, obviously');
+      log(`😤 A citation arrived the same afternoon. Coincidence, surely.`, 'bad');
+    }
+    beep(180, 0.3, 'sawtooth', 0.06);
+  }
+  renderBoardMember(); renderBoard(); render();
+  checkBoardControl();
+});
+// --- seating your own people ---
+function openSeatModal(){
+  if (!S || S.mode !== 'playing' || S.seatOpen < 1) return;
+  const allies = S.neighbors.filter(n => n.alliance && !n.exposed && !n.hostile);
+  S.mode = 'seat';
+  document.getElementById('seatText').textContent = allies.length
+    ? `${S.seatOpen} seat${S.seatOpen > 1 ? 's are' : ' is'} vacant. Run one of your allies — costs 1⚡ and the board will hate it.`
+    : 'A seat is vacant, but you have no allies willing to run. Build alliances on the street first.';
+  const list = document.getElementById('seatList');
+  list.innerHTML = '';
+  allies.forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'btn sm';
+    b.textContent = `${n.ico} Run ${n.name}`;
+    b.disabled = S.ap < 1;
+    b.addEventListener('click', () => seatInsurgent(n));
+    list.appendChild(b);
+  });
+  document.getElementById('seatModal').classList.remove('hidden');
+}
+function seatInsurgent(n){
+  if (S.ap < 1 || S.seatOpen < 1) return;
+  S.ap--; S.seatOpen--; S.stats.insurgents++;
+  S.anger = Math.min(100, S.anger + 10);
+  const seat = { name:n.name, arch:{ ico:n.ico, title:'Your Insurgent', desc:'Ran on a platform of "reading the actual bylaws". Won.', kinds:['rule'], dirt:['procedural'] },
+    president:false, trust:3, dirt:[], ally:true, insurgent:true, removed:false, endorsed:false,
+    favorMonth:-1, endorseMonth:-1, digMonth:-1 };
+  S.board.push(seat);
+  n.onBoard = true;
+  log(`🗳️ <b>${n.name} WON THE SEAT.</b> Your candidate is on the board. They will slow the agenda, leak it to you for free, and vote with you. (+10 😠 from the survivors)`, 'good');
+  setTicker(`🗳️ ${n.name} has joined the board. The president's jaw has not fully closed.`);
+  document.getElementById('seatModal').classList.add('hidden');
+  S.mode = 'playing';
+  beep(523,0.12,'triangle',0.06); setTimeout(()=>beep(784,0.2,'triangle',0.06),140);
+  renderBoard(); render();
+  checkBoardControl();
+}
+document.getElementById('seatClose').addEventListener('click', () => {
+  document.getElementById('seatModal').classList.add('hidden');
+  if (S.mode === 'seat') S.mode = 'playing';
+  render();
+});
+function checkBoardControl(){
+  const active = activeBoard();
+  const yours = active.filter(m => m.insurgent || m.ally).length;
+  if (active.length && yours > active.length / 2 && S.mode !== 'won'){
+    S.mode = 'won';
+    ending('🏛️ YOU CONTROL THE BOARD',
+      `Month ${S.month}: with <b>${yours} of ${active.length}</b> seats, the board answers to you now. ` +
+      `You didn't dissolve it — you <i>took</i> it. The first motion passed unanimously: reopen the pool.<br><br>` +
+      `${statLine()}${scoreLine(150)}<br><br>Power corrupts. Try to remember the gnome you used to be, ${S.playerName || 'neighbor'}.`);
+    beep(523,0.15,'triangle',0.06); setTimeout(()=>beep(659,0.15,'triangle',0.06),150); setTimeout(()=>beep(784,0.3,'triangle',0.06),300);
+    return true;
+  }
+  return false;
 }
 function newGame(cfg){
   const d = cfg.diff, age = cfg.age, size = cfg.size;
@@ -909,7 +1219,8 @@ function newGame(cfg){
   const neighbors = makeNeighbors(size.neighbors, cfg.homes);
   const unaffiliated = Math.max(0, cfg.homes - 1 - neighbors.length - neighbors.reduce((a, n) => a + n.influence, 0));
   return {
-    mode:'playing', diffKey:cfg.tier, diff:d, age, size, factions:true,
+    mode:'playing', diffKey:cfg.tier, diff:d, age, size, factions:true, regime:cfg.r,
+    boardTarget:null, seatOpen:0,
     comms:8, commsMax:8, comps:100, sales:[], revealsFired:[], unaffiliated,
     livLabel:cfg.liv, livDesc:cfg.livDesc, livTierIdx:cfg.tierIdx, homes:cfg.homes, years:cfg.years,
     month:1, ap:d.ap, apMax:d.ap, cash:d.cash, equity:d.equity, eqMax:d.equity + 60 + age.eqBonus,
@@ -922,7 +1233,8 @@ function newGame(cfg){
     mgmtCo:null, mgmtCoCooldown:0,
     plan:[], planRevealed:false, improvedThisMonth:false, lawyer:false,
     socialTarget:null, meetingHeld:false, petitioned:false,
-    stats:{ complied:0, contested:0, liens:0, tipsTrue:0, tipsFalse:0, exposed:0, wrongAccusals:0, assessed:0, appeals:0, amendments:0 },
+    stats:{ complied:0, contested:0, liens:0, tipsTrue:0, tipsFalse:0, exposed:0, wrongAccusals:0, assessed:0,
+            appeals:0, appealsWon:0, amendments:0, removed:0, insurgents:0, dirtFound:0 },
   };
 }
 
@@ -965,16 +1277,26 @@ function makePlan(){
   if (S.comps < 85 && Math.random() < 0.25) count = Math.max(0, count - 1); // the board spent the meeting arguing about Zillow
   const kinds = ['violation','violation','inspection','assessment','rule','rumor','duesHike','amend'];
   for (let i = 0; i < S.age.amendWeight; i++) kinds.push('amend'); // old boards amend compulsively
+  // your insurgents obstruct from the inside — each one kills an agenda item
+  const insurgents = activeBoard().filter(m => m.insurgent).length;
+  count = Math.max(0, count - insurgents);
+  // hostile members propose; endorsed ones propose twice as often (the price of flattery)
+  const roster = activeBoard().filter(m => !m.insurgent);
+  const pool = [];
+  for (const m of roster){ pool.push(m); if (m.endorsed) pool.push(m); }
   const plan = [];
-  for (let i = 0; i < count; i++){
-    const member = pick(S.board);
+  for (let i = 0; i < count && pool.length; i++){
+    const member = pick(pool);
+    // a member who likes you will quietly let things slide
+    if (member.trust >= 2 && Math.random() < 0.35 + member.trust * 0.08) continue;
     // board personalities drive the agenda: members push their own obsessions
     let k = Math.random() < 0.7 ? pick(member.arch.kinds) : pick(kinds);
     if ((k === 'duesHike' || k === 'amend') && plan.some(p => p.kind === k)) k = 'violation';
     plan.push({ kind:k, by:member });
   }
   S.plan = plan;
-  S.planRevealed = false;
+  // people on the inside just tell you what's coming
+  S.planRevealed = insurgents > 0 || activeBoard().some(m => m.ally);
 }
 
 // ================= tips (intel about this month's plan) =================
@@ -1053,9 +1375,58 @@ function issueViolation(reason, why){
   S.violations.push({ id:++vioId, txt:reason, fine, deadline:S.diff.deadline, escalated:false });
   log(`📬 VIOLATION${why ? ' ' + why : ''}: "${reason}" — fine $${fine}, ${S.diff.deadline} month(s) to respond.`, 'bad');
 }
+// odds the appeal actually succeeds — cultivate the board and it becomes real
+function appealOdds(){
+  let p = 8;
+  if (S.lawyer) p += 18;
+  p += Math.min(16, S.evidence * 4);
+  p += friendlyBoard().length * 14;                       // members who take your call
+  p += activeBoard().filter(m => m.insurgent).length * 8;  // your own people vote yes
+  p += Math.min(10, S.rep);
+  p += S.neighbors.filter(n => n.alliance && !n.exposed && !n.hostile).length * 2;
+  p -= S.anger * 0.25;
+  p -= (S.regime.petty + S.regime.grudge) / 200 * 30;      // pettier, grudge-holding boards deny more
+  p += (S.regime.mercy / 100) * 12;
+  return Math.max(2, Math.min(82, Math.round(p)));
+}
+function advanceAppeals(lines){
+  for (const v of [...S.violations]){
+    const a = v.appeal;
+    if (!a) continue;
+    if (a.blocked){
+      lines.push(`📨 Appeal on "${v.txt}" is stalled: ${a.blocked.txt} Nothing moves until you deal with it.`);
+      continue;
+    }
+    if (Math.random() < 0.45){                             // the hoops
+      a.blocked = pick(APPEAL_STALLS);
+      lines.push(`📨 ${a.blocked.txt} (appeal on "${v.txt}" is stuck)`);
+      continue;
+    }
+    a.stage++;
+    if (a.stage <= 4){
+      lines.push(`📨 Appeal on "${v.txt}": ${APPEAL_STAGES[a.stage]}.`);
+      continue;
+    }
+    // the hearing resolves
+    v.appeal = null; v.appealed = true;
+    S.stats.appeals++;
+    const odds = appealOdds();
+    if (Math.random() * 100 < odds){
+      S.stats.appealsWon++;
+      S.violations = S.violations.filter(x => x !== v);
+      S.rep = Math.min(10, S.rep + 1);
+      const advocate = friendlyBoard()[0];
+      lines.push(`🎉 APPEAL GRANTED on "${v.txt}" — the citation is VACATED. ` +
+        (advocate ? `${advocate.name} spoke up for you, and the room turned.` : `They could not produce the original complaint. +1 ⭐.`));
+    } else {
+      charge(10, 'an appeal processing fee');
+      lines.push(`📨 ${pick(APPEAL_DENIALS)} ("${v.txt}" — deadline resumes next month, −$10 processing fee.)`);
+    }
+  }
+}
 function tickViolations(lines){
   for (const v of [...S.violations]){
-    if (v.underAppeal) continue; // deadline frozen while "the committee reviews"
+    if (v.appeal) continue; // deadline frozen while "the committee reviews"
     v.deadline--;
     if (v.deadline <= 0){
       if (!v.escalated){
@@ -1161,14 +1532,7 @@ function boardPhase(){
   }
   S.improvedThisMonth = false;
   tickViolations(lines);
-  // appeals resolve AFTER the tick — the frozen month is real, the denial is inevitable
-  for (const v of S.violations){
-    if (v.underAppeal){
-      v.underAppeal = false; v.appealed = true;
-      charge(10, 'an appeal processing fee');
-      lines.push(`📨 ${pick(APPEAL_DENIALS)} (−$10 processing fee. "${v.txt}" deadline resumes next month.)`);
-    }
-  }
+  advanceAppeals(lines);   // after the tick, so a frozen month is genuinely frozen
   if (!S.plan.length && !lines.length) lines.push('🌤️ An eerily quiet month. The board met, glared at a spreadsheet, and adjourned.');
   // anger ramps naturally with time on harder boards
   S.anger = Math.min(100, S.anger + Math.round(S.diff.angerRamp / 2));
@@ -1275,6 +1639,12 @@ function startMonth(){
       log(`${n.ico} <b>${n.name}</b> (ally): "${tip.text}"`, 'tip');
     }
   }
+  // friends on the inside leak the agenda without costing you an action
+  const insiders = activeBoard().filter(m => m.insurgent || m.ally);
+  if (insiders.length && S.plan.length){
+    const who = pick(insiders);
+    log(`${who.arch.ico} <b>${who.name}</b> (inside): "Agenda this month — ${S.plan.map(p => PLAN_DESC[p.kind]).join(', ')}." You didn't hear it from them.`, 'tip');
+  }
   if (S.ai){
     aiAdvisor();
     if (Math.random() < 0.25) pick(AI_EVENTS)();
@@ -1305,6 +1675,12 @@ function aiAdvisor(){
     ? `${S.mgmtCo.name} has drained ${S.mgmtCo.drained} 🏠 so far — you have the allies to 🔥 fire them TODAY and claw all of it back.`
     : `${S.mgmtCo.name} is bleeding ${3} 🏠 per month from everyone. You need ${S.petitionNeed} allies to fire them; you have ${allies}.`);
   if (S.comps < 92) tips.push(`Comparables at ${Math.round(S.comps)}% — falling values are radicalizing the whole street. A recall gets easier while the anger lasts.`);
+  const digTarget = activeBoard().filter(m => !m.insurgent && m.dirt.length === 1)[0];
+  if (digTarget) tips.push(`One more piece of misconduct on ${digTarget.name} and you can move for removal.`);
+  const warm = activeBoard().filter(m => m.trust === 1 && !m.insurgent)[0];
+  if (warm) tips.push(`${warm.name} is warming to you. One more favor and they may start letting things slide — and taking your appeals seriously.`);
+  if (S.seatOpen > 0) tips.push(`There ${S.seatOpen > 1 ? 'are' : 'is'} ${S.seatOpen} vacant board seat${S.seatOpen > 1 ? 's' : ''}. Seat an ally before they appoint a loyalist.`);
+  if (S.violations.some(v => v.appeal && v.appeal.blocked)) tips.push(`An appeal is stalled on an administrative obstruction. Clearing it is cheaper than the fine.`);
   const coldBloc = S.neighbors.filter(n => !n.exposed && !n.hostile && (n.sway || 0) <= 0).sort((a, b) => (b.influence || 0) - (a.influence || 0))[0];
   if (coldBloc && S.comms >= 1) tips.push(`${coldBloc.name} sways ${coldBloc.influence} homes and their circle is cold on you. A planted 📨 message could move real ballots.`);
   if (!tips.length) tips.push('All metrics nominal. Statistically, this is exactly when HOAs strike.');
@@ -1359,6 +1735,16 @@ document.getElementById('resumeBtn').addEventListener('click', () => {
     if (n.influence == null){ n.influence = 5; n.sway = 0; n.superInfluencer = false; n.plantedMonth = -1; }
   }
   if (S.unaffiliated == null) S.unaffiliated = Math.max(0, (S.homes || 60) - 1 - S.neighbors.length - S.neighbors.reduce((a, n) => a + n.influence, 0));
+  // saves from before the board-politics systems
+  if (!S.regime) S.regime = { petty:55, fines:50, dues:45, mercy:50, grudge:50 };
+  if (S.seatOpen == null) S.seatOpen = 0;
+  S.boardTarget = null;
+  for (const m of S.board){
+    if (m.trust == null){ m.trust = 0; m.dirt = []; m.ally = false; m.insurgent = false; m.removed = false; m.endorsed = false; }
+    if (m.favorMonth == null){ m.favorMonth = -1; m.endorseMonth = -1; m.digMonth = -1; }
+    if (!m.arch.dirt) m.arch.dirt = ['procedural'];
+  }
+  for (const v of S.violations){ if (v.underAppeal){ v.underAppeal = false; v.appeal = { stage:1, blocked:null }; } }
   for (const id of ['boardModal','socialModal','meetingModal','reachModal','ruleModal','quitModal','tutModal','endModal'])
     document.getElementById(id) && document.getElementById(id).classList.add('hidden');
   document.getElementById('menu').classList.add('hidden');
@@ -1625,7 +2011,9 @@ function renderViolations(){
     el.className = 'vio' + (v.escalated ? ' escalated' : '');
     const fixCost = S.freeComply ? 0 : Math.round(v.fine / 2);
     el.innerHTML = `<div class="vt">${v.escalated ? '🚨 ESCALATED: ' : ''}${v.txt}</div>` +
-      `<div class="meta">Fine if ignored: $${v.fine} · ${v.underAppeal ? '⏳ under appeal — deadline frozen' : '⏰ ' + v.deadline + ' month(s) left'}${v.appealed ? ' · appeal DENIED' : ''}</div>`;
+      `<div class="meta">Fine if ignored: $${v.fine} · ${v.appeal ? '⏳ deadline frozen (under appeal)' : '⏰ ' + v.deadline + ' month(s) left'}${v.appealed ? ' · prior appeal denied' : ''}</div>` +
+      (v.appeal ? `<div class="stage">📨 ${APPEAL_STAGES[v.appeal.stage]} · odds if it reaches a hearing: ~${appealOdds()}%</div>` : '') +
+      (v.appeal && v.appeal.blocked ? `<div class="block">⛔ ${v.appeal.blocked.txt}</div>` : '');
     const comply = document.createElement('button');
     comply.className = 'comply';
     comply.textContent = fixCost === 0 ? '✅ Comply (FREE — loophole!)' : `✅ Comply ($${fixCost})`;
@@ -1639,16 +2027,33 @@ function renderViolations(){
       beep(440, 0.07, 'triangle', 0.04); render();
     });
     const appeal = document.createElement('button');
-    appeal.className = 'contest';
-    appeal.textContent = '📨 Appeal (free)';
-    appeal.title = 'Freezes the deadline one month while "the committee reviews". Appeals are always denied. Always.';
-    appeal.disabled = S.mode !== 'playing' || v.appealed || v.underAppeal;
-    appeal.addEventListener('click', () => {
-      if (S.mode !== 'playing' || v.appealed || v.underAppeal) return;
-      v.underAppeal = true; S.stats.appeals++;
-      log(`📨 Appeal filed on "${v.txt}". The deadline freezes while the committee "carefully reviews" it. (They will deny it.)`, 'info');
-      beep(500, 0.06, 'sine', 0.04); render();
-    });
+    appeal.className = 'appeal';
+    if (v.appeal && v.appeal.blocked){
+      const bl = v.appeal.blocked;
+      appeal.textContent = bl.fix;
+      const can = bl.need === 'comms' ? S.comms >= 1 : bl.need === 'cash' ? S.cash >= bl.amt : true;
+      appeal.disabled = S.mode !== 'playing' || !can;
+      appeal.title = 'Clear this obstruction so the appeal can crawl forward another inch.';
+      appeal.addEventListener('click', () => {
+        if (S.mode !== 'playing' || !can) return;
+        if (bl.need === 'comms') S.comms--;
+        if (bl.need === 'cash') S.cash -= bl.amt;
+        v.appeal.blocked = null;
+        log(`📎 Obstruction cleared on "${v.txt}". The appeal may now proceed to the next obstruction.`, 'info');
+        beep(560, 0.05, 'sine', 0.03); render();
+      });
+    } else {
+      appeal.textContent = v.appeal ? '⏳ Appeal pending' : '📨 Appeal (1📞)';
+      appeal.title = 'Freezes the deadline while it grinds through review, hearings, and paperwork. It can actually be won — cultivate the board and bring evidence.';
+      appeal.disabled = S.mode !== 'playing' || !!v.appeal || v.appealed || S.comms < 1;
+      appeal.addEventListener('click', () => {
+        if (S.mode !== 'playing' || v.appeal || v.appealed || S.comms < 1) return;
+        S.comms--;
+        v.appeal = { stage:1, blocked:null };
+        log(`📨 Appeal filed on "${v.txt}" (Form 27-B, in duplicate). The deadline freezes. Current odds at a hearing: <b>~${appealOdds()}%</b> — improve them with evidence, a lawyer, and friends on the board.`, 'tip');
+        beep(500, 0.06, 'sine', 0.04); render();
+      });
+    }
     const contest = document.createElement('button');
     contest.className = 'contest';
     contest.textContent = '⚖️ Contest ($30 + 1📸)';
@@ -1921,7 +2326,8 @@ document.getElementById('meetDone').addEventListener('click', () => {
 // ================= endings =================
 function statLine(){
   const st = S.stats;
-  let s = `Complied: <b>${st.complied}</b> · Contested: <b>${st.contested}</b> · Liens: <b>${st.liens}</b> · Assessed: <b>$${st.assessed}</b> · Appeals denied: <b>${st.appeals}</b>/${st.appeals} · Bylaws amended: <b>${st.amendments}</b>` +
+  let s = `Complied: <b>${st.complied}</b> · Contested: <b>${st.contested}</b> · Liens: <b>${st.liens}</b> · Assessed: <b>$${st.assessed}</b> · Appeals won: <b>${st.appealsWon || 0}</b>/${st.appeals} · Bylaws amended: <b>${st.amendments}</b>` +
+    (st.dirtFound ? `<br>🗂️ Misconduct documented: <b>${st.dirtFound}</b> · ⚖️ Board members removed: <b>${st.removed || 0}</b> · 🗳️ Insurgents seated: <b>${st.insurgents || 0}</b>` : '') +
     (st.mgmtFired ? ` · 🔥 Mgmt companies fired: <b>${st.mgmtFired}</b>` : '') +
     (st.planted ? ` · 📨 Messages planted: <b>${st.planted}</b>` : '') +
     ` · 📈 Final comps: <b>${Math.round(S.comps ?? 100)}%</b> (${(S.sales || []).length} sales tracked)`;
