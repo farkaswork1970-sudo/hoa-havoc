@@ -256,6 +256,13 @@
   #socLog .tag.T{color:var(--green);} #socLog .tag.F{color:var(--red);} #socLog .tag.P{color:#8a9a78;}
   #socLog .tipl{margin-bottom:6px; line-height:1.35;}
   button{-webkit-tap-highlight-color:transparent; touch-action:manipulation;}
+  /* narrower desktop windows: tighten the bar rather than orphaning the controls onto row two */
+  @media (max-width:1060px) and (min-width:721px){
+    #topbar{font-size:13px; gap:6px; padding:7px 10px;}
+    #statGroup{gap:6px;}
+    .tbtn{padding:4px 6px; font-size:12px;}
+    #endBtn{min-width:124px; font-size:15px; padding:0 8px;}
+  }
   /* ---- phone layout ---- */
   @media (max-width:720px){
     body{padding:6px;}
@@ -1947,9 +1954,9 @@ function boardPhase(){
         const reason = 'Property condition below community standards (' + S.condition + '%)';
         const fine = Math.round(60 * (S.diff.fineMult + S.fineBonus));
         S.violations.push({ id:++vioId, txt:reason, fine, deadline:S.diff.deadline, escalated:false });
-        lines.push(`${who}🔍 SURPRISE INSPECTION: your condition (${S.condition}%) failed. Citation issued — $${fine}.`);
+        lines.push(`${who}🔍 SURPRISE INSPECTION: your condition (${Math.round(S.condition)}%) failed. Citation issued — $${fine}.`);
       } else {
-        lines.push(`${who}🔍 SURPRISE INSPECTION: clipboard out, white gloves on… nothing found (${S.condition}%). They seemed genuinely sad.`);
+        lines.push(`${who}🔍 SURPRISE INSPECTION: clipboard out, white gloves on… nothing found (${Math.round(S.condition)}%). They seemed genuinely sad.`);
       }
     } else if (p.kind === 'assessment'){
       const amt = Math.round((30 + Math.random() * 40) * S.diff.fineMult * S.age.assessMult);
@@ -2072,16 +2079,18 @@ function startMonth(){
   if (S.otBonus) log('🔥 Crunch time at the office: overtime pays DOUBLE this month.', 'good');
   S.cash += S.diff.income;
   charge(S.dues, 'HOA dues');
-  log(`💵 Paycheck +$${S.diff.income} · HOA dues −$${S.dues}.`, 'info');
+  log(`💵 Paycheck +$${S.diff.income} · HOA dues −$${Math.round(S.dues)}.`, 'info');
   if (Math.random() < 0.35) log(`📰 ${pick(PA_NEWSLETTER)}`, 'info');
   if (Math.random() < 0.4){
     const ev = pick(MARKET_EVENTS);
     S.equity = Math.min(S.eqMax, S.equity + ev.eq);
     log(`${ev.eq > 0 ? '📈' : '📉'} ${ev.txt} (${ev.eq > 0 ? '+' : ''}${ev.eq} 🏠)`, ev.eq > 0 ? 'good' : 'bad');
   }
-  S.commons = Math.max(0, S.commons - S.age.commonsDecay);
-  if (S.commons < 40){ S.equity -= 2; log(`🌳 The commons look post-apocalyptic (${S.commons}%). The whole street's equity sags: −2 🏠.`, 'bad'); }
-  else if (S.commons >= 70){ S.equity = Math.min(S.eqMax, S.equity + 1); log(`🌳 The commons look great (${S.commons}%) — thanks to you, mostly. +1 🏠.`, 'good'); }
+  // round on assignment: the decay is fractional (amenities add tenths) and would otherwise
+  // leak floating-point noise like 53.900000000000006 into every display and log line
+  S.commons = Math.max(0, Math.round(S.commons - S.age.commonsDecay));
+  if (S.commons < 40){ S.equity -= 2; log(`🌳 The commons look post-apocalyptic (${Math.round(S.commons)}%). The whole street's equity sags: −2 🏠.`, 'bad'); }
+  else if (S.commons >= 70){ S.equity = Math.min(S.eqMax, S.equity + 1); log(`🌳 The commons look great (${Math.round(S.commons)}%) — thanks to you, mostly. +1 🏠.`, 'good'); }
   if (Math.random() < S.age.infra) pick(INFRA_EVENTS)();
   amenityPhase();
   // the management company: every HOA's final boss
@@ -2271,8 +2280,8 @@ document.getElementById('dispSkip').addEventListener('click', () => { if (S.mode
 function aiAdvisor(){
   const tips = [];
   const enforcer = S.board.some(m => m.arch.title === 'The Enforcer');
-  if (S.condition < 55) tips.push(`Condition ${S.condition}% — ${enforcer ? 'with an Enforcer on this board, an inspection citation is near-certain' : 'inspection risk is rising'}. Mow.`);
-  if (S.commons < 40) tips.push(`Commons at ${S.commons}% are bleeding the whole street's equity. One 🌳 fix pays for itself.`);
+  if (S.condition < 55) tips.push(`Condition ${Math.round(S.condition)}% — ${enforcer ? 'with an Enforcer on this board, an inspection citation is near-certain' : 'inspection risk is rising'}. Mow.`);
+  if (S.commons < 40) tips.push(`Commons at ${Math.round(S.commons)}% are bleeding the whole street's equity. One 🌳 fix pays for itself.`);
   if (S.evidence < 3) tips.push(`Only ${S.evidence}📸 evidence on file — fence-sitters need 3+ to vote with you. Document.`);
   const liar = S.neighbors.find(n => !n.accused && !n.exposed && !n.hostile && n.tips.some(t => t.resolved && t.claim && !t.truthful));
   if (liar) tips.push(`${liar.name}'s record contains a proven lie. Cross-referencing lemonade attendance… consider an accusation.`);
@@ -3047,13 +3056,13 @@ function maybeAuto(){
 function render(){
   if (!S) return;
   document.getElementById('monthLbl').textContent = `📅 Month ${S.month}`;
-  document.getElementById('cashLbl').textContent = `💵 $${S.cash}`;
+  document.getElementById('cashLbl').textContent = `💵 $${Math.round(S.cash)}`;
   document.getElementById('eqLbl').textContent = Math.max(0, Math.round(S.equity));
-  document.getElementById('condLbl').textContent = S.condition + '%';
-  document.getElementById('angerLbl').textContent = S.anger;
-  document.getElementById('evLbl').textContent = S.evidence;
-  document.getElementById('repLbl').textContent = S.rep;
-  document.getElementById('comLbl').textContent = S.commons + '%';
+  document.getElementById('condLbl').textContent = Math.round(S.condition) + '%';
+  document.getElementById('angerLbl').textContent = Math.round(S.anger);
+  document.getElementById('evLbl').textContent = Math.round(S.evidence);
+  document.getElementById('repLbl').textContent = Math.round(S.rep);
+  document.getElementById('comLbl').textContent = Math.round(S.commons) + '%';
   document.getElementById('commsLbl').textContent = `${S.comms ?? 0}/${S.commsMax ?? 8}`;
   document.getElementById('apLbl').textContent = `⚡ ${S.ap}/${S.apMax}`;
   const comps = Math.round(S.comps ?? 100);
@@ -3065,10 +3074,10 @@ function render(){
   maybeAuto();
   document.getElementById('eqBar').style.width = Math.max(0, S.equity / S.eqMax * 100) + '%';
   document.getElementById('eqVal').textContent = Math.max(0, Math.round(S.equity)) + '/' + S.eqMax;
-  document.getElementById('condBar').style.width = S.condition + '%';
-  document.getElementById('condVal').textContent = S.condition + '%';
-  document.getElementById('angerBar').style.width = S.anger + '%';
-  document.getElementById('angerVal').textContent = S.anger + '/100';
+  document.getElementById('condBar').style.width = Math.round(S.condition) + '%';
+  document.getElementById('condVal').textContent = Math.round(S.condition) + '%';
+  document.getElementById('angerBar').style.width = Math.round(S.anger) + '%';
+  document.getElementById('angerVal').textContent = Math.round(S.anger) + '/100';
   document.getElementById('ruleCt').textContent = S.rules.length;
   if (S.rules.length){
     document.getElementById('rulesBox').innerHTML = S.rules.map(r => `<div>• ${r}</div>`).join('');
