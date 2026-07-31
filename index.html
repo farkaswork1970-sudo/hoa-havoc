@@ -28,11 +28,11 @@
   #topbar{
     display:flex; align-items:center; gap:8px; flex-wrap:wrap;
     background:var(--panel); border:2px solid var(--line); border-radius:12px 12px 0 0;
-    padding:8px 14px; font-size:15px; font-weight:bold;
+    padding:8px 12px; font-size:14px; font-weight:bold;
   }
   /* stats flow and wrap freely; the controls stay welded together as one block, so a
      narrow window moves the whole control bar as a unit instead of orphaning a button */
-  #statGroup{display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex:1 1 auto; min-width:0;}
+  #statGroup{display:flex; align-items:center; gap:7px; flex-wrap:wrap; flex:1 1 auto; min-width:0;}
   #ctrlGroup{display:flex; align-items:center; gap:6px; flex:0 0 auto; margin-left:auto;}
   #topbar .stat{display:flex; align-items:center; gap:4px; white-space:nowrap;}
   #monthLbl{color:var(--blue); font-size:16px;}
@@ -43,14 +43,14 @@
     font-family:inherit; font-weight:bold; font-size:16px; padding:8px 12px; cursor:pointer;
     /* fixed footprint so swapping to the countdown label can't reflow the topbar —
        the ✋ emoji has a taller line box than ▶, so height is pinned too */
-    min-width:148px; height:38px; flex-shrink:0; white-space:nowrap; line-height:1;
+    min-width:142px; height:38px; flex-shrink:0; white-space:nowrap; line-height:1;
     display:inline-flex; align-items:center; justify-content:center;
   }
   #endBtn:hover{filter:brightness(1.1);}
   #endBtn:disabled{opacity:.4; cursor:not-allowed;}
   .tbtn{
     background:#3a4a63; color:#cfe2ff; border:2px solid #5a7096; border-radius:8px;
-    font-family:inherit; font-weight:bold; font-size:13px; padding:5px 9px; cursor:pointer; white-space:nowrap;
+    font-family:inherit; font-weight:bold; font-size:13px; padding:5px 7px; cursor:pointer; white-space:nowrap;
   }
   .tbtn:hover{filter:brightness(1.15);}
   #aiBtn.on{background:#4a2e5a; border-color:#9668b8; color:#ecd8ff;}
@@ -298,6 +298,7 @@
     </div>
     <div id="ctrlGroup">
       <button id="musicBtn" class="tbtn" title="Background music on/off.">🎵</button>
+      <button id="sfxBtn" class="tbtn" title="Sound effects and spoken remarks on/off.">🔊</button>
       <button id="aiBtn" class="tbtn" title="AI assistant: advises you every month — but the board and the gossips get AI too. Toggle anytime.">🤖 OFF</button>
       <button id="helpBtn" class="tbtn" title="How to play &amp; strategy guide">❓</button>
       <button id="quitBtn" class="tbtn" title="List the house and sell. There are only three ways out: foreclosure, dissolving the board, or this.">🏷️ Sell</button>
@@ -801,7 +802,7 @@ const PA_NEWSLETTER = [
 ];
 const ANNUAL = 12; // annual meetings recur every 12 months; the game runs until you win, lose, or sell
 const AI_EVENTS = [
-  () => { issueViolation('Algorithmic citation: "lawn entropy detected" (issued 3:11 AM)', '🤖');
+  () => { SFX.play('drone'); issueViolation('Algorithmic citation: "lawn entropy detected" (issued 3:11 AM)', '🤖');
           log('🤖 The board\'s compliance AI cited you at 3:11 AM. It does not sleep. It does not dream.', 'bad'); },
   () => { S.rep = Math.max(0, S.rep - 1);
           log('🤖 The AI newsletter ran a generated image of "your" lawn with 7 flamingos. You own zero flamingos. −1 ⭐.', 'bad'); },
@@ -1036,6 +1037,191 @@ function beep(freq, dur, type, vol){
 }
 function shuffle(a){ for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+const VOICE_LINES = {
+  citation:{ who:'board', o:['A violation has been observed.', 'The measurement was taken twice.', 'Compliance is not optional.', 'Photographs are on file.', 'This is your first notice.'] },
+  appealFiled:{ who:'self', o:['Paperwork against paperwork.', 'Filed in triplicate. Again.', 'I attached the photographs.', 'I found the correct form.', 'This will go nowhere.'] },
+  appealDenied:{ who:'board', o:['The board is not persuaded.', 'Respectfully, no.', 'The original finding stands.', 'Your appeal lacked merit.', 'The committee reviewed it briefly.'] },
+  appealGranted:{ who:'self', o:['I want that in writing.', 'They said yes.', 'Someone made a mistake.', 'That worked. Somehow.', 'I am keeping the letter.'] },
+  comply:{ who:'self', o:['Fine. It is beige now.', 'I paid it.', 'It was cheaper than fighting.', 'I repainted the door.', 'It is done. I hate it.'] },
+  lien:{ who:'board', o:['A lien has been recorded.', 'Interest accrues from today.', 'Your equity now includes us.', 'This attaches to the title.', 'The county has been notified.'] },
+  meeting:{ who:'board', o:['Quorum has been assumed.', 'Refreshments are in the back.', 'Comments are limited to two minutes.', 'Meeting called to order.', 'Roll call is waived.'] },
+  voteWin:{ who:'board', o:['Adjourned. Permanently.', 'This body no longer exists.', 'The keys will be surrendered.', 'The motion carries. So noted.', 'The binders are heavy.'] },
+  voteLose:{ who:'board', o:['The motion fails.', 'Proxies were counted by management.', 'The current board remains seated.', 'Turnout was disappointing again.', 'The outcome was expected.'] },
+  duesHike:{ who:'board', o:['Dues have been adjusted upward.', 'Costs are outside our control.', 'The increase takes effect immediately.', 'This was voted on Tuesday.', 'Notice was properly posted.'] },
+  assessment:{ who:'board', o:['A special assessment is levied.', 'This is not a dues increase.', 'The pool needed unforeseen work.', 'Payment is due in full.', 'Nonpayment carries additional penalties.'] },
+  newRule:{ who:'board', o:['Mailboxes must now face east.', 'Wreaths are seasonal only.', 'Wind chimes are now prohibited.', 'Garage doors will remain closed.', 'Trash cans must be concealed.'] },
+  amendment:{ who:'board', o:['The bylaws have been amended.', 'It passed with two votes.', 'Grandfather status was granted selectively.', 'Certain owners are exempt.', 'Thank you for not reading.'] },
+  mgmtHired:{ who:'board', o:['Professional management has been retained.', 'Service levels will improve.', 'The fee is passed through.', 'They handle correspondence now.', 'The contract renews automatically.'] },
+  mgmtFired:{ who:'board', o:['The contract was not renewed.', 'Their records remain unavailable.', 'Their services are hereby terminated.', 'The transition will be seamless.', 'No cause was stated.'] },
+  boardRemoved:{ who:'board', o:['A member has stepped down.', 'The record is silent.', 'No wrongdoing is admitted.', 'He is spending time elsewhere.', 'The seat is now vacant.'] },
+  insurgent:{ who:'board', o:['A new member was seated.', 'She was not our candidate.', 'Orientation materials will be withheld.', 'The vote was close.', 'The seating is provisional.'] },
+  dirtFound:{ who:'self', o:['Someone bought a boat.', 'His brother owns the company.', 'The invoices do not match.', 'I made copies of everything.', 'Well. Look at that.'] },
+  ally:{ who:'self', o:['Finally. Backup.', 'Someone else is angry too.', 'She has been keeping notes.', 'He signed the petition.', 'Two of us now.'] },
+  spyExposed:{ who:'self', o:['She was taking the photographs.', 'That explains the timing.', 'He waved every morning.', 'The fence had a witness.', 'Everyone knows now.'] },
+  wrongAccusal:{ who:'self', o:['That was the wrong house.', 'I owe someone a casserole.', 'Nobody is waving anymore.', 'He was not the one.', 'That went poorly for me.'] },
+  mow:{ who:'self', o:['Mowed. Again.', 'Edged. Trimmed. Measured.', 'Two and a half inches.', 'Nobody will notice.', 'The lawn is legal again.'] },
+  improve:{ who:'self', o:['Six weekends. Done.', 'The permit cost more than lumber.', 'The deck exists now.', 'It looks better. Probably.', 'Someone will complain about it.'] },
+  arcApproved:{ who:'board', o:['The committee approves the plans.', 'This sets no precedent.', 'Approval is conditional and revocable.', 'The color was acceptable.', 'Do exactly what you drew.'] },
+  arcDenied:{ who:'board', o:['Denied. Try beige.', 'Resubmit in the spring.', 'The committee cited harmony concerns.', 'No reason is required.', 'The submission was incomplete.'] },
+  yardSale:{ who:'self', o:['Permit obtained. Signs approved.', 'Someone bought the ladder.', 'Two dollars for the lamp.', 'Signs come down by noon.', 'The neighbors are watching.'] },
+  overtime:{ who:'self', o:['Overtime again.', 'I do this for grass.', 'The dues do not pay themselves.', 'More hours. Same house.', 'Time and a half.'] },
+  foreclosed:{ who:'board', o:['Thank you for your years here.', 'The property has been reclaimed.', 'The sale was properly noticed.', 'The account is settled.', 'The file is hereby archived.'] },
+  soldOut:{ who:'self', o:['I took the offer.', 'The next place has no association.', 'Let them fine the next guy.', 'Somebody else can mow it.', 'The sign is up.'] },
+  dispute:{ who:'self', o:['Everyone has printed the rules.', 'It is about the pool again.', 'Two hours on parking.', 'The pickleball court is contested.', 'Nobody is backing down.'] },
+  inspection:{ who:'board', o:['An inspection is being conducted.', 'The side gate was unlocked.', 'Please remain inside.', 'No notice is required.', 'This is routine.'] },
+  drone:{ who:'board', o:['The aerial survey has begun.', 'Overhead imaging is not surveillance.', 'Do not wave at it.', 'It flies on Tuesdays.', 'Your backyard is now documented.'] },
+};
+
+// which synthesised effect accompanies each spoken cue
+const CUE_SFX = {
+  citation:'cite', appealFiled:'rustle', appealDenied:'denied', appealGranted:'stamp',
+  comply:'spend', lien:'alarm', meeting:'murmur', voteWin:'applause', voteLose:'denied',
+  duesHike:'spend', assessment:'spend', newRule:'gavel', amendment:'gavel',
+  mgmtHired:'thud', mgmtFired:'fanfare', boardRemoved:'gavel', insurgent:'fanfare',
+  dirtFound:'camera', ally:'pop', spyExposed:'whistle', wrongAccusal:'denied',
+  mow:'mow', improve:'hammer', arcApproved:'stamp', arcDenied:'denied',
+  yardSale:'money', overtime:'money', foreclosed:'sad', soldOut:'doorbell',
+  dispute:'murmur', inspection:'doorbell', drone:'drone',
+};
+// one call gives the event its noise and, when the voice is free, its remark
+function cue(hook){
+  const s = CUE_SFX[hook];
+  if (s) SFX.play(s);
+  const v = VOICE_LINES[hook];
+  if (v) Voice.say(pick(v.o), v.who);
+}
+
+// ---------- sound effects: everything synthesised, nothing loaded ----------
+const SFX = {
+  on:(() => { try{ return localStorage.getItem('hoaSfx') !== '0'; }catch(e){ return true; } })(),
+  bus:null, noiseBuf:null, lastAt:0,
+  gate(){
+    if (!this.on) return null;
+    try{
+      ensureAC();
+      if (AC.state === 'suspended') AC.resume();
+      if (!this.bus){ this.bus = AC.createGain(); this.bus.gain.value = 0.9; this.bus.connect(AC.destination); }
+      return AC.currentTime;
+    }catch(e){ return null; }
+  },
+  noise(t, dur, vol, type, freq, q){
+    if (!this.noiseBuf){
+      this.noiseBuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
+      const d = this.noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
+    s.buffer = this.noiseBuf; s.loop = true;
+    f.type = type || 'bandpass'; f.frequency.value = freq || 1200; if (q) f.Q.value = q;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(this.bus);
+    s.start(t); s.stop(t + dur + 0.02);
+    return { g, f };
+  },
+  blip(t, f0, f1, dur, vol, type){
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(f0, t);
+    if (f1 && f1 !== f0) o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + Math.min(0.02, dur * 0.2));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(this.bus);
+    o.start(t); o.stop(t + dur + 0.03);
+  },
+  play(name){
+    const now = this.gate();
+    if (now === null) return;
+    // a board phase fires several consequences at once: stagger them into a sequence
+    // rather than dropping them or piling them onto one instant
+    const t = Math.max(now, this.lastAt + 0.19);
+    if (t - now > 2.2) return;              // too far behind; let this one go
+    this.lastAt = t;
+    const S_ = this;
+    switch (name){
+      case 'cite':        // the mailbox thunk of a violation notice
+        S_.noise(t, 0.09, 0.16, 'lowpass', 900); S_.blip(t + 0.02, 320, 90, 0.16, 0.09, 'square'); break;
+      case 'money':       // coins
+        S_.blip(t, 1180, 1180, 0.07, 0.06, 'sine'); S_.blip(t + 0.06, 1560, 1560, 0.1, 0.05, 'sine'); break;
+      case 'spend':
+        S_.blip(t, 520, 190, 0.16, 0.06, 'triangle'); break;
+      case 'mow':         // a small engine, badly maintained
+        { const n = S_.noise(t, 0.75, 0.09, 'bandpass', 320, 1.4);
+          for (let i = 0; i < 14; i++) S_.blip(t + i * 0.05, 92 + (i % 2) * 10, 92, 0.045, 0.028, 'sawtooth'); } break;
+      case 'hammer':
+        for (let i = 0; i < 3; i++){ S_.noise(t + i * 0.14, 0.06, 0.14, 'bandpass', 2200, 1.2); S_.blip(t + i * 0.14, 240, 120, 0.07, 0.05, 'square'); } break;
+      case 'camera':      // shutter
+        S_.noise(t, 0.03, 0.16, 'highpass', 3200); S_.noise(t + 0.07, 0.045, 0.13, 'highpass', 2400); break;
+      case 'gavel':
+        S_.blip(t, 190, 70, 0.13, 0.13, 'sine'); S_.noise(t, 0.05, 0.1, 'lowpass', 1400); break;
+      case 'doorbell':
+        S_.blip(t, 660, 660, 0.34, 0.07, 'sine'); S_.blip(t + 0.26, 528, 528, 0.46, 0.07, 'sine'); break;
+      case 'phone':
+        for (let i = 0; i < 2; i++) S_.blip(t + i * 0.14, 980, 980, 0.09, 0.045, 'triangle'); break;
+      case 'stamp':       // approved
+        S_.noise(t, 0.05, 0.13, 'lowpass', 700); S_.blip(t + 0.04, 420, 720, 0.16, 0.06, 'triangle'); break;
+      case 'denied':      // the buzzer of a committee that already decided
+        S_.blip(t, 165, 150, 0.34, 0.08, 'sawtooth'); S_.blip(t + 0.02, 110, 100, 0.34, 0.06, 'square'); break;
+      case 'murmur':      // a room filling with folding chairs
+        { const n = S_.noise(t, 1.5, 0.055, 'bandpass', 700, 0.8);
+          n.g.gain.setValueAtTime(0.0001, t); n.g.gain.linearRampToValueAtTime(0.055, t + 0.5);
+          n.g.gain.exponentialRampToValueAtTime(0.0001, t + 1.5); } break;
+      case 'applause':
+        for (let i = 0; i < 26; i++) S_.noise(t + Math.random() * 1.1, 0.05, 0.05, 'bandpass', 1600 + Math.random() * 1800, 0.7); break;
+      case 'alarm':       // lien / foreclosure
+        S_.blip(t, 420, 120, 0.7, 0.1, 'sawtooth'); S_.blip(t + 0.35, 380, 100, 0.7, 0.08, 'sawtooth'); break;
+      case 'drone':
+        { const n = S_.noise(t, 1.1, 0.05, 'bandpass', 1800, 3);
+          for (let i = 0; i < 20; i++) S_.blip(t + i * 0.055, 430 + Math.sin(i) * 40, 430, 0.05, 0.022, 'sawtooth'); } break;
+      case 'splash':
+        { const n = S_.noise(t, 0.4, 0.13, 'lowpass', 2600); n.f.frequency.exponentialRampToValueAtTime(300, t + 0.4); } break;
+      case 'honk':        // the geese are permanent
+        for (let i = 0; i < 2; i++){ S_.blip(t + i * 0.22, 380, 300, 0.17, 0.07, 'sawtooth'); } break;
+      case 'fanfare':
+        [523, 659, 784, 1047].forEach((f, i) => S_.blip(t + i * 0.11, f, f, 0.3, 0.07, 'triangle')); break;
+      case 'sad':
+        [392, 349, 294, 233].forEach((f, i) => S_.blip(t + i * 0.19, f, f, 0.42, 0.075, 'triangle')); break;
+      case 'pop':
+        S_.blip(t, 700, 1250, 0.07, 0.05, 'sine'); break;
+      case 'thud':
+        S_.blip(t, 130, 60, 0.2, 0.1, 'sine'); break;
+      case 'rustle':      // paperwork
+        S_.noise(t, 0.22, 0.05, 'highpass', 2600); break;
+      case 'whistle':     // something going up
+        S_.blip(t, 400, 1100, 0.3, 0.045, 'sine'); break;
+    }
+  },
+  toggle(){
+    this.on = !this.on;
+    try{ localStorage.setItem('hoaSfx', this.on ? '1' : '0'); }catch(e){}
+    if (!this.on && window.speechSynthesis) try{ speechSynthesis.cancel(); }catch(e){}
+    syncSfxBtn();
+    if (this.on) this.play('pop');
+  },
+};
+// ---------- the spoken layer: the browser's own voice, used flatly ----------
+const Voice = {
+  lastAt:0,
+  say(text, speaker){
+    if (!SFX.on || !text || !window.speechSynthesis) return;
+    const now = Date.now();
+    if (now - this.lastAt < 2600) return;    // never talk over itself
+    this.lastAt = now;
+    try{
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      if (speaker === 'board'){ u.rate = 0.92; u.pitch = 0.72; u.volume = 0.85; }  // institutional, unbothered
+      else { u.rate = 1.02; u.pitch = 0.95; u.volume = 0.75; }                     // your own weary head
+      speechSynthesis.speak(u);
+    }catch(e){}
+  },
+};
+function syncSfxBtn(){
+  const b = document.getElementById('sfxBtn');
+  if (b) b.textContent = SFX.on ? '🔊' : '🔈';
+}
 
 // ---------- background music ----------
 // A real arrangement on a 16-step grid: drum kit, syncopated bass, offbeat comping,
@@ -1399,7 +1585,7 @@ document.getElementById('bmDigBtn').addEventListener('click', () => {
     if (pool.length){
       const txt = pick(pool);
       m.dirt.push({ type, txt });
-      S.stats.dirtFound++;
+      S.stats.dirtFound++; cue('dirtFound');
       log(`🔍 You found something on <b>${m.name}</b>: ${MISCONDUCT[type].ico} <b>${MISCONDUCT[type].label}</b> — ${txt}. (🗂️ ${m.dirt.length} on file)`, 'good');
       beep(880, 0.08, 'triangle', 0.05);
     } else {
@@ -1422,7 +1608,7 @@ document.getElementById('bmComplaintBtn').addEventListener('click', () => {
   const odds = removalOdds(m);
   const kinds = [...new Set(m.dirt.map(d => MISCONDUCT[d.type].label))].join(' and ');
   if (Math.random() * 100 < odds){
-    m.removed = true; m.ally = false; m.insurgent = false;
+    m.removed = true; m.ally = false; m.insurgent = false; cue('boardRemoved');
     S.seatOpen++; S.stats.removed++;
     S.rep = Math.min(10, S.rep + 2);
     S.anger = Math.min(100, S.anger + 15);
@@ -1464,7 +1650,7 @@ function openSeatModal(){
 }
 function seatInsurgent(n){
   if (S.ap < 1 || S.seatOpen < 1) return;
-  S.ap--; S.seatOpen--; S.stats.insurgents++;
+  S.ap--; S.seatOpen--; S.stats.insurgents++; cue('insurgent');
   S.anger = Math.min(100, S.anger + 10);
   const seat = { name:n.name, arch:{ ico:n.ico, title:'Your Insurgent', desc:'Ran on a platform of "reading the actual bylaws". Won.', kinds:['rule'], dirt:['procedural'] },
     president:false, trust:3, dirt:[], ally:true, insurgent:true, removed:false, endorsed:false,
@@ -1670,6 +1856,7 @@ function resolveTips(){
 function issueViolation(reason, why){
   const fine = Math.round((40 + Math.random() * 50) * (S.diff.fineMult + S.fineBonus));
   S.violations.push({ id:++vioId, txt:reason, fine, deadline:S.diff.deadline, escalated:false });
+  cue('citation');
   log(`📬 VIOLATION${why ? ' ' + why : ''}: "${reason}" — fine $${fine}, ${S.diff.deadline} month(s) to respond.`, 'bad');
 }
 // odds the appeal actually succeeds — cultivate the board and it becomes real
@@ -1709,14 +1896,14 @@ function advanceAppeals(lines){
     S.stats.appeals++;
     const odds = appealOdds();
     if (Math.random() * 100 < odds){
-      S.stats.appealsWon++;
+      S.stats.appealsWon++; cue('appealGranted');
       S.violations = S.violations.filter(x => x !== v);
       S.rep = Math.min(10, S.rep + 1);
       const advocate = friendlyBoard()[0];
       lines.push(`🎉 APPEAL GRANTED on "${v.txt}" — the citation is VACATED. ` +
         (advocate ? `${advocate.name} spoke up for you, and the room turned.` : `They could not produce the original complaint. +1 ⭐.`));
     } else {
-      charge(10, 'an appeal processing fee');
+      charge(10, 'an appeal processing fee'); cue('appealDenied');
       lines.push(`📨 ${pick(APPEAL_DENIALS)} ("${v.txt}" — deadline resumes next month, −$10 processing fee.)`);
     }
   }
@@ -1733,7 +1920,7 @@ function tickViolations(lines){
         lines.push(`⏰ Deadline blown on "${v.txt}" — fine of $${v.fine/2} charged, citation ESCALATED (now $${v.fine}).`);
       } else {
         S.violations = S.violations.filter(x => x !== v);
-        S.equity -= 15; S.stats.liens++;
+        S.equity -= 15; S.stats.liens++; cue('lien');
         S.anger = Math.min(100, S.anger + 10);
         lines.push(`🏦 LIEN FILED over "${v.txt}" — −15 🏠 equity. This is how they get you.`);
       }
@@ -1752,8 +1939,10 @@ function boardPhase(){
       const reason = pick(VIOLATIONS);
       const fine = Math.round((40 + Math.random() * 50) * (S.diff.fineMult + S.fineBonus));
       S.violations.push({ id:++vioId, txt:reason, fine, deadline:S.diff.deadline, escalated:false });
+      cue('citation');
       lines.push(`${who}📬 Citation issued: "${reason}" — fine $${fine}, respond within ${S.diff.deadline} month(s).`);
     } else if (p.kind === 'inspection'){
+      cue('inspection');
       if (S.condition < 50){
         const reason = 'Property condition below community standards (' + S.condition + '%)';
         const fine = Math.round(60 * (S.diff.fineMult + S.fineBonus));
@@ -1764,7 +1953,7 @@ function boardPhase(){
       }
     } else if (p.kind === 'assessment'){
       const amt = Math.round((30 + Math.random() * 40) * S.diff.fineMult * S.age.assessMult);
-      charge(amt, 'a special assessment');
+      charge(amt, 'a special assessment'); cue('assessment');
       S.stats.assessed += amt;
       if (Math.random() < 0.4){
         S.commons = Math.min(100, S.commons + 5);
@@ -1773,7 +1962,7 @@ function boardPhase(){
         lines.push(`${who}🏊 SPECIAL ASSESSMENT: −$${amt} for ${pick(ASSESS_REASONS)}.`);
       }
     } else if (p.kind === 'amend'){
-      S.stats.amendments++;
+      S.stats.amendments++; cue('amendment');
       const roll = Math.random();
       if (roll < 0.3){
         raiseDues(5, 'founding-family exemption');
@@ -1802,7 +1991,7 @@ function boardPhase(){
       }
     } else if (p.kind === 'rule'){
       const r = RULES_PASSED[S.rules.length % RULES_PASSED.length];
-      S.rules.push(r);
+      S.rules.push(r); cue('newRule');
       lines.push(`${who}📜 NEW RULE PASSED: ${r}`);
       if (Math.random() < 0.4){
         issueViolation(pick(VIOLATIONS), 'under the new rule');
@@ -1815,7 +2004,7 @@ function boardPhase(){
         (src ? ` It started "somewhere near ${src.name}'s cul-de-sac", people say.` : '') +
         (S.sizeKey === 'large' ? ' In a community this size, rumors travel at highway speed.' : ''));
     } else if (p.kind === 'duesHike'){
-      raiseDues(10, 'board vote');
+      raiseDues(10, 'board vote'); cue('duesHike');
       lines.push(`${who}📈 DUES INCREASE: monthly dues are now $${S.dues}. The newsletter calls it "an investment in excellence".`);
     }
   }
@@ -1836,10 +2025,10 @@ function boardPhase(){
     } else {
       const denied = Math.random() * 100 < S.diff.arcDeny;
       if (!denied){
-        S.arcApproved++;
+        S.arcApproved++; cue('arcApproved');
         lines.push(`📐 ARC APPROVED your plans${Math.random() < 0.5 ? ', with conditions on the trim colour' : ' — stamped, initialled, and filed'}. You may now build the thing you own.`);
         S.arcPermit = null;
-      } else if (!S.arcPermit.resubmitted){
+      } else if (cue('arcDenied'), !S.arcPermit.resubmitted){
         S.arcPermit = { wait:Math.max(1, S.diff.arcWait), resubmitted:true };
         lines.push(`📐 ARC DENIED your plans for "community character". You may resubmit once, in beige. The resubmission goes to the back of the queue.`);
       } else {
@@ -1904,7 +2093,7 @@ function startMonth(){
     const name = pick(MGMT_NAMES);
     S.mgmtCo = { name, drained:8 };
     S.equity -= 8;
-    raiseDues(10, 'management contract');
+    raiseDues(10, 'management contract'); cue('mgmtHired');
     log(`🏢 OH NO. The board hired a MANAGEMENT COMPANY: <b>${name}</b>. Every mailbox got the same letter. The whole street's equity dips (−8 🏠) and dues rise $10 for the "administration convenience fee". Rally ${S.petitionNeed} allies and 🔥 fire them to claw it all back.`, 'bad');
     setTicker(`🏢 ${name} has "assumed day-to-day operations". Nothing will be day-to-day ever again.`);
     beep(196, 0.3, 'sawtooth', 0.06);
@@ -2002,6 +2191,7 @@ function applyAmenityEvent(a, e){
   } else if (e.kind === 'violation'){
     const fine = Math.round(e.amount * (S.diff.fineMult + S.fineBonus));
     S.violations.push({ id:++vioId, txt:e.txt, fine, deadline:S.diff.deadline, escalated:false });
+    cue('citation');
     log(`${who} CITATION: ${e.txt} <b>$${fine}</b>, ${S.diff.deadline} month(s) to respond.`, 'bad');
   } else if (e.kind === 'commons'){
     S.commons = Math.max(0, Math.min(100, S.commons + e.amount));
@@ -2048,7 +2238,7 @@ function maybeDispute(){
   document.getElementById('dispA').textContent = a.dispute.a.label;
   document.getElementById('dispB').textContent = a.dispute.b.label;
   document.getElementById('disputeModal').classList.remove('hidden');
-  beep(420, 0.1, 'square', 0.04);
+  cue('dispute');
   return true;
 }
 function settleDispute(sideKey){
@@ -2335,7 +2525,7 @@ document.getElementById('boardOk').addEventListener('click', () => {
 // ================= actions =================
 const ACTIONS = [
   { id:'mow',   ico:'🌱', name:'Mow & Maintain', cost:'1⚡ · $20', can:() => S.ap >= 1 && S.cash >= 20,
-    run(){ S.ap--; S.cash -= 20; S.condition = Math.min(100, S.condition + 12);
+    run(){ S.ap--; S.cash -= 20; S.condition = Math.min(100, S.condition + 12); cue('mow');
       log('🌱 Mowed, edged, painted the trim. Condition +12%.', 'good'); } },
   { id:'arc', ico:'📐', name:'Submit Plans to ARC', cost:'1⚡', can:() => S.ap >= 1 && S.diff.arcNeed && !S.arcPermit && S.arcApproved < 1,
     run(){ S.ap--;
@@ -2343,7 +2533,7 @@ const ACTIONS = [
       log(`📐 Plans submitted to the Architectural Review Committee${S.diff.arcWait ? ` — review takes about ${S.diff.arcWait} month(s)` : ' — they will rule this month'}. ` +
           `Approval odds: <b>~${100 - S.diff.arcDeny}%</b>. Building before they rule is a citation, not a shortcut.`, 'tip'); } },
   { id:'improve', ico:'🔨', name:'Home Improvement', cost:'1⚡ · $100', can:() => S.ap >= 1 && S.cash >= 100,
-    run(){ S.ap--; S.cash -= 100; S.equity = Math.min(S.eqMax, S.equity + 8); S.condition = Math.min(100, S.condition + 5);
+    run(){ S.ap--; S.cash -= 100; S.equity = Math.min(S.eqMax, S.equity + 8); S.condition = Math.min(100, S.condition + 5); cue('improve');
       if (!S.diff.arcNeed){
         S.improvedThisMonth = true;
         log('🔨 New pergola. +8 🏠 equity, +5% condition. Nobody here needs a form for that.', 'good');
@@ -2360,12 +2550,12 @@ const ACTIONS = [
   { id:'work',  ico:'💼', name:'Work Overtime', cost:'1⚡', can:() => S.ap >= 1,
     run(){ S.ap--;
       const base = Math.min(160, 80 + S.otStreak * 20);
-      const pay = base * (S.otBonus ? 2 : 1);
+      const pay = base * (S.otBonus ? 2 : 1); cue('overtime');
       if (!S.workedOT){ S.workedOT = true; S.otStreak++; }
       S.cash += pay;
       log(`💼 Overtime: +$${pay}${S.otBonus ? ' (CRUNCH DOUBLE!)' : ''}${base > 80 ? ` — the streak raise is real ($${base} base)` : ''}. The office was quieter than this neighborhood.`, 'good'); } },
   { id:'yard',  ico:'🏷️', name:'Yard Sale', cost:'1⚡ · every 3 mo', can:() => S.ap >= 1 && S.month - S.lastYardSale >= 3,
-    run(){ S.ap--; S.lastYardSale = S.month;
+    run(){ S.ap--; S.lastYardSale = S.month; cue('yardSale');
       const earn = 40 + S.rep * 12;
       S.cash += earn;
       log(`🏷️ Yard sale! Your reputation drew a crowd: +$${earn}.`, 'good');
@@ -2374,7 +2564,7 @@ const ACTIONS = [
     run(){ S.ap--; S.cash -= 40; S.commons = Math.min(100, S.commons + 15); S.rep = Math.min(10, S.rep + 1);
       log(`🌳 You fixed the playground swing and mowed the median (+15%). The newsletter credits "board initiative". +1 ⭐ anyway.`, 'good'); } },
   { id:'doc',   ico:'📸', name:'Document Everything', cost:'1⚡', can:() => S.ap >= 1 && S.evidence < 5,
-    run(){ S.ap--; S.evidence++;
+    run(){ S.ap--; S.evidence++; SFX.play('camera');
       log(pick([
         '📸 Photographed the board president\'s own dead lawn. +1 evidence.',
         '📸 Copied the meeting minutes nobody was supposed to see. +1 evidence.',
@@ -2404,7 +2594,7 @@ const ACTIONS = [
       S.equity = Math.min(S.eqMax, S.equity + refund);
       S.dues = Math.max(20, S.dues - 10);
       S.anger = Math.min(100, S.anger + 10);
-      S.stats.mgmtFired = (S.stats.mgmtFired || 0) + 1;
+      S.stats.mgmtFired = (S.stats.mgmtFired || 0) + 1; cue('mgmtFired');
       log(`🔥 EMERGENCY MEETING: your ${allies} allies packed the clubhouse with folding chairs and grievances. <b>${S.mgmtCo.name}</b> was terminated by voice vote — their farewell invoice was entered into evidence. Equity clawed back: +${refund} 🏠. The convenience fee dies with them. The board pouts (+10 😠).`, 'good');
       setTicker('🔥 The management company has been un-hired. The clubhouse smelled like victory and burnt coffee.');
       S.mgmtCoCooldown = S.month + 6;
@@ -2464,7 +2654,7 @@ function renderViolations(){
     comply.disabled = S.mode !== 'playing' || S.cash < fixCost;
     comply.addEventListener('click', () => {
       if (S.mode !== 'playing' || S.cash < fixCost) return;
-      S.cash -= fixCost; S.stats.complied++;
+      S.cash -= fixCost; S.stats.complied++; cue('comply');
       if (S.freeComply){ S.freeComply = false; log('📋 The drafting-error loophole worked. The board is drafting a correction as we speak.', 'good'); }
       S.violations = S.violations.filter(x => x !== v);
       log(`✅ Complied with "${v.txt}" for $${fixCost}. Dignity: slightly dented.`, 'info');
@@ -2494,6 +2684,7 @@ function renderViolations(){
         if (S.mode !== 'playing' || v.appeal || v.appealed || S.comms < 1) return;
         S.comms--;
         v.appeal = { stage:1, blocked:null };
+        cue('appealFiled');
         log(`📨 Appeal filed on "${v.txt}" (Form 27-B, in duplicate). The deadline freezes. Current odds at a hearing: <b>~${appealOdds()}%</b> — improve them with evidence, a lawyer, and friends on the board.`, 'tip');
         beep(500, 0.06, 'sine', 0.04); render();
       });
@@ -2630,7 +2821,7 @@ document.getElementById('allyBtn').addEventListener('click', () => {
   if (S.socialTarget == null || S.ap < 1) return;
   const n = S.neighbors[S.socialTarget];
   if (n.alliance || n.rel < 2) return;
-  S.ap--; n.alliance = true;
+  S.ap--; n.alliance = true; cue('ally');
   if (n.type === 'friend'){
     log(`🤝 <b>${n.name}</b> is all in: "Us against the board." Expect intel and casseroles.`, 'good');
   } else if (n.type === 'fence'){
@@ -2648,12 +2839,12 @@ document.getElementById('accuseBtn').addEventListener('click', () => {
   if (n.accused) return;
   S.ap--; n.accused = true;
   if (n.type === 'deceiver'){
-    n.exposed = true; n.alliance = false; S.stats.exposed++;
+    n.exposed = true; n.alliance = false; S.stats.exposed++; cue('spyExposed');
     S.cash += 75; S.rep = Math.min(10, S.rep + 2); S.anger = Math.min(100, S.anger + 10);
     log(`🚨 BUSTED! <b>${n.name}</b> was reporting your gnome count to the board all along. +$75 from grateful neighbors, +2 ⭐.`, 'good');
     beep(980, 0.1, 'square', 0.05);
   } else {
-    n.hostile = true; n.alliance = false; S.stats.wrongAccusals++;
+    n.hostile = true; n.alliance = false; S.stats.wrongAccusals++; cue('wrongAccusal');
     S.rep = Math.max(0, S.rep - 2);
     for (const o of S.neighbors) if (o !== n) o.rel = Math.max(0, o.rel - 1);
     log(`😬 <b>${n.name}</b> was innocent. The whole street watched. −2 ⭐, and everyone trusts you a little less.`, 'bad');
@@ -2673,6 +2864,7 @@ const meetingModal = document.getElementById('meetingModal');
 function openMeeting(title, intro){
   S.mode = 'meeting';
   S.meetingHeld = true;
+  cue('meeting');
   document.getElementById('meetTitle').textContent = title;
   document.getElementById('meetIntro').textContent = intro;
   document.getElementById('voteList').classList.add('hidden');
@@ -2741,12 +2933,13 @@ document.getElementById('voteBtn').addEventListener('click', () => {
   if (yes > no){
     res.textContent = '🎉 THE MOTION CARRIES! The board is DISSOLVED!';
     res.style.color = '#8fd14f';
-    S.pendingWin = true;
+    S.pendingWin = true; cue('voteWin');
     beep(523,0.15,'triangle',0.06); setTimeout(()=>beep(659,0.15,'triangle',0.06),150); setTimeout(()=>beep(784,0.3,'triangle',0.06),300);
   } else {
     res.textContent = `❌ The motion fails (${yes}–${no}). The board president smiles like a lizard. (+20 😠)`;
     res.style.color = '#ff8c8c';
     S.anger = Math.min(100, S.anger + 20);
+    cue('voteLose');
     S.petitioned = false; // the fight continues — you can petition again once you regroup
     log(`🗳️ Recall FAILED ${yes}–${no}. The board will remember this.`, 'bad');
     beep(220,0.3,'sawtooth',0.06);
@@ -2806,6 +2999,7 @@ function winRecall(){
 }
 function sellOut(){
   S.mode = 'over';
+  cue('soldOut');
   ending('🏷️ SOLD — ON YOUR TERMS',
     `Month ${S.month}: the sign went up, the offers came in, and ${S.playerName || 'you'} cashed out <b>${Math.round(S.equity)}</b> equity — leaving ${S.hoaName || 'the HOA'} to its empire of mulch. The buyers seem nice. They have a flamingo. They have no idea.<br><br>` +
     `${statLine()}${scoreLine(0)}`);
@@ -2813,6 +3007,7 @@ function sellOut(){
 }
 function lose(){
   S.mode = 'over';
+  cue('foreclosed');
   let betrayal = '';
   if (S.factions){
     const t = S.neighbors.find(n => n.alliance && n.type === 'deceiver' && !n.exposed);
@@ -3036,6 +3231,8 @@ document.getElementById('againBtn').addEventListener('click', () => {
 refreshResume();
 window.addEventListener('pageshow', refreshResume);
 document.getElementById('musicBtn').addEventListener('click', () => Music.toggle());
+document.getElementById('sfxBtn').addEventListener('click', () => SFX.toggle());
+syncSfxBtn();
 document.addEventListener('click', () => { if (Music.on) Music.start(); }); // autoplay rules: first gesture starts the band
 syncMusicBtn();
 </script>
