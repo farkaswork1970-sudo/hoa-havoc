@@ -55,9 +55,34 @@
   .tbtn:hover{filter:brightness(1.15);}
   #aiBtn.on{background:#4a2e5a; border-color:#9668b8; color:#ecd8ff;}
   #log .ai{color:#d8b8f0;}
-  #tutBody{text-align:left; font-size:14px; line-height:1.55; min-height:170px;}
+  /* the How to Play window: one fixed frame for every page, film-style line reveal */
+  #tutPanel{width:min(640px,94vw); height:min(560px,90vh); display:flex; flex-direction:column;}
+  #tutTitle{min-height:28px; flex:0 0 auto;}
+  #tutTitle.tin{animation:tutFade .4s ease both;}
+  #tutFrame{
+    flex:1 1 auto; min-height:0; margin:8px 0 8px; text-align:left; overflow-y:auto; cursor:pointer;
+    background:#141a0e; border:2px solid var(--line); border-radius:4px;
+    outline:4px solid #1d2716; outline-offset:3px;
+    box-shadow:inset 0 0 26px rgba(0,0,0,.55), 0 0 0 8px #24301b;
+    padding:14px 18px;
+  }
+  #tutBody{font-size:14px; line-height:1.55;}
   #tutBody b{color:var(--gold);}
-  #tutStep{color:#c9d6b4; font-size:12px; margin-top:6px;}
+  #tutBody .tl{opacity:0; transform:translateY(10px); animation:tutLine .5s ease forwards;}
+  #tutBody .tl.gap{height:10px;}
+  #tutBody.now .tl{animation:none; opacity:1; transform:none;}
+  #tutStep{color:#c9d6b4; font-size:12px; margin:0 0 4px; flex:0 0 auto;}
+  #tutFoot{display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; flex:0 0 auto;}
+  #tutFoot #tutPrev{min-width:84px;}
+  #tutFoot #tutNext{min-width:92px;}   /* "Next" and "Play" swap labels; the button must not move */
+  #tutPanel.leaving #tutBody, #tutPanel.leaving #tutTitle{opacity:0; transition:opacity .16s ease;}
+  @keyframes tutLine{ to{opacity:1; transform:none;} }
+  @keyframes tutFade{ from{opacity:0; transform:translateY(-4px);} to{opacity:1; transform:none;} }
+  @media (prefers-reduced-motion: reduce){
+    #tutBody .tl{animation:none; opacity:1; transform:none;}
+    #tutTitle.tin{animation:none;}
+    #tutPanel.leaving #tutBody, #tutPanel.leaving #tutTitle{transition:none; opacity:1;}
+  }
   #ticker{
     background:#3d2f13; border:2px solid var(--line); border-top:none;
     color:#ffe9a8; padding:5px 14px; font-size:13.5px; font-style:italic; min-height:29px;
@@ -525,13 +550,15 @@
 </div>
 
 <div id="tutModal" class="overlay hidden">
-  <div class="panel">
+  <div class="panel" id="tutPanel">
     <h2 id="tutTitle"></h2>
-    <div id="tutBody"></div>
+    <div id="tutFrame" title="Click to show the whole page at once"><div id="tutBody"></div></div>
     <div id="tutStep"></div>
-    <button class="btn sm grey" id="tutPrev">◀ Back</button>
-    <button class="btn sm" id="tutNext">Next ▶</button>
-    <button class="btn sm alt" id="tutSkip">Skip — let the fines teach me</button>
+    <div id="tutFoot">
+      <button class="btn sm grey" id="tutPrev">◀ Back</button>
+      <button class="btn sm" id="tutNext">Next ▶</button>
+      <button class="btn sm alt" id="tutSkip">Skip — let the fines teach me</button>
+    </div>
   </div>
 </div>
 
@@ -2817,15 +2844,45 @@ document.getElementById('resumeBtn').addEventListener('click', () => {
 });
 
 // ================= tutorial =================
-let tutIdx = 0, tutReturnMode = 'playing';
-function renderTut(){
+let tutIdx = 0, tutReturnMode = 'playing', tutSwapTimer = null;
+function renderTutContent(){
   const step = TUTORIAL_STEPS[tutIdx];
-  document.getElementById('tutTitle').textContent = step.t;
-  document.getElementById('tutBody').innerHTML = step.b;
+  const title = document.getElementById('tutTitle');
+  title.textContent = step.t;
+  title.classList.remove('tin'); void title.offsetWidth; title.classList.add('tin');
+  const body = document.getElementById('tutBody');
+  body.classList.remove('now');
+  // each line of the page rolls on in sequence, like credits
+  const parts = step.b.split(/<br\s*\/?>/);
+  body.innerHTML = parts.map((p, i) =>
+    p.trim() === ''
+      ? `<div class="tl gap" style="animation-delay:${140 + i * 110}ms"></div>`
+      : `<div class="tl" style="animation-delay:${140 + i * 110}ms">${p}</div>`
+  ).join('');
+  document.getElementById('tutFrame').scrollTop = 0;
   document.getElementById('tutStep').textContent = `Step ${tutIdx + 1} of ${TUTORIAL_STEPS.length}`;
   document.getElementById('tutPrev').disabled = tutIdx === 0;
   document.getElementById('tutNext').textContent = tutIdx === TUTORIAL_STEPS.length - 1 ? 'Play ▶' : 'Next ▶';
 }
+function renderTut(transition){
+  const panel = document.getElementById('tutPanel');
+  if (tutSwapTimer){ clearTimeout(tutSwapTimer); tutSwapTimer = null; }
+  if (transition){
+    panel.classList.add('leaving');
+    tutSwapTimer = setTimeout(() => {
+      tutSwapTimer = null;
+      panel.classList.remove('leaving');
+      renderTutContent();
+    }, 170);
+  } else {
+    panel.classList.remove('leaving');
+    renderTutContent();
+  }
+}
+// clicking the framed page shows the rest of it at once — nobody is held hostage by a slow reveal
+document.getElementById('tutFrame').addEventListener('click', () => {
+  document.getElementById('tutBody').classList.add('now');
+});
 function openTut(){
   if (S){
     tutReturnMode = S.mode === 'tutorial' ? 'playing' : S.mode;
@@ -2864,9 +2921,12 @@ document.getElementById('welcomeOk').addEventListener('click', () => {
 });
 document.getElementById('tutNext').addEventListener('click', () => {
   if (tutIdx >= TUTORIAL_STEPS.length - 1) return closeTut();
-  tutIdx++; renderTut();
+  tutIdx++; renderTut(true);
+  beep(620, 0.04, 'sine', 0.025);
 });
-document.getElementById('tutPrev').addEventListener('click', () => { if (tutIdx > 0){ tutIdx--; renderTut(); } });
+document.getElementById('tutPrev').addEventListener('click', () => {
+  if (tutIdx > 0){ tutIdx--; renderTut(true); beep(520, 0.04, 'sine', 0.025); }
+});
 document.getElementById('tutSkip').addEventListener('click', closeTut);
 document.getElementById('helpBtn').addEventListener('click', () => {
   if (!S || (S.mode !== 'playing' && S.mode !== 'tutorial')) return;
