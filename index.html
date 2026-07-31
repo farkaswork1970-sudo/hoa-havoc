@@ -214,6 +214,18 @@
   #bmRole{color:var(--gold); font-size:13px;}
   #bmStatus{font-size:12.5px; color:#c9d6b4;}
   #seatList{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:10px 0;}
+  #amenityList{display:grid; grid-template-columns:1fr 1fr; gap:5px; text-align:left;}
+  .amen{
+    display:flex; align-items:flex-start; gap:7px; padding:6px 8px; cursor:pointer;
+    background:var(--panel2); border:2px solid var(--line); border-radius:9px; font-size:12px;
+  }
+  .amen:hover{border-color:#7a9455;}
+  .amen.on{border-color:var(--gold); background:#33401f;}
+  .amen input{width:15px; height:15px; margin-top:2px; accent-color:var(--gold); cursor:pointer; flex:0 0 auto;}
+  .amen b{display:block; font-size:12.5px;}
+  .amen span{color:#c9d6b4; font-size:10.5px; line-height:1.3; display:block;}
+  .amen .cost{color:var(--gold); font-size:10.5px;}
+  @media (max-width:720px){ #amenityList{grid-template-columns:1fr;} }
   .vio .appeal{background:#6a5a8a; color:#efe6ff;}
   .vio .stage{color:#c9b8e0; font-size:11.5px; font-style:italic; margin:3px 0;}
   .vio .block{color:#ffc9a6; font-size:12px; margin:3px 0;}
@@ -417,6 +429,17 @@
   </div>
 </div>
 
+<div id="disputeModal" class="overlay hidden">
+  <div class="panel">
+    <h2 id="dispTitle">🗣️ THE NEIGHBORHOOD IS ARGUING</h2>
+    <p id="dispPrompt" style="font-size:15px;"></p>
+    <p class="small" id="dispCamps"></p>
+    <button class="btn sm" id="dispA"></button>
+    <button class="btn sm alt" id="dispB"></button>
+    <button class="btn sm grey" id="dispSkip">Stay out of it</button>
+  </div>
+</div>
+
 <div id="seatModal" class="overlay hidden">
   <div class="panel">
     <h2>🗳️ SEAT AN INSURGENT</h2>
@@ -444,6 +467,10 @@
       <label><span id="lHomes">🏘️ Community size</span> <output id="oHomes">90 homes</output><input type="range" id="sHomes" min="30" max="150" step="5" value="90"><span class="hint" id="hHomes"></span></label>
       <label><span id="lYears">📅 How long this has festered</span> <output id="oYears">25 years old</output><input type="range" id="sYears" min="5" max="50" value="25"><span class="hint" id="hYears"></span></label>
     </div>
+    <div class="selhead">WHAT THE COMMUNITY BUILT AND NOW CANNOT AFFORD</div>
+    <p class="small" style="text-align:left;margin:2px 0 6px;">Every amenity adds to your dues, wears out the commons, and starts an argument you will be asked to take a side in.</p>
+    <div id="amenityList"></div>
+    <div id="amenitySum" class="small" style="text-align:left;margin:6px 0 2px;color:var(--gold);"></div>
     <div id="diffMeter2" style="height:14px;background:#141a0e;border:1px solid var(--line);border-radius:7px;overflow:hidden;margin-top:12px;"><div id="diffFill2" style="height:100%;width:50%;background:#ffd24a;transition:width .25s, background .25s;"></div></div>
     <div id="diffLabel2" style="font-size:13px;margin-top:6px;color:#ffe9a8;min-height:34px;text-align:left;"></div>
     <button class="btn" id="customDone">Looks Terrible. Done ▶</button>
@@ -503,6 +530,165 @@ const LIV_TIERS = [
   { max:80,  t:'🚨 Radicalized by Form 14-B',  d:'You know the fine schedule by heart, and four neighbors\' cell numbers you never wanted.' },
   { max:101, t:'⚖️ Litigious and Unwell',      d:'Binder, timeline, drone photos of your own lawn. The consultation is Thursday at four.' },
 ];
+// the things the community built and now cannot afford — each one costs dues and starts an argument
+const AMENITIES = [
+  { key:'pool', ico:'🏊', name:'Swimming Pool', duesAdd:14, strife:8, drain:2,
+    desc:'Open Memorial Day. Closed by June for a permit nobody applied for.',
+    events:[
+      { kind:'assessment', amount:240, txt:'The plaster failed in year nine of a fifteen-year finish. Replastering came in at $86,000, shared out by lot.' },
+      { kind:'duesHike', amount:7, txt:'The carrier will not renew without a certified attendant on the deck. That payroll is now a permanent line.' },
+      { kind:'violation', amount:70, txt:'Four guests logged on your fob under a two-guest covenant; the sign-in sheet was photographed at 4:15.' },
+      { kind:'commons', amount:-6, txt:'The circulation pump seized in August and the pool sat closed and green through the Labor Day weekend.' },
+    ],
+    dispute:{ prompt:'The heater. Water aerobics wants 86 degrees through October. The finance committee has brought the projected gas bill and a laser pointer.',
+      a:{ label:'Hold it at 86 degrees', side:'The 7 a.m. water aerobics six', flavor:'Six people swim daily and speak well of you. The gas line doubles and runs in the newsletter beside your lot number.' },
+      b:{ label:'Heater off after Labor Day', side:'Owners who read page four', flavor:'You saved the association $4,100 in therms. Six retirees now describe you, in writing, as the reason they cannot walk.' },
+    } },
+  { key:'pond', ico:'🦆', name:'Retention Pond', duesAdd:7, strife:6, drain:3,
+    desc:'Legally a stormwater device. Marketed as a lake. Named for a bird.',
+    events:[
+      { kind:'equity', amount:-4, txt:'The county reclassified the outfall berm as a regulated dam. Your title report now contains the word dam.' },
+      { kind:'assessment', amount:200, txt:'Twenty-two years of silt has to leave by truck. The dredging bid was $190,000 and there was one bidder.' },
+      { kind:'commons', amount:-5, txt:'Algae bloom in July. The board\'s response was a bag of barley straw and a notice about lawn fertilizer.' },
+      { kind:'anger', amount:4, txt:'Geese. Eleven of them, permanently. The board concluded that residents feeding them are the real issue and read out a list.' },
+    ],
+    dispute:{ prompt:'A toddler was found at the water\'s edge. The safety committee wants a four-foot fence around the pond. The six waterfront lots paid a premium for the view of it.',
+      a:{ label:'Fence the pond', side:'Parents and the insurance carrier', flavor:'Chain link on three sides and the exposure ends. Six waterfront households watch their premium disappear and know the vote by name.' },
+      b:{ label:'Post signs, no fence', side:'The six waterfront lots', flavor:'Four laminated warnings and an unbroken view. The exposure stays exactly where it was, and everybody knows whose idea that was.' },
+    } },
+  { key:'clubhouse', ico:'🏛️', name:'Clubhouse', duesAdd:12, strife:7, drain:2,
+    desc:'Rented eleven times a year. Heated, insured and roofed for 365.',
+    events:[
+      { kind:'assessment', amount:190, txt:'Year 22 of a 20-year shingle. The roof reserve holds $4,100 against a bid of $71,000.' },
+      { kind:'duesHike', amount:7, txt:'The air handler died in August. The reserve held $61.17, so the replacement goes onto dues permanently.' },
+      { kind:'violation', amount:75, txt:'Your booking ran nineteen minutes past ten and the thermostat was found at 68; item nine was unchecked.' },
+      { kind:'anger', amount:6, txt:'You declined the clubhouse cleaning rotation. Two directors noticed, mentioned it twice, and put it in the minutes.' },
+    ],
+    dispute:{ prompt:'One room, one calendar. The Tuesday Bunco group has held Tuesday nights since 1998. The young families want Tuesdays for a playgroup, since it is the only room with heat.',
+      a:{ label:'Tradition keeps Tuesdays', side:'The Tuesday Bunco four', flavor:'Twenty-eight years of standing reservation survives. The playgroup relocates to a garage and posts weekly photographs of the garage.' },
+      b:{ label:'Give Tuesdays to playgroup', side:'The nine playgroup families', flavor:'Nine toddlers get heat and a floor. Four women who have run this room since 1998 now consider you a matter of principle.' },
+    } },
+  { key:'playground', ico:'🛝', name:'Playground & Tot Lot', duesAdd:5, strife:5, drain:1,
+    desc:'Mulch depth is inspected annually. The swing chains are not.',
+    events:[
+      { kind:'assessment', amount:95, txt:'The annual inspection failed on fall-zone depth. Twelve yards of engineered fiber, delivered and spread, billed per lot.' },
+      { kind:'duesHike', amount:4, txt:'The carrier added a playground rider with a posted-hours condition after a claim two neighborhoods over.' },
+      { kind:'violation', amount:50, txt:'Play equipment in use forty minutes after the posted dusk closure; three perimeter homes supplied the time stamps.' },
+      { kind:'commons', amount:-4, txt:'The mulch washed out again. It always washes out. Nobody has ever fixed the grade.' },
+    ],
+    dispute:{ prompt:'The sign says ages 2 to 12. Teenagers hold the structure most evenings. The parents of small children want it fenced and locked at dusk. The parents of teenagers ask where else they should go.',
+      a:{ label:'Fence it, lock it at dusk', side:'Parents of the under-sixes', flavor:'The toddlers get their evenings back. Six teenagers relocate to the cul-de-sac, which is worse, and their parents remember the vote.' },
+      b:{ label:'Leave it open', side:'Parents of the teenagers', flavor:'The structure stays open and occupied. Every dropped vape cartridge is photographed, numbered, and attributed to your position.' },
+    } },
+  { key:'trails', ico:'🌲', name:'Walking Trails & Greenbelt', duesAdd:6, strife:5, drain:3,
+    desc:'Nine acres the developer could not build on. Now you mow them.',
+    events:[
+      { kind:'violation', amount:70, txt:'Your raised bed sits eighteen inches into the greenbelt easement. Cited for encroachment on common property.' },
+      { kind:'assessment', amount:150, txt:'Fourteen ash trees died standing over the trail. Removal runs $1,100 each and the arborist counted twice.' },
+      { kind:'commons', amount:-5, txt:'Root heave has lifted the asphalt in nine places. Patching was deferred again, for the fourth year running.' },
+      { kind:'rep', amount:3, txt:'You cleared the storm washout yourself with a wheelbarrow. Three walkers saw you do it and told everybody.' },
+    ],
+    dispute:{ prompt:'The greenbelt behind the houses is overgrown. Eleven backing homes want it left wild as a privacy screen. The walkers want it cleared, citing sight lines, ticks, and one confirmed coyote.',
+      a:{ label:'Clear the underbrush', side:'The sight-lines-and-ticks camp', flavor:'You can see the trail from the kitchen now, and the trail can see the kitchen. Eleven homes lose their screen and say so weekly.' },
+      b:{ label:'Leave it wild', side:'The eleven backing homes', flavor:'The screen holds another season. Every coyote sighting for the next year arrives in your inbox as an attachment, with a timestamp.' },
+    } },
+  { key:'courts', ico:'🎾', name:'Tennis Courts', duesAdd:8, strife:9, drain:1,
+    desc:'Two courts, one net, and an unresolved question about pickleball.',
+    events:[
+      { kind:'assessment', amount:220, txt:'Court resurfacing came due at year eight, exactly as scheduled in a reserve study nobody read.' },
+      { kind:'violation', amount:55, txt:'Play recorded at 6:42 a.m. against a posted 8 a.m. opening; the court gate log lists your fob number.' },
+      { kind:'rep', amount:-3, txt:'Forty-one signatures on a petition about the morning play. Yours is on it, or conspicuously is not.' },
+      { kind:'duesHike', amount:5, txt:'The court lights were rewired to code and put on their own meter, which carries a monthly minimum.' },
+    ],
+    dispute:{ prompt:'Restriping for pickleball costs $1,200 and doubles court use. Acoustic fencing for the four homes within four hundred feet costs $40,000 and nobody has bid it yet.',
+      a:{ label:'Stripe it for pickleball', side:'The eighteen 6:30 a.m. players', flavor:'Court use triples for the price of paint. Four households now hear a sound the acoustics report calls impulsive, from dawn.' },
+      b:{ label:'Keep it tennis, keep it quiet', side:'The four homes inside 400 feet', flavor:'Peace on that street. Two courts serve six players, and eighteen paddle players begin attending every meeting in matching shirts.' },
+    } },
+  { key:'golf', ico:'⛳', name:'Golf Course', duesAdd:16, strife:8, drain:1,
+    desc:'Consumes most of the budget. Used by roughly forty households.',
+    events:[
+      { kind:'assessment', amount:280, txt:'The irrigation main failed on the back nine. There is no reserve line for irrigation because irrigation was called landscaping.' },
+      { kind:'assessment', amount:240, txt:'The course lost money a fourth straight year and the operator walked. The shortfall was divided by lot count.' },
+      { kind:'equity', amount:-4, txt:'A ball took out your bay window. The course\'s carrier cites the plat note: you bought a home on a golf course.' },
+      { kind:'duesHike', amount:8, txt:'Cart paths and the superintendent moved from the club budget to the association budget on a 3-2 vote.' },
+    ],
+    dispute:{ prompt:'Six houses along the seventh have replaced eleven windows in two years. They want a thirty-foot net. The golfers say a net there makes the hole unplayable and the course unsellable.',
+      a:{ label:'Fund the net', side:'The eleven-window households', flavor:'Thirty feet of black mesh goes up and the glass survives. Forty golfers describe the seventh as ruined, in writing, monthly.' },
+      b:{ label:'No net, file the claims', side:'The forty playing members', flavor:'The hole plays as designed and the sightline is preserved. Glass keeps breaking and every claim lands on a homeowner\'s policy.' },
+    } },
+  { key:'dogpark', ico:'🐕', name:'Dog Park', duesAdd:4, strife:7, drain:2,
+    desc:'A fenced half acre of dirt and a bag dispenser nobody refills.',
+    events:[
+      { kind:'rep', amount:-3, txt:'A photo captioned this happened at 4:15, you know who you are has been shared eleven times. It is your gate.' },
+      { kind:'rep', amount:3, txt:'You returned a lost dog to the correct porch and were named in the newsletter, for once without irony.' },
+      { kind:'commons', amount:-5, txt:'The turf died under the shade tree and became a mud slick that sixty dogs now carry home on four feet each.' },
+      { kind:'violation', amount:45, txt:'Animal off leash between the parking area and the gate, thirty feet that counsel confirms is common area.' },
+    ],
+    dispute:{ prompt:'After the incident the board wants registration, proof of vaccination, and a muzzle rule for anything over sixty pounds. The large-dog owners call it a breed ban in a costume.',
+      a:{ label:'Back the muzzle rule', side:'Small-dog owners and parents', flavor:'The park is safer on paper and quieter in fact. Nine households stop using it and describe the rule, accurately, as aimed at them.' },
+      b:{ label:'Registration only', side:'The nine large-dog homes', flavor:'Tags and shot records, no muzzles. The next incident report is read aloud at forum with your name attached to the vote.' },
+    } },
+  { key:'rvlot', ico:'🚐', name:'RV & Boat Storage Lot', duesAdd:5, strife:7, drain:1,
+    desc:'Forty-one spaces, a sixty-name waiting list, and a gravel budget.',
+    events:[
+      { kind:'violation', amount:60, txt:'Boat in your driveway past the 24-hour limit. The lot has been full since 2019, which the committee considers your problem.' },
+      { kind:'anger', amount:8, txt:'You asked how three directors hold six of the forty-one spaces. The answer was that the waitlist is confidential.' },
+      { kind:'assessment', amount:110, txt:'The gravel failed and the county wants a stormwater permit for the regrade. Thirty-one thousand, plus the permit.' },
+      { kind:'commons', amount:-3, txt:'Two trailers sank to the axle in the ruts and the fence fabric tore where they were winched out.' },
+    ],
+    dispute:{ prompt:'Storage rent is $35 a month against a market rate of $95. Raising it funds the regrade outright. Holding it protects forty-one owners and freezes a sixty-name list.',
+      a:{ label:'Raise rent to market', side:'Homes with nothing to store', flavor:'The lot pays for its own paving and stops touching dues. Forty-one owners have been handed a $720 a year increase, by name.' },
+      b:{ label:'Hold the rent at $35', side:'The forty-one space holders', flavor:'Forty-one friends for life. The regrade becomes a special assessment, so the sixty on the list fund spaces they cannot have.' },
+    } },
+  { key:'garden', ico:'🌱', name:'Community Garden', duesAdd:3, strife:6, drain:1,
+    desc:'Twenty raised beds and the closest thing here to a land war.',
+    events:[
+      { kind:'commons', amount:2, txt:'Forty people turned out for the spring workday and the beds, the paths and the fence line all came back at once.' },
+      { kind:'rep', amount:-3, txt:'Your plot was reassigned while you were away two weeks. The tomatoes were harvested by the reassignment.' },
+      { kind:'violation', amount:40, txt:'Sunflowers exceeded the posted height limit and shaded plot 14, whose holder measured them and filed twice.' },
+      { kind:'assessment', amount:60, txt:'The deer fence failed and the deer took everything but the rosemary. New fencing was ordered before anyone priced it.' },
+    ],
+    dispute:{ prompt:'Twenty beds, thirty-one applicants. The long-tenured gardeners have held the same plots since the beds were built. The newcomers want two-year terms and a public lottery.',
+      a:{ label:'Grandfather the plots', side:'The nine original gardeners', flavor:'The asparagus beds survive, which takes three years to establish. Eleven newcomers conclude the garden is not really community.' },
+      b:{ label:'Two-year terms, by lottery', side:'The thirty-one on the list', flavor:'The lottery runs and the list finally moves. Four people who built these beds with their own lumber are now on the waiting list.' },
+    } },
+  { key:'monument', ico:'⛲', name:'Entrance Monument & Fountain', duesAdd:5, strife:4, drain:1,
+    desc:'Brick, boxwoods, and a fountain pump rated for far less than this.',
+    events:[
+      { kind:'assessment', amount:140, txt:'The fountain pump seized and the GFCI has been tripping since spring. They are quoted together because they always are.' },
+      { kind:'commons', amount:3, txt:'The entry beds went in on time and the community looks, briefly, the way the brochure said it would.' },
+      { kind:'equity', amount:2, txt:'The monument was repointed and relit. Agents began mentioning the entrance again and the comps took the hint.' },
+      { kind:'duesHike', amount:4, txt:'Seasonal color, entry irrigation and the monument lighting meter were consolidated into one standing line.' },
+    ],
+    dispute:{ prompt:'The landscape chair wants the monument decorated for six occasions a year. The other camp wants seasonal color only, on the grounds that a subdivision entrance is not a mantelpiece.',
+      a:{ label:'Approve six changeovers', side:'The decorating chair and her two', flavor:'Wreaths, flags, pumpkins, lights. The line item triples and one resident photographs each installation for the record.' },
+      b:{ label:'Seasonal color only', side:'The mantelpiece objectors', flavor:'Mums in October and nothing else. The decorating chair resigns by email, at length, and names the households responsible.' },
+    } },
+  { key:'patrol', ico:'🚔', name:'Security Patrol', duesAdd:9, strife:8, drain:0,
+    desc:'A white sedan with a light bar and no authority whatsoever.',
+    events:[
+      { kind:'violation', amount:65, txt:'Patrol log, 11:52 p.m.: guest vehicle at the curb without a hangtag, photographed, plate recorded, ninth night.' },
+      { kind:'rep', amount:3, txt:'You requested the patrol log under the records statute and received it. Four neighbors have now asked you how.' },
+      { kind:'duesHike', amount:6, txt:'The contract renewed with a fuel surcharge, a mileage clause and one extra pass per night nobody requested.' },
+      { kind:'assessment', amount:140, txt:'The minimum-hours true-up came due: eleven months of unbilled hours, invoiced at once, in December.' },
+    ],
+    dispute:{ prompt:'The board wants the patrol writing parking citations directly instead of reporting to the manager. Supporters want the 72-hour rule enforced. Opponents call it deputizing a contractor.',
+      a:{ label:'Let the patrol cite', side:'The 72-hour rule enforcers', flavor:'The street clears within a month. A contractor now issues fines at 2 a.m. with no director awake to be asked about it.' },
+      b:{ label:'Observe and report only', side:'Every household with a third car', flavor:'Citations route back through the manager and slow to a trickle. The 72-hour rule becomes decorative, and the enforcers say so.' },
+    } },
+  { key:'gate', ico:'🚧', name:'Entry Gate', duesAdd:10, strife:7, drain:0,
+    desc:'Stuck open since March. The fob system still bills every month.',
+    events:[
+      { kind:'assessment', amount:120, txt:'A landscape trailer took the arm off again. Your code was the last one entered, so the board bills the host.' },
+      { kind:'violation', amount:65, txt:'Fob 0412, registered to your lot, admitted four vehicles on one cycle at 11:40 p.m. Code sharing is its own offense.' },
+      { kind:'equity', amount:-3, txt:'The gate failed open for nine days. Every listing on the street quietly stopped using the word gated.' },
+      { kind:'anger', amount:6, txt:'You proposed removing the gate at open forum. Two directors were elected on that gate and remember it that way.' },
+    ],
+    dispute:{ prompt:'The gate has been open since March. Repairing it and staffing the callbox runs $9,400 a year. Taking it out costs $3,000 once, and the sign comes down with it.',
+      a:{ label:'Fix it, keep it closed', side:'Owners who bought the word gated', flavor:'The listings keep the word gated, which the comps do reward. You also bought a $9,400 annual subscription to a broken arm.' },
+      b:{ label:'Take the gate out', side:'Owners who paid for two arms', flavor:'Nine thousand a year returns to the budget. Six households insist, at length, that you personally devalued their homes.' },
+    } },
+];
 // five bands per dial, so dragging the handle tells a story instead of showing a fixed range
 const SLIDER_COPY = {
   petty: { label:'🔍 Enforcement pettiness', bands:[
@@ -554,11 +740,14 @@ const SLIDER_COPY = {
     'Thirty-eight years. The founder still holds his seat, and the retaining wall is bowing.',
     'Fifty years. Six inherited rules, a codified fine schedule, and 1985 plumbing.'] },
 };
-function livScore(homes, years, r){
+const AMENITY_STRIFE_TOTAL = AMENITIES.reduce((a, x) => a + x.strife, 0);
+function amenityDues(a){ return Math.max(2, Math.round(a.duesAdd * 0.6)); }
+function livScore(homes, years, r, amenStrife){
   return Math.round(
-    (homes - 30) / 120 * 16 + (years - 5) / 45 * 16
-    + r.petty / 100 * 20 + r.fines / 100 * 12 + r.dues / 100 * 7
-    + (100 - r.mercy) / 100 * 9 + r.grudge / 100 * 10 + (r.arc || 0) / 100 * 10);
+    (homes - 30) / 120 * 14 + (years - 5) / 45 * 14
+    + r.petty / 100 * 18 + r.fines / 100 * 11 + r.dues / 100 * 6
+    + (100 - r.mercy) / 100 * 8 + r.grudge / 100 * 9 + (r.arc || 0) / 100 * 8
+    + (amenStrife || 0) / AMENITY_STRIFE_TOTAL * 12);
 }
 function livTier(score){ return LIV_TIERS.find(t => score < t.max) || LIV_TIERS[LIV_TIERS.length - 1]; }
 // pick the description band matching where the handle actually sits (0..1 across the slider's range)
@@ -597,15 +786,15 @@ const AI_EVENTS = [
           log('🤖 The board\'s compliance AI cited you at 3:11 AM. It does not sleep. It does not dream.', 'bad'); },
   () => { S.rep = Math.max(0, S.rep - 1);
           log('🤖 The AI newsletter ran a generated image of "your" lawn with 7 flamingos. You own zero flamingos. −1 ⭐.', 'bad'); },
-  () => { S.dues += 5;
+  () => { raiseDues(5, 'AI budget optimisation');
           log('🤖 The board\'s AI "optimized" the budget. Dues +$5. The optimization consultant was the AI itself.', 'bad'); },
 ];
 const TUTORIAL_STEPS = [
   { t:'🎯 The Goal', b:'Nobody just leaves an HOA. There are exactly three exits:<br><br>🎉 <b>Win</b> — vote the board out of existence at a meeting.<br>🔨 <b>Lose</b> — your 🏠 equity hits zero and the bank takes the house.<br>🏷️ <b>Sell</b> — your choice, anytime you still have equity. Not a victory, not a defeat; the board simply outlives you.<br><br>There is no timer — the siege continues until one of the three happens. Every ending shows your <b>final score</b>: equity, cash, allies, exposed spies, and reputation all count.' },
-  { t:'📊 Your Stats', b:'💵 <b>Cash</b> — pays for everything; dues drain it monthly.<br>🏠 <b>Equity</b> — your health bar. Liens, blight, and market shocks eat it.<br>🛠️ <b>Condition</b> — decays every month. Below 50% inspections cite you; below 40% equity rots. At 80%+ you get <b>+1⚡</b>.<br>😠 <b>Board anger</b> — angrier boards act more each month.<br>📸 <b>Evidence</b> — fuels legal contests AND gives scared neighbors courage to vote.<br>⭐ <b>Reputation</b> — at 8+ you get <b>+1⚡</b>; fence-sitters won\'t back a nobody.<br>🌳 <b>Commons</b> — the board lets them rot, dragging everyone\'s equity. Fix them yourself.<br>📞 <b>Communication</b> — a separate, generous budget for chats, favors, and planted messages. Talk is cheap; use lots of it.<br>📈 <b>Comparables</b> — the neighborhood\'s tracked sale prices. Your equity drifts with them, and falling comps radicalize everyone against the board.' },
+  { t:'📊 Your Stats', b:'💵 <b>Cash</b> — pays for everything; dues drain it monthly.<br>🏠 <b>Equity</b> — your health bar. Liens, blight, and market shocks eat it.<br>🛠️ <b>Condition</b> — decays every month. Below 50% inspections cite you; below 40% equity rots. At 80%+ you get <b>+1⚡</b>.<br>😠 <b>Board anger</b> — angrier boards act more each month.<br>📸 <b>Evidence</b> — fuels legal contests AND gives scared neighbors courage to vote.<br>⭐ <b>Reputation</b> — at 8+ you get <b>+1⚡</b>; fence-sitters won\'t back a nobody.<br>🌳 <b>Commons</b> — the board lets them rot, dragging everyone\'s equity. Fix them yourself. Every amenity you ticked at setup wears them down faster, bills you monthly, and eventually fires a capital assessment nobody budgeted for.<br>📞 <b>Communication</b> — a separate, generous budget for chats, favors, and planted messages. Talk is cheap; use lots of it.<br>📈 <b>Comparables</b> — the neighborhood\'s tracked sale prices. Your equity drifts with them, and falling comps radicalize everyone against the board.' },
   { t:'⚡ Actions', b:'🌱 <b>Mow</b> before inspections — check your board for an Enforcer.<br>💼 <b>Overtime</b> pays more each consecutive month ($80→$160), double in 🔥 crunch months.<br>🏷️ <b>Yard Sale</b> scales with reputation.<br>📸 <b>Document</b> early — you\'ll want 3+ evidence at every vote.<br>🏛️ <b>Attend the meeting</b> to learn the board\'s true monthly plan. Costs 1⚡; never lies.<br>🔨 <b>Improvements</b> boost equity — but where an <b>Architectural Review Committee</b> exists you must 📐 <b>submit plans first</b>, wait out the review, and survive an approval roll. Build without the stamped form and the citation arrives the same week, no warning stage. At maximum review authority they can even re-open a project they already approved (the street finds that outrageous, which is worth ⭐ to you).<br>⚖️ <b>The lawyer</b> unlocks contests and shakes up alliances.' },
   { t:'📋 Violations', b:'Citations have deadlines. Miss one: the fine is charged and it <b>escalates</b> (doubled). Miss again: <b>lien</b>, −15 equity.<br><br>✅ <b>Comply</b> — pay half the fine, done.<br>⚖️ <b>Contest</b> — needs the lawyer, $30, and 1📸. Always wins.<br>📨 <b>Appeal</b> — costs 1📞 and freezes the deadline while it grinds through <b>filing → review → hearing</b>. Expect obstructions: superseded forms, "lost" submissions, notarization fees, hearings rescheduled because the chair "had a thing". Each one must be cleared before the appeal moves.<br><br>Appeals <b>can be won</b> — the odds are shown live. They rise with 📸 evidence, a lawyer, your ⭐ reputation, allies, and above all <b>friends on the board</b>. They fall with board anger, and a petty, grudge-holding board denies almost everything. On a tyrannical setting, don\'t appeal without an insider.' },
-  { t:'🏘️ Neighbors', b:'Every neighbor is secretly a truthful <b>friend</b>, a scared <b>fence-sitter</b>, or a <b>deceiver</b> reporting to the board. All of them offer intel about the board\'s secret monthly plan — deceivers\' first tip is TRUE to earn your trust.<br><br>Watch the <b>✓/✗ record</b> on their card — but carefully: friends are occasionally <i>honestly wrong</i>, and good spies are right most of the time. Expect a year of chatter before you can truly sort the street. 🚨 <b>Accuse</b> only with a pattern, not a single ✗.<br><br>Every neighbor also <b>sways a circle of households</b> (shown in their dossier) — and 🌐 super-connectors float through every circle: message carriers as allies, wide-reach spies otherwise. 📨 <b>Plant messages</b> (1📞) to win blocs before a vote — through the wrong person, your words come back rearranged. And neighbors <b>sell and move</b>: their replacement inherits the circle with an unknown allegiance.' },
+  { t:'🏘️ Neighbors', b:'Every neighbor is secretly a truthful <b>friend</b>, a scared <b>fence-sitter</b>, or a <b>deceiver</b> reporting to the board. All of them offer intel about the board\'s secret monthly plan — deceivers\' first tip is TRUE to earn your trust.<br><br>Watch the <b>✓/✗ record</b> on their card — but carefully: friends are occasionally <i>honestly wrong</i>, and good spies are right most of the time. Expect a year of chatter before you can truly sort the street. 🚨 <b>Accuse</b> only with a pattern, not a single ✗.<br><br>🗣️ Amenities also start <b>standing arguments</b> — the pool heater, the pond fence, who gets Tuesdays in the clubhouse. You will be asked to take a side, and you cannot please both camps: one bloc warms to you, the other cools. Staying out of it annoys everyone slightly and costs ⭐.<br><br>Every neighbor also <b>sways a circle of households</b> (shown in their dossier) — and 🌐 super-connectors float through every circle: message carriers as allies, wide-reach spies otherwise. 📨 <b>Plant messages</b> (1📞) to win blocs before a vote — through the wrong person, your words come back rearranged. And neighbors <b>sell and move</b>: their replacement inherits the circle with an unknown allegiance.' },
   { t:'🏛️ Working the Board', b:'Each member has an archetype (📏 Enforcer, 🧮 Treasurer-for-Life, 📜 Parliamentarian, 📢 Megaphone, 🕰️ Founder, 🏗️ Declarant) and <b>pushes their own obsessions onto the agenda</b>. Every board action in the log is signed by its author. <b>Click any member</b> to work them:<br><br>🎁 <b>Do them a favor</b> (1📞+$30) — buys trust. At ★★ they start letting your violations slide and taking your appeals seriously; some become quiet allies who leak the agenda.<br>👍 <b>Endorse their agenda</b> (1📞) — cheap trust and calms the board, but they push their pet issue twice as hard. Flattery has a price.<br>🔍 <b>Dig for dirt</b> (1⚡) — hunt real misconduct: breach of fiduciary duty, preferential enforcement, neglect of common areas, procedural violations, retaliation. Trust and evidence make digging easier; get caught and the board hardens.<br>⚖️ <b>File a governance complaint</b> (needs 2 🗂️) — move to remove them. Fail and they retaliate; succeed and a <b>seat opens</b>.<br><br>🗳️ Then <b>run one of your allies</b> for the vacancy. Insurgents kill an agenda item every month, hand you the agenda free, and swing appeals. <b>Control a majority of seats and you win</b> — you don\'t dissolve the board, you take it.' },
   { t:'🗳️ Meetings & the Recall', b:'The <b>annual meeting</b> comes every 12th month. With enough allies you can 📢 <b>petition</b> a special meeting early (re-usable after a failed vote).<br><br>The vote is <b>community-wide</b>: every home casts a ballot. Primaries vote their conscience (friends need to know you; fence-sitters need ★★ trust, evidence, and ⭐5+ rep; unexposed deceivers vote no) — and each one <b>delivers their influence circle</b>, scaled by how much you\'ve swayed it. Unaffiliated homes follow your reputation. Falling 📈 comps make every group angrier at the board. Win the majority of ballots.<br><br>⚠️ And if the board ever hires a <b>management company</b>, everyone\'s equity bleeds monthly — rally enough allies and 🔥 fire them to claw back every point they drained.' },
   { t:'🤖 AI & 💾 Saving', b:'The <b>🤖 AI assistant</b> is a deal with the devil: ON, you get a monthly strategic advisor that reads the field and sometimes leaks the board\'s real plans — but <b>everyone gets AI</b>: the board acts more often, files algorithmic 3 AM citations, and "optimizes" your dues. Toggle it anytime; decide if the intel is worth the arms race.<br><br>💾 The game <b>autosaves every month</b> — close the tab whenever; the menu will offer to resume. Good luck. The board already knows you\'re reading this.<br><br><span style="opacity:.7;font-size:12.5px;">HOA Havoc — © 2026 Jeffrey Farkas &amp; BigSpoke AI. All rights reserved.</span>' },
@@ -658,7 +847,7 @@ const NEIGHBOR_ICONS = ['🧓','👨‍🦳','👵','🧔','💁‍♀️','🕶
 const REVEALS = [
   { after:4,  txt:'Courthouse records reveal the previous owner never permitted the sunroom. Yours now. −5 🏠.', fx(){ S.equity -= 5; } },
   { after:6,  txt:'The neighborhood was built on a "decommissioned" golf-course landfill. Comps sag −3%.', fx(){ S.comps = Math.max(70, S.comps - 3); } },
-  { after:8,  txt:'The HOA quietly lost a lawsuit in 2019. The judgment remains unpaid. Dues +$5, comps −2%.', fx(){ S.dues += 5; S.comps = Math.max(70, S.comps - 2); } },
+  { after:8,  txt:'The HOA quietly lost a lawsuit in 2019. The judgment remains unpaid. Dues +$5, comps −2%.', fx(){ raiseDues(5, 'unpaid judgment'); S.comps = Math.max(70, S.comps - 2); } },
   { after:10, txt:'Your street\'s sewer line was "value-engineered" in a way actual engineers deny. −4 🏠.', fx(){ S.equity -= 4; } },
   { after:12, txt:'The reserve fund was invested in the president\'s nephew\'s kombucha brand. It did not ferment well. Comps −3%.', fx(){ S.comps = Math.max(70, S.comps - 3); } },
 ];
@@ -705,10 +894,15 @@ function buildConfig(){
     arcDeny:Math.round(5 + r.arc / 100 * 55),
     arcReopen:r.arc >= 80,
   };
-  const score = livScore(homes, years, r);
+  const amenities = AMENITIES.filter(a => chosenAmenities.has(a.key));
+  const amenStrife = amenities.reduce((s, a) => s + a.strife, 0);
+  diff.dues += amenities.reduce((s, a) => s + amenityDues(a), 0);
+  age.commonsDecay = Math.min(9, age.commonsDecay + amenities.reduce((s, a) => s + a.drain, 0) * 0.15);
+  const score = livScore(homes, years, r, amenStrife);
   const tier = score < 40 ? 'easy' : score < 70 ? 'medium' : 'expert';
   const lt = livTier(score);
-  return { homes, years, r, size, age, diff, score, tier, tierIdx:LIV_TIERS.indexOf(lt), liv:`${lt.t} (${score}/100)`, livDesc:lt.d };
+  return { homes, years, r, size, age, diff, amenities:amenities.map(a => a.key), score, tier,
+    tierIdx:LIV_TIERS.indexOf(lt), liv:`${lt.t} (${score}/100)`, livDesc:lt.d };
 }
 const LEGACY_RULES = [
   'Legacy rule (1987): garage doors may be open no longer than 90 seconds.',
@@ -723,7 +917,7 @@ const INFRA_EVENTS = [
           log(`🏚️ AGING INFRASTRUCTURE: the clubhouse roof finally gave in. Emergency assessment −$${amt}.`, 'bad'); },
   () => { S.commons = Math.max(0, S.commons - 10);
           log('🚿 AGING INFRASTRUCTURE: the original pipes burst under the commons (−10% 🌳). The geyser is "being monitored".', 'bad'); },
-  () => { S.dues += 5;
+  () => { raiseDues(5, 'reserve study');
           log('🧾 RESERVE STUDY: total reserves located: $61.17. Dues +$5 to "rebuild the future fund".', 'bad'); },
   () => { S.commons = Math.max(0, S.commons - 5);
           log('⛲ The entrance fountain (installed 1985) now makes a coughing sound (−5% 🌳). A committee has been formed.', 'bad'); },
@@ -1033,7 +1227,7 @@ function replaceNeighbor(i){
   while (used.has(nm) && g++ < 60) nm = pick(FIRST_NAMES);
   const price = Math.round(S.comps + (Math.random() * 4 - 2));
   S.sales.push({ month:S.month, name:old.name, price });
-  S.comps = Math.max(70, S.comps - (price < 100 ? 0.6 : 0.2));
+  S.comps = Math.max(70, S.comps - (price < S.comps ? 0.5 : 0.15));
   S.neighbors[i] = { name:nm, ico:pick(NEIGHBOR_ICONS), type:pick(['friend','fence','deceiver']),
     superInfluencer:old.superInfluencer, influence:old.influence, sway:0,
     rel:0, tips:[], alliance:false, exposed:false, hostile:false, accused:false, chattedMonth:-1, plantedMonth:-1 };
@@ -1075,10 +1269,19 @@ function renderBoard(){
     el.addEventListener('click', openSeatModal);
     box.appendChild(el);
   }
+  const mine = myAmenities();
+  if (mine.length){
+    const el = document.createElement('div');
+    el.className = 'bm';
+    el.style.cssText = 'margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;cursor:default;';
+    el.innerHTML = `🏊 <b>Amenities you pay for</b><br><span class="bd">${mine.map(a => a.ico + ' ' + a.name).join(' · ')}</span>`;
+    el.title = mine.map(a => `${a.name}: +$${amenityDues(a)}/mo`).join('\n');
+    box.appendChild(el);
+  }
   if (S.livLabel){
     const el = document.createElement('div');
     el.className = 'bm';
-    el.style.cssText = 'margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;';
+    el.style.cssText = 'margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;cursor:default;';
     el.innerHTML = `📊 <b>Livability:</b> ${S.livLabel}<br><span class="bd">${S.livDesc || ''}</span>`;
     box.appendChild(el);
   }
@@ -1284,6 +1487,8 @@ function newGame(cfg){
   return {
     mode:'playing', diffKey:cfg.tier, diff:d, age, size, factions:true, regime:cfg.r,
     boardTarget:null, seatOpen:0, arcPermit:null, arcApproved:0,
+    amenities:cfg.amenities.slice(), disputesSettled:0, lastDispute:-9,
+    duesCap:Math.round(d.dues * 2),
     comms:8, commsMax:8, comps:100, sales:[], revealsFired:[], unaffiliated,
     livLabel:cfg.liv, livDesc:cfg.livDesc, livTierIdx:cfg.tierIdx, homes:cfg.homes, years:cfg.years,
     month:1, ap:d.ap, apMax:d.ap, cash:d.cash, equity:d.equity, eqMax:d.equity + 60 + age.eqBonus,
@@ -1319,6 +1524,16 @@ function logMonth(){
 function setTicker(t){ document.getElementById('ticker').textContent = t; }
 
 // ================= money =================
+// dues can only climb so far before enough owners actually turn up to vote one down
+function raiseDues(amount, why){
+  const cap = S.duesCap || 9999;
+  if (S.dues >= cap){
+    log(`📈 A dues increase ${why ? '(' + why + ') ' : ''}failed for the first time in living memory — enough owners came to the meeting to vote it down. Dues hold at $${S.dues}.`, 'good');
+    return false;
+  }
+  S.dues = Math.min(cap, S.dues + amount);
+  return true;
+}
 function charge(amount, why){
   // cash first; shortfall taps home equity ($10 = 1 equity)
   const fromCash = Math.min(S.cash, amount);
@@ -1542,7 +1757,7 @@ function boardPhase(){
       S.stats.amendments++;
       const roll = Math.random();
       if (roll < 0.3){
-        S.dues += 5;
+        raiseDues(5, 'founding-family exemption');
         const txt = `Amendment ${12 + S.stats.amendments}: "founding families" exempted from dues increases. You are not a founding family. Dues +$5.`;
         S.rules.push(txt); lines.push(`${who}📋 BYLAWS AMENDED: ${txt}`);
       } else if (roll < 0.6){
@@ -1581,7 +1796,7 @@ function boardPhase(){
         (src ? ` It started "somewhere near ${src.name}'s cul-de-sac", people say.` : '') +
         (S.sizeKey === 'large' ? ' In a community this size, rumors travel at highway speed.' : ''));
     } else if (p.kind === 'duesHike'){
-      S.dues += 10;
+      raiseDues(10, 'board vote');
       lines.push(`${who}📈 DUES INCREASE: monthly dues are now $${S.dues}. The newsletter calls it "an investment in excellence".`);
     }
   }
@@ -1660,6 +1875,7 @@ function startMonth(){
   if (S.commons < 40){ S.equity -= 2; log(`🌳 The commons look post-apocalyptic (${S.commons}%). The whole street's equity sags: −2 🏠.`, 'bad'); }
   else if (S.commons >= 70){ S.equity = Math.min(S.eqMax, S.equity + 1); log(`🌳 The commons look great (${S.commons}%) — thanks to you, mostly. +1 🏠.`, 'good'); }
   if (Math.random() < S.age.infra) pick(INFRA_EVENTS)();
+  amenityPhase();
   // the management company: every HOA's final boss
   if (S.mgmtCo){
     S.equity -= 3;
@@ -1669,14 +1885,15 @@ function startMonth(){
     const name = pick(MGMT_NAMES);
     S.mgmtCo = { name, drained:8 };
     S.equity -= 8;
-    S.dues += 10;
+    raiseDues(10, 'management contract');
     log(`🏢 OH NO. The board hired a MANAGEMENT COMPANY: <b>${name}</b>. Every mailbox got the same letter. The whole street's equity dips (−8 🏠) and dues rise $10 for the "administration convenience fee". Rally ${S.petitionNeed} allies and 🔥 fire them to claw it all back.`, 'bad');
     setTicker(`🏢 ${name} has "assumed day-to-day operations". Nothing will be day-to-day ever again.`);
     beep(196, 0.3, 'sawtooth', 0.06);
   }
   // comparables: the neighborhood's collective value, tracked sale by sale
   let drift = Math.random() - 0.5;
-  if (S.commons >= 70) drift += 0.4; else if (S.commons < 40) drift -= 0.6;
+  if (S.commons >= 70) drift += 0.55; else if (S.commons < 40) drift -= 0.6;
+  if (S.condition >= 85) drift += 0.2;   // yours is the house the listing photos are taken from
   if (S.mgmtCo) drift -= 0.8;
   S.comps = Math.min(115, Math.max(70, S.comps + drift));
   S.equity += (S.comps - 100) * 0.05;
@@ -1690,7 +1907,9 @@ function startMonth(){
   if (Math.random() < Math.min(0.5, S.homes / 200)){
     const price = Math.round(S.comps + (Math.random() * 6 - 3));
     S.sales.push({ month:S.month, name:'a neighbor', price });
-    S.comps = Math.max(70, Math.min(115, S.comps + (price < 100 ? -0.4 : 0.3)));
+    // compare each sale to the CURRENT level, not a fixed 100 — otherwise every sale below par
+    // drags the index down again and the market can never recover
+    S.comps = Math.max(70, Math.min(115, S.comps + (price < S.comps ? -0.35 : 0.35)));
     log(`🪧 A house across ${S.hoaName || 'the neighborhood'} sold at ${price}% of peak. Comps now ${Math.round(S.comps)}%.`, price < 100 ? 'bad' : 'good');
   }
   // things you didn't know when you bought
@@ -1743,12 +1962,101 @@ function startMonth(){
   }
   if (S.month % ANNUAL === 0 && S.factions && S.mode === 'playing'){
     openMeeting('🗳️ THE ANNUAL MEETING', `The ${S.hoaName || 'HOA'} faithful assemble. Folding chairs. Burnt coffee. The board smirks behind a folding table. This is your moment, ${S.playerName || 'neighbor'} — call for the recall vote, or sit quietly another year?`);
-  } else if (S.factions && Math.random() < S.size.outreach){
+  } else if (!maybeDispute() && S.factions && Math.random() < S.size.outreach){
     neighborOutreach();
   }
   render();
   saveGame();
 }
+
+// ================= amenities: the money pits and their arguments =================
+function myAmenities(){ return AMENITIES.filter(a => (S.amenities || []).includes(a.key)); }
+function applyAmenityEvent(a, e){
+  const who = `${a.ico} <b>${a.name}</b>`;
+  if (e.kind === 'assessment'){
+    charge(e.amount, 'an amenity assessment');
+    S.stats.assessed += e.amount;
+    log(`${who}: ${e.txt} <b>−$${e.amount}</b>`, 'bad');
+  } else if (e.kind === 'duesHike'){
+    if (!raiseDues(e.amount, a.name)) return;
+    log(`${who}: ${e.txt} <b>Dues +$${e.amount}/mo</b> (now $${S.dues}).`, 'bad');
+  } else if (e.kind === 'violation'){
+    const fine = Math.round(e.amount * (S.diff.fineMult + S.fineBonus));
+    S.violations.push({ id:++vioId, txt:e.txt, fine, deadline:S.diff.deadline, escalated:false });
+    log(`${who} CITATION: ${e.txt} <b>$${fine}</b>, ${S.diff.deadline} month(s) to respond.`, 'bad');
+  } else if (e.kind === 'commons'){
+    S.commons = Math.max(0, Math.min(100, S.commons + e.amount));
+    log(`${who}: ${e.txt} <b>${e.amount > 0 ? '+' : ''}${e.amount}% 🌳</b>`, e.amount > 0 ? 'good' : 'bad');
+  } else if (e.kind === 'rep'){
+    S.rep = Math.max(0, Math.min(10, S.rep + e.amount));
+    log(`${who}: ${e.txt} <b>${e.amount > 0 ? '+' : ''}${e.amount} ⭐</b>`, e.amount > 0 ? 'good' : 'bad');
+  } else if (e.kind === 'anger'){
+    S.anger = Math.min(100, S.anger + e.amount);
+    log(`${who}: ${e.txt} <b>+${e.amount} 😠</b>`, 'bad');
+  } else if (e.kind === 'equity'){
+    S.equity = Math.min(S.eqMax, S.equity + e.amount);
+    log(`${who}: ${e.txt} <b>${e.amount > 0 ? '+' : ''}${e.amount} 🏠</b>`, e.amount > 0 ? 'good' : 'bad');
+  }
+}
+function amenityPhase(){
+  const mine = myAmenities();
+  if (!mine.length) return;
+  // one amenity misbehaves in a given month, more often the more you own
+  if (Math.random() < Math.min(0.6, 0.16 + mine.length * 0.055)){
+    const a = pick(mine);
+    applyAmenityEvent(a, pick(a.events));
+  }
+}
+// the standing argument: pick a side, and the street remembers
+let disputeCtx = null;
+function maybeDispute(){
+  const mine = myAmenities();
+  if (!mine.length || S.month - S.lastDispute < 3 || !S.neighbors.length) return false;
+  if (Math.random() > Math.min(0.45, 0.12 + mine.length * 0.035)) return false;
+  const a = pick(mine);
+  const usable = S.neighbors.filter(n => !n.exposed && !n.hostile);
+  if (usable.length < 2) return false;
+  const shuffled = shuffle([...usable]);
+  const half = Math.max(1, Math.floor(shuffled.length / 2));
+  disputeCtx = { a, campA:shuffled.slice(0, half), campB:shuffled.slice(half) };
+  S.lastDispute = S.month;
+  S.mode = 'dispute';
+  document.getElementById('dispTitle').textContent = `${a.ico} ${a.name.toUpperCase()}: THE ARGUMENT`;
+  document.getElementById('dispPrompt').textContent = a.dispute.prompt;
+  document.getElementById('dispCamps').innerHTML =
+    `<b>${a.dispute.a.side}</b> — ${disputeCtx.campA.map(n => n.name).join(', ')}<br>` +
+    `<b>${a.dispute.b.side}</b> — ${disputeCtx.campB.map(n => n.name).join(', ')}`;
+  document.getElementById('dispA').textContent = a.dispute.a.label;
+  document.getElementById('dispB').textContent = a.dispute.b.label;
+  document.getElementById('disputeModal').classList.remove('hidden');
+  beep(420, 0.1, 'square', 0.04);
+  return true;
+}
+function settleDispute(sideKey){
+  if (!disputeCtx) return;
+  const { a, campA, campB } = disputeCtx;
+  const win = sideKey === 'a' ? campA : sideKey === 'b' ? campB : [];
+  const lose = sideKey === 'a' ? campB : sideKey === 'b' ? campA : [];
+  if (sideKey){
+    const opt = a.dispute[sideKey];
+    for (const n of win) n.sway = Math.min(1, n.sway + 0.3);
+    for (const n of lose) n.sway = Math.max(-1, n.sway - 0.25);
+    S.disputesSettled++;
+    log(`🗣️ <b>${a.name}</b> — you sided with ${opt.side}. ${opt.flavor}`, 'tip');
+    setTicker(`🗣️ You picked a side on the ${a.name.toLowerCase()}. ${win.length} households approve; ${lose.length} do not.`);
+  } else {
+    for (const n of [...campA, ...campB]) n.sway = Math.max(-1, n.sway - 0.08);
+    S.rep = Math.max(0, S.rep - 1);
+    log(`🗣️ <b>${a.name}</b> — you said nothing at the meeting. Both camps noticed, and neither was impressed. (−1 ⭐)`, 'info');
+  }
+  disputeCtx = null;
+  document.getElementById('disputeModal').classList.add('hidden');
+  if (S.mode === 'dispute') S.mode = 'playing';
+  renderStrip(); render();
+}
+document.getElementById('dispA').addEventListener('click', () => { if (S.mode === 'dispute') settleDispute('a'); });
+document.getElementById('dispB').addEventListener('click', () => { if (S.mode === 'dispute') settleDispute('b'); });
+document.getElementById('dispSkip').addEventListener('click', () => { if (S.mode === 'dispute') settleDispute(null); });
 
 // ================= the AI arms race =================
 function aiAdvisor(){
@@ -1834,6 +2142,8 @@ document.getElementById('resumeBtn').addEventListener('click', () => {
   if (S.regime.arc == null) S.regime.arc = 50;
   if (S.diff.arcNeed == null){ S.diff.arcNeed = false; S.diff.arcWait = 0; S.diff.arcDeny = 20; S.diff.arcReopen = false; }
   if (S.arcApproved == null){ S.arcApproved = 0; S.arcPermit = null; S.approvedBuilds = 0; }
+  if (!S.amenities){ S.amenities = []; S.disputesSettled = 0; S.lastDispute = -9; }
+  if (!S.duesCap) S.duesCap = Math.max(S.dues, Math.round((S.diff.dues || S.dues) * 2));
   if (S.seatOpen == null) S.seatOpen = 0;
   S.boardTarget = null;
   for (const m of S.board){
@@ -2443,6 +2753,7 @@ function statLine(){
   const st = S.stats;
   let s = `Complied: <b>${st.complied}</b> · Contested: <b>${st.contested}</b> · Liens: <b>${st.liens}</b> · Assessed: <b>$${st.assessed}</b> · Appeals won: <b>${st.appealsWon || 0}</b>/${st.appeals} · Bylaws amended: <b>${st.amendments}</b>` +
     (st.dirtFound ? `<br>🗂️ Misconduct documented: <b>${st.dirtFound}</b> · ⚖️ Board members removed: <b>${st.removed || 0}</b> · 🗳️ Insurgents seated: <b>${st.insurgents || 0}</b>` : '') +
+    ((S.amenities || []).length ? `<br>🏊 Amenities carried: <b>${S.amenities.length}</b> · 🗣️ Neighborhood arguments you took a side in: <b>${S.disputesSettled || 0}</b>` : '') +
     (st.mgmtFired ? ` · 🔥 Mgmt companies fired: <b>${st.mgmtFired}</b>` : '') +
     (st.planted ? ` · 📨 Messages planted: <b>${st.planted}</b>` : '') +
     ` · 📈 Final comps: <b>${Math.round(S.comps ?? 100)}%</b> (${(S.sales || []).length} sales tracked)`;
@@ -2555,6 +2866,30 @@ function render(){
 // ================= setup =================
 const REGIME_SLIDERS = { sPetty:'petty', sFines:'fines', sDues:'dues', sMercy:'mercy', sGrudge:'grudge', sArc:'arc' };
 let applyingPreset = false;
+let chosenAmenities = new Set(['pond', 'playground', 'trails']);
+function renderAmenities(){
+  const box = document.getElementById('amenityList');
+  if (!box) return;
+  box.innerHTML = '';
+  for (const a of AMENITIES){
+    const on = chosenAmenities.has(a.key);
+    const el = document.createElement('label');
+    el.className = 'amen' + (on ? ' on' : '');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.checked = on;
+    const txt = document.createElement('span');
+    txt.style.flex = '1';
+    txt.innerHTML = `<b>${a.ico} ${a.name}</b><span>${a.desc}</span><span class="cost">+$${amenityDues(a)}/mo · strife ${a.strife}/10</span>`;
+    cb.addEventListener('change', () => {
+      if (cb.checked) chosenAmenities.add(a.key); else chosenAmenities.delete(a.key);
+      el.classList.toggle('on', cb.checked);
+      updateMeter();
+      beep(cb.checked ? 660 : 440, 0.04, 'sine', 0.025);
+    });
+    el.appendChild(cb); el.appendChild(txt);
+    box.appendChild(el);
+  }
+}
 function updateMeter(){
   for (const [id, key] of Object.entries(REGIME_SLIDERS)){
     document.getElementById('o' + id.slice(1)).textContent = document.getElementById(id).value;
@@ -2572,6 +2907,14 @@ function updateMeter(){
     if (lbl) lbl.textContent = copy.label;
   }
   const cfg = buildConfig();
+  const sum = document.getElementById('amenitySum');
+  if (sum){
+    const picked = AMENITIES.filter(a => chosenAmenities.has(a.key));
+    const add = picked.reduce((s, a) => s + amenityDues(a), 0);
+    sum.textContent = picked.length
+      ? `${picked.length} amenit${picked.length === 1 ? 'y' : 'ies'} · +$${add}/mo in dues · total dues $${cfg.diff.dues}/mo`
+      : `No amenities. Nothing to maintain, nothing to argue about. Dues $${cfg.diff.dues}/mo.`;
+  }
   const color = cfg.score < 20 ? '#8fd14f' : cfg.score < 40 ? '#b8d14f' : cfg.score < 60 ? '#ffd24a' : cfg.score < 80 ? '#ff9a4f' : '#ff5c5c';
   const label = `HOA Livability: <b>${cfg.liv}</b> · ${cfg.homes} homes, ${cfg.years} yrs<br>${cfg.livDesc}`;
   for (const suffix of ['', '2']){
@@ -2585,6 +2928,7 @@ function updateMeter(){
 }
 document.getElementById('customBtn').addEventListener('click', () => {
   document.getElementById('customModal').classList.remove('hidden');
+  renderAmenities();
   updateMeter();
   beep(600, 0.05, 'sine', 0.03);
 });
