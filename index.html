@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  HOA HAVOC — A Turn-Based Game of Suburban Survival
+  HOA HAVOC — A Turn-Based Game of Suburban Survival — v1.0
   Copyright © 2026 BigSpoke AI. All rights reserved.
 
   This game, including its source code, written content, game systems, and
@@ -17,10 +17,52 @@
   :root{
     --bg:#1a2314; --panel:#24301b; --panel2:#2e3d22; --line:#4a5c38;
     --gold:#ffd24a; --red:#ff5c5c; --green:#8fd14f; --ink:#eef3e4; --blue:#9fd0ff;
+    --deep:#141a0e; --box:#1d2716; --glow:#2b3a1e; --strip:#20301f; --selbg:#33401f;
+    --tickbg:#3d2f13; --tickink:#ffe9a8; --muted:#c9d6b4; --dim:#8a9a78;
+    --btn:#3a4a63; --btnline:#5a7096; --btnink:#cfe2ff; --hov:#7a9455;
+    --logbad:#ffb0a6; --loggood:#b8e39a; --loginfo:#d8d2b8; --logtip:#a8c8e8; --logai:#d8b8f0;
+    --viobg:#33231a; --violine:#6e4a33; --viometa:#e0b9a0; --vioesc:#3d1f1a;
+  }
+  /* ---- alternate paint jobs; "lawn" is the :root default above ---- */
+  :root[data-scheme="midnight"]{
+    --bg:#10141c; --panel:#171e2b; --panel2:#212b3d; --line:#3b4c68;
+    --ink:#e8eef8; --blue:#9fd0ff; --red:#ff6e6e;
+    --deep:#0b0f16; --box:#131a26; --glow:#1c2434; --strip:#16202f; --selbg:#243550;
+    --tickbg:#1d2333; --tickink:#cfe2ff; --muted:#aabdd4; --dim:#6e8098;
+    --btn:#31415c; --btnline:#5f7ba6; --btnink:#cfe2ff; --hov:#6e93c8;
+    --loginfo:#d0d5e2;
+    --viobg:#332a23; --violine:#6e5a43; --viometa:#e0cdb8; --vioesc:#3d2c1f;
+  }
+  :root[data-scheme="terracotta"]{
+    --bg:#211410; --panel:#2a1a12; --panel2:#3a2619; --line:#6e4a33;
+    --gold:#ffb84a; --ink:#f5e8dc; --blue:#ffc89a; --red:#ff6e5a;
+    --deep:#180e09; --box:#231510; --glow:#2f1d14; --strip:#251811; --selbg:#44291a;
+    --tickbg:#38221a; --tickink:#ffd9a8; --muted:#dcc2ab; --dim:#a5876f;
+    --btn:#5a3d2d; --btnline:#8a6248; --btnink:#ffe2c8; --hov:#c98a5a;
+    --loggood:#c8e39a; --loginfo:#e0d5c2; --logtip:#ffce9a; --logai:#e8b8d8;
+    --viobg:#402019; --violine:#7e5038; --viometa:#eec3a8; --vioesc:#4d1f14;
+  }
+  :root[data-scheme="linen"]{
+    --bg:#e7e0ce; --panel:#f1ead8; --panel2:#e4dbc4; --line:#b3a687;
+    --gold:#996f00; --ink:#2e2a1e; --blue:#2f6ea8; --red:#b03a2e; --green:#7cbf45;
+    --deep:#faf6ea; --box:#f8f3e4; --glow:#f6f1e2; --strip:#eae1cb; --selbg:#efe3bd;
+    --tickbg:#f1e4c0; --tickink:#6b510f; --muted:#6d6a50; --dim:#98917a;
+    --btn:#dce4f0; --btnline:#8fa5c4; --btnink:#2c4a6e; --hov:#7a9455;
+    --logbad:#a03424; --loggood:#3d7a24; --loginfo:#6b6249; --logtip:#2f6ea8; --logai:#7a4c9c;
+    --viobg:#f7e3d0; --violine:#c99b74; --viometa:#8a5533; --vioesc:#f4d2c2;
+  }
+  :root[data-scheme="hydrangea"]{
+    --bg:#dfe5ee; --panel:#ecf0f7; --panel2:#dde4f0; --line:#a3b2ca;
+    --gold:#6b5ca8; --ink:#252a36; --blue:#3a5fae; --red:#b03a5e; --green:#7cbf45;
+    --deep:#f8fafd; --box:#f4f7fb; --glow:#f2f5fa; --strip:#e4e9f3; --selbg:#dbe4f6;
+    --tickbg:#e2e8f6; --tickink:#3a4a6e; --muted:#5d6579; --dim:#8d96a8;
+    --btn:#d3ddef; --btnline:#7f96bc; --btnink:#28436b; --hov:#6b7fd4;
+    --logbad:#a03434; --loggood:#3d7a3d; --loginfo:#5d6579; --logtip:#3a5fae; --logai:#7a4c9c;
+    --viobg:#eee2f2; --violine:#b394c4; --viometa:#6e4a86; --vioesc:#e8d2ee;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
-    background:radial-gradient(1200px 700px at 50% -10%, #2b3a1e, var(--bg));
+    background:radial-gradient(1200px 700px at 50% -10%, var(--glow), var(--bg));
     color:var(--ink); font-family:"Trebuchet MS", Verdana, sans-serif;
     display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:10px; user-select:none;
   }
@@ -37,7 +79,7 @@
   #topbar .stat{display:flex; align-items:center; gap:4px; white-space:nowrap;}
   #monthLbl{color:var(--blue); font-size:16px;}
   #cashLbl{color:var(--gold);}
-  #apLbl{color:#c8f5c8;}
+  #apLbl{color:var(--loggood);}
   #endBtn{
     margin-left:auto; background:var(--green); color:#15200c; border:none; border-radius:10px;
     font-family:inherit; font-weight:bold; font-size:16px; padding:8px 12px; cursor:pointer;
@@ -49,21 +91,21 @@
   #endBtn:hover{filter:brightness(1.1);}
   #endBtn:disabled{opacity:.4; cursor:not-allowed;}
   .tbtn{
-    background:#3a4a63; color:#cfe2ff; border:2px solid #5a7096; border-radius:8px;
+    background:var(--btn); color:var(--btnink); border:2px solid var(--btnline); border-radius:8px;
     font-family:inherit; font-weight:bold; font-size:13px; padding:5px 7px; cursor:pointer; white-space:nowrap;
   }
   .tbtn:hover{filter:brightness(1.15);}
   #aiBtn.on{background:#4a2e5a; border-color:#9668b8; color:#ecd8ff;}
-  #log .ai{color:#d8b8f0;}
+  #log .ai{color:var(--logai);}
   /* the How to Play window: one fixed frame for every page, film-style line reveal */
   #tutPanel{width:min(640px,94vw); height:min(560px,90vh); display:flex; flex-direction:column;}
   #tutTitle{min-height:28px; flex:0 0 auto;}
   #tutTitle.tin{animation:tutFade .4s ease both;}
   #tutFrame{
     flex:1 1 auto; min-height:0; margin:8px 0 8px; text-align:left; overflow-y:auto; cursor:pointer;
-    background:#141a0e; border:2px solid var(--line); border-radius:4px;
-    outline:4px solid #1d2716; outline-offset:3px;
-    box-shadow:inset 0 0 26px rgba(0,0,0,.55), 0 0 0 8px #24301b;
+    background:var(--deep); border:2px solid var(--line); border-radius:4px;
+    outline:4px solid var(--box); outline-offset:3px;
+    box-shadow:inset 0 0 26px rgba(0,0,0,.55), 0 0 0 8px var(--panel);
     padding:14px 18px;
   }
   #tutBody{font-size:14px; line-height:1.55;}
@@ -71,7 +113,7 @@
   #tutBody .tl{opacity:0; transform:translateY(10px); animation:tutLine .5s ease forwards;}
   #tutBody .tl.gap{height:10px;}
   #tutBody.now .tl{animation:none; opacity:1; transform:none;}
-  #tutStep{color:#c9d6b4; font-size:12px; margin:0 0 4px; flex:0 0 auto;}
+  #tutStep{color:var(--muted); font-size:12px; margin:0 0 4px; flex:0 0 auto;}
   #tutFoot{display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; flex:0 0 auto;}
   #tutFoot #tutPrev{min-width:84px;}
   #tutFoot #tutNext{min-width:92px;}   /* "Next" and "Play" swap labels; the button must not move */
@@ -84,43 +126,49 @@
     #tutPanel.leaving #tutBody, #tutPanel.leaving #tutTitle{transition:none; opacity:1;}
   }
   #ticker{
-    background:#3d2f13; border:2px solid var(--line); border-top:none;
-    color:#ffe9a8; padding:5px 14px; font-size:13.5px; font-style:italic; min-height:29px;
+    background:var(--tickbg); border:2px solid var(--line); border-top:none;
+    color:var(--tickink); padding:5px 14px; font-size:13.5px; font-style:italic; min-height:29px;
   }
   #nstrip{
     display:none; gap:8px; padding:6px 8px;
-    background:#20301f; border:2px solid var(--line); border-top:none;
+    background:var(--strip); border:2px solid var(--line); border-top:none;
   }
   #nstrip.on{display:flex;}
   .nb{
     flex:1; min-width:0; text-align:center; cursor:pointer; padding:4px 2px 5px;
     background:var(--panel2); border:2px solid var(--line); border-radius:10px; position:relative;
   }
-  .nb:hover{border-color:#7a9455;}
+  .nb:hover{border-color:var(--hov);}
   .nb .av{font-size:24px; line-height:1.1;}
   .nb .nm{font-size:12px; font-weight:bold; display:block;}
   .nb .rel{font-size:10px; color:var(--gold); letter-spacing:1px;}
   .nb .rec{font-size:11px; letter-spacing:2px; min-height:14px;}
-  .nb .rec .T{color:var(--green);} .nb .rec .F{color:var(--red);} .nb .rec .U{color:#8a9a78;}
+  .nb .rec .T{color:var(--green);} .nb .rec .F{color:var(--red);} .nb .rec .U{color:var(--dim);}
   .nb .badge{position:absolute; top:-7px; right:-5px; font-size:14px;}
   .nb.exposed{border-color:var(--red); opacity:.75;}
   .nb.hostile{opacity:.5;}
   .nb.ally{border-color:#5a965a;}
   /* one-tap shortcuts: chat from the card, favors from the board row, arrows in the dossiers */
   .qb{
-    font-family:inherit; background:#3a4a63; color:#cfe2ff; border:1px solid #5a7096;
+    font-family:inherit; background:var(--btn); color:var(--btnink); border:1px solid var(--btnline);
     border-radius:6px; font-size:11.5px; font-weight:bold; padding:2px 8px; cursor:pointer;
   }
   .qb:hover{filter:brightness(1.25);}
   .qb:disabled{opacity:.35; cursor:not-allowed;}
   .nb .qb{margin-top:3px;}
-  .nb.rounds{background:#2b3a52; border-color:#5a7096;}
+  .nb.rounds{background:#2b3a52; border-color:var(--btnline);}
   .nb.rounds:hover{border-color:#9fd0ff;}
   .nb.rounds .rel{color:#9fd0ff;}
   .nb.spent{opacity:.45; cursor:default;}
   .nb.spent:hover{border-color:var(--line);}
   .bmq{float:right; display:flex; gap:4px; margin-left:6px;}
   .modnav{display:flex; flex-direction:column; gap:5px;}
+  .sw{
+    width:26px; height:26px; border-radius:50%; border:2px solid var(--line);
+    cursor:pointer; padding:0; flex:0 0 auto;
+  }
+  .sw:hover{transform:scale(1.12);}
+  .sw.sel{border-color:var(--gold); box-shadow:0 0 7px rgba(255,210,74,.55);}
   #main{
     display:flex; gap:10px; background:var(--panel); border:2px solid var(--line); border-top:none;
     border-radius:0 0 12px 12px; padding:10px; align-items:stretch;
@@ -128,30 +176,30 @@
   .col{display:flex; flex-direction:column; gap:10px;}
   #colL{flex:1.1; min-width:0;}
   #colR{flex:1; min-width:0;}
-  .box{background:#1d2716; border:2px solid var(--line); border-radius:10px; padding:10px 12px;}
-  .box h3{font-size:14px; color:#c9d6b4; letter-spacing:1px; margin-bottom:8px;}
+  .box{background:var(--box); border:2px solid var(--line); border-radius:10px; padding:10px 12px;}
+  .box h3{font-size:14px; color:var(--muted); letter-spacing:1px; margin-bottom:8px;}
   /* house */
   #housePanel .bars{display:flex; flex-direction:column; gap:6px; margin-bottom:8px;}
   .barrow{display:flex; align-items:center; gap:8px; font-size:13px;}
   .barrow .lb{width:105px; white-space:nowrap;}
-  .bar{flex:1; height:14px; background:#141a0e; border:1px solid var(--line); border-radius:7px; overflow:hidden;}
+  .bar{flex:1; height:14px; background:var(--deep); border:1px solid var(--line); border-radius:7px; overflow:hidden;}
   .bar > div{height:100%; transition:width .3s;}
   .barrow .val{width:58px; text-align:right; font-weight:bold; font-size:12px;}
   .vio{
-    background:#33231a; border:1px solid #6e4a33; border-radius:8px; padding:7px 10px; margin-bottom:7px; font-size:13px;
+    background:var(--viobg); border:1px solid var(--violine); border-radius:8px; padding:7px 10px; margin-bottom:7px; font-size:13px;
   }
-  .vio.escalated{border-color:var(--red); background:#3d1f1a;}
+  .vio.escalated{border-color:var(--red); background:var(--vioesc);}
   .vio .vt{font-weight:bold;}
-  .vio .meta{color:#e0b9a0; font-size:12px; margin:3px 0;}
+  .vio .meta{color:var(--viometa); font-size:12px; margin:3px 0;}
   .vio button{
     font-family:inherit; font-size:12px; font-weight:bold; border:none; border-radius:6px;
     padding:4px 10px; margin-right:6px; margin-top:2px; cursor:pointer;
   }
   .vio .comply{background:var(--green); color:#15200c;}
-  .vio .contest{background:#5a7096; color:#eaf2ff;}
+  .vio .contest{background:var(--btnline); color:#eaf2ff;}
   .vio button:disabled{opacity:.35; cursor:not-allowed;}
-  #noVio{color:#8a9a78; font-size:13px; font-style:italic;}
-  #rulesBox{font-size:12.5px; color:#d8c9a8; max-height:90px; overflow-y:auto;}
+  #noVio{color:var(--dim); font-size:13px; font-style:italic;}
+  #rulesBox{font-size:12.5px; color:var(--muted); max-height:90px; overflow-y:auto;}
   #rulesBox div{margin-bottom:3px;}
   /* actions */
   #actGrid{display:grid; grid-template-columns:1fr 1fr; gap:7px;}
@@ -159,7 +207,7 @@
     background:var(--panel2); border:2px solid var(--line); border-radius:9px; padding:7px 9px;
     cursor:pointer; font-size:12.5px; text-align:left; font-family:inherit; color:var(--ink);
   }
-  .act:hover{border-color:#7a9455;}
+  .act:hover{border-color:var(--hov);}
   .act b{display:block; font-size:13px;}
   .act .cost{color:var(--gold); font-size:11.5px;}
   .act:disabled{opacity:.38; cursor:not-allowed;}
@@ -167,7 +215,7 @@
   #log{font-size:12.5px; line-height:1.45; max-height:240px; overflow-y:auto;}
   #log .mh{color:var(--blue); font-weight:bold; margin-top:6px; border-top:1px dashed var(--line); padding-top:5px;}
   #log .mh:first-child{margin-top:0; border-top:none; padding-top:0;}
-  #log .bad{color:#ffb0a6;} #log .good{color:#b8e39a;} #log .info{color:#d8d2b8;} #log .tip{color:#a8c8e8;}
+  #log .bad{color:var(--logbad);} #log .good{color:var(--loggood);} #log .info{color:var(--loginfo);} #log .tip{color:var(--logtip);}
   /* overlays */
   .overlay{
     position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
@@ -181,38 +229,38 @@
   .panel h1{font-size:30px; color:var(--gold); margin-bottom:4px;}
   .panel h2{font-size:21px; margin-bottom:10px;}
   .panel p{font-size:14px; line-height:1.45; margin-bottom:8px;}
-  .panel .small{font-size:12.5px; color:#c9d6b4;}
+  .panel .small{font-size:12.5px; color:var(--muted);}
   .btn{
     display:inline-block; margin:6px 5px 0; padding:9px 20px; font-size:15px; font-weight:bold;
     background:var(--green); color:#15200c; border:none; border-radius:10px; cursor:pointer; font-family:inherit;
   }
   .btn:hover{filter:brightness(1.1);}
   .btn.alt{background:#d86a5a; color:#fff;}
-  .btn.law{background:#5a7096; color:#eaf2ff;}
+  .btn.law{background:var(--btnline); color:#eaf2ff;}
   .btn.sm{font-size:13px; padding:7px 14px;}
   .btn.grey{background:#556; color:#fff;}
   .btn:disabled{opacity:.35; cursor:not-allowed;}
   .hidden{display:none !important;}
   .diffs{display:flex; flex-direction:column; gap:8px; margin:10px 0; text-align:left;}
   .diff{background:var(--panel2); border:2px solid var(--line); border-radius:10px; padding:9px 14px; cursor:pointer;}
-  .diff:hover{border-color:#7a9455;}
+  .diff:hover{border-color:var(--hov);}
   .diff.sel{border-color:var(--gold); box-shadow:0 0 8px rgba(255,210,74,.4);}
   .diff b{font-size:15px;}
-  .diff span{display:block; font-size:12px; color:#c9d6b4; margin-top:2px;}
+  .diff span{display:block; font-size:12px; color:var(--muted); margin-top:2px;}
   .toggle{
     display:flex; align-items:flex-start; gap:10px; text-align:left; font-size:13.5px;
     background:var(--panel2); border:2px solid var(--line); border-radius:10px; padding:10px 14px; cursor:pointer;
   }
   .toggle input{width:18px; height:18px; margin-top:2px; accent-color:var(--gold); cursor:pointer;}
-  .toggle span small{display:block; color:#c9d6b4; font-size:11.5px; margin-top:2px;}
-  .selhead{text-align:left; font-size:11.5px; color:#c9d6b4; letter-spacing:1px; margin-top:8px; font-weight:bold;}
+  .toggle span small{display:block; color:var(--muted); font-size:11.5px; margin-top:2px;}
+  .selhead{text-align:left; font-size:11.5px; color:var(--muted); letter-spacing:1px; margin-top:8px; font-weight:bold;}
   .nameinputs{display:flex; gap:8px; margin:10px 0 2px;}
   .nameinputs label{
-    flex:1; text-align:left; font-size:11.5px; color:#c9d6b4; font-weight:bold; letter-spacing:1px;
+    flex:1; text-align:left; font-size:11.5px; color:var(--muted); font-weight:bold; letter-spacing:1px;
     display:flex; flex-direction:column; gap:3px; position:relative;
   }
   .nameinputs input{
-    background:#141a0e; border:2px solid var(--line); border-radius:8px; color:var(--ink);
+    background:var(--deep); border:2px solid var(--line); border-radius:8px; color:var(--ink);
     font-family:inherit; font-size:14px; padding:7px 30px 7px 9px; user-select:text; -webkit-user-select:text; width:100%;
   }
   .nameinputs input:focus{outline:none; border-color:var(--gold);}
@@ -222,58 +270,58 @@
   .sliders label{display:block; font-size:12.5px; font-weight:bold; margin:5px 0 1px;}
   .sliders output{color:var(--gold); float:right; font-size:12px;}
   .sliders input[type=range]{width:100%; accent-color:var(--gold); cursor:pointer; margin:2px 0 0;}
-  .sliders .hint{display:block; color:#8a9a78; font-size:10.5px; font-style:italic; font-weight:normal; margin-top:1px;}
-  #diffMeter{height:14px; background:#141a0e; border:1px solid var(--line); border-radius:7px; overflow:hidden; margin-top:12px;}
+  .sliders .hint{display:block; color:var(--dim); font-size:10.5px; font-style:italic; font-weight:normal; margin-top:1px;}
+  #diffMeter{height:14px; background:var(--deep); border:1px solid var(--line); border-radius:7px; overflow:hidden; margin-top:12px;}
   #diffFill{height:100%; width:50%; background:#ffd24a; transition:width .25s, background .25s;}
-  #diffLabel{font-size:13px; margin-top:6px; color:#ffe9a8; min-height:34px; text-align:left;}
+  #diffLabel{font-size:13px; margin-top:6px; color:var(--tickink); min-height:34px; text-align:left;}
   #diffLabel b{color:var(--gold);}
   .chiprow{display:flex; gap:6px; margin:6px 0;}
   .chip{flex:1; background:var(--panel2); border:2px solid var(--line); border-radius:10px; padding:7px 5px; cursor:pointer; text-align:center;}
-  .chip:hover{border-color:#7a9455;}
+  .chip:hover{border-color:var(--hov);}
   .chip b{display:block; font-size:12.5px;}
-  .chip span{color:#c9d6b4; font-size:10.5px; display:block; margin-top:2px; line-height:1.3;}
+  .chip span{color:var(--muted); font-size:10.5px; display:block; margin-top:2px; line-height:1.3;}
   .chip.sel{border-color:var(--gold); box-shadow:0 0 8px rgba(255,210,74,.4);}
   #boardBox{font-size:12.5px;}
   #boardBox .bm{
     margin-bottom:6px; line-height:1.35; padding:4px 6px; border-radius:7px;
     border:1px solid transparent; cursor:pointer;
   }
-  #boardBox .bm:hover{border-color:#7a9455; background:#22301b;}
-  #boardBox .bd{color:#c9d6b4; font-size:11.5px;}
+  #boardBox .bm:hover{border-color:var(--hov); background:var(--strip);}
+  #boardBox .bd{color:var(--muted); font-size:11.5px;}
   #boardBox .tr{color:var(--gold); letter-spacing:1px;}
-  #boardBox .dt{color:#ffb0a6;}
+  #boardBox .dt{color:var(--logbad);}
   #boardBox .bm.gone{opacity:.45; cursor:default;}
   #boardBox .bm.gone:hover{border-color:transparent; background:none;}
   #boardBox .bm.ins{border-color:#5a965a; background:#1f2e1f;}
   #boardBox .bm.seat{border:1px dashed var(--gold); color:var(--gold);}
   #bmDirt{
-    text-align:left; background:#141a0e; border:1px solid var(--line); border-radius:8px;
+    text-align:left; background:var(--deep); border:1px solid var(--line); border-radius:8px;
     padding:8px 12px; font-size:12.5px; max-height:150px; overflow-y:auto; margin:8px 0;
   }
   #bmDirt .tipl{margin-top:5px; line-height:1.35;}
   #bmRole{color:var(--gold); font-size:13px;}
-  #bmStatus{font-size:12.5px; color:#c9d6b4;}
+  #bmStatus{font-size:12.5px; color:var(--muted);}
   #seatList{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:10px 0;}
   #amenityList{display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; text-align:left;}
   .amen{
     display:flex; align-items:flex-start; gap:5px; padding:5px 6px; cursor:pointer;
     background:var(--panel2); border:2px solid var(--line); border-radius:8px; font-size:11.5px;
   }
-  .amen:hover{border-color:#7a9455;}
-  .amen.on{border-color:var(--gold); background:#33401f;}
+  .amen:hover{border-color:var(--hov);}
+  .amen.on{border-color:var(--gold); background:var(--selbg);}
   .amen input{width:14px; height:14px; margin-top:1px; accent-color:var(--gold); cursor:pointer; flex:0 0 auto;}
   .amen b{display:block; font-size:11.5px; line-height:1.2;}
-  .amen span{color:#c9d6b4; font-size:10px; line-height:1.25; display:block;}
+  .amen span{color:var(--muted); font-size:10px; line-height:1.25; display:block;}
   .amen .cost{color:var(--gold); font-size:10px;}
   /* tabbed setup so every detail survives without a two-screen-tall modal */
   #customModal .panel{max-width:820px;}
   .tabbar{display:flex; gap:5px; margin:6px 0 10px;}
   .tab{
-    flex:1; background:var(--panel2); color:#c9d6b4; border:2px solid var(--line); border-radius:9px 9px 0 0;
+    flex:1; background:var(--panel2); color:var(--muted); border:2px solid var(--line); border-radius:9px 9px 0 0;
     font-family:inherit; font-weight:bold; font-size:13px; padding:7px 4px; cursor:pointer;
   }
-  .tab:hover{border-color:#7a9455;}
-  .tab.sel{background:#33401f; border-color:var(--gold); color:var(--ink);}
+  .tab:hover{border-color:var(--hov);}
+  .tab.sel{background:var(--selbg); border-color:var(--gold); color:var(--ink);}
   .pane{min-height:212px;}
   @media (max-width:860px){ #amenityList{grid-template-columns:1fr 1fr;} }
   @media (max-width:560px){ #amenityList{grid-template-columns:1fr;} .tab{font-size:11.5px;} }
@@ -281,19 +329,19 @@
   .vio .stage{color:#c9b8e0; font-size:11.5px; font-style:italic; margin:3px 0;}
   .vio .block{color:#ffc9a6; font-size:12px; margin:3px 0;}
   #boardList, #voteList{text-align:left; font-size:13.5px; line-height:1.5; margin:10px 0;}
-  #boardList div{margin-bottom:6px; padding:6px 10px; background:#1d2716; border-radius:8px; border:1px solid var(--line);}
-  #voteList div{margin-bottom:4px; padding:5px 10px; background:#1d2716; border-radius:8px; border:1px solid var(--line);}
+  #boardList div{margin-bottom:6px; padding:6px 10px; background:var(--box); border-radius:8px; border:1px solid var(--line);}
+  #voteList div{margin-bottom:4px; padding:5px 10px; background:var(--box); border-radius:8px; border:1px solid var(--line);}
   #socHead, #bmHead{display:flex; align-items:center; gap:14px; text-align:left; margin-bottom:8px;}
   #socAv, #bmAv{font-size:48px;}
   #socName{font-size:22px; font-weight:bold;}
   #socRel{color:var(--gold); font-size:13px; letter-spacing:2px;}
-  #socStatus{font-size:12.5px; color:#c9d6b4;}
+  #socStatus{font-size:12.5px; color:var(--muted);}
   #socLog{
-    text-align:left; background:#141a0e; border:1px solid var(--line); border-radius:8px;
+    text-align:left; background:var(--deep); border:1px solid var(--line); border-radius:8px;
     padding:8px 12px; font-size:12.5px; max-height:140px; overflow-y:auto; margin:8px 0;
   }
   #socLog .tag{font-weight:bold; margin-right:5px;}
-  #socLog .tag.T{color:var(--green);} #socLog .tag.F{color:var(--red);} #socLog .tag.P{color:#8a9a78;}
+  #socLog .tag.T{color:var(--green);} #socLog .tag.F{color:var(--red);} #socLog .tag.P{color:var(--dim);}
   #socLog .tipl{margin-bottom:6px; line-height:1.35;}
   button{-webkit-tap-highlight-color:transparent; touch-action:manipulation;}
   /* narrower desktop windows: tighten the bar rather than orphaning the controls onto row two */
@@ -330,6 +378,7 @@
 </head>
 <body>
 <!-- HOA HAVOC — © 2026 BigSpoke AI. All rights reserved. -->
+<script>(function(){ try{ var k = localStorage.getItem('hoaScheme'); if (k) document.documentElement.dataset.scheme = k; }catch(e){} })();</script>
 <div id="wrap">
   <div id="topbar">
     <div id="statGroup">
@@ -343,10 +392,12 @@
       <span class="stat" title="Common areas. The board lets them rot; neglect drags everyone's equity. You can fix them yourself.">🌳 <span id="comLbl">60%</span></span>
       <span class="stat" title="Communication: chats, favors, and planted messages. Plentiful — but the month always ends.">📞 <span id="commsLbl">8/8</span></span>
       <span class="stat" id="apLbl" title="Action points this month.">⚡ 3/3</span>
+      <span class="stat" id="playersStat" style="display:none;" title="Homeowners who have ever moved in — across every neighborhood running this game.">👥 <span id="playersTop">–</span></span>
     </div>
     <div id="ctrlGroup">
       <button id="musicBtn" class="tbtn" title="Background music on/off.">🎵</button>
       <button id="sfxBtn" class="tbtn" title="Sound effects and spoken remarks on/off.">🔊</button>
+      <button id="schemeBtn" class="tbtn" title="Repaint the neighborhood — cycle color schemes.">🎨</button>
       <button id="aiBtn" class="tbtn" title="AI assistant: advises you every month — but the board and the gossips get AI too. Toggle anytime.">🤖 OFF</button>
       <button id="helpBtn" class="tbtn" title="How to play &amp; strategy guide">❓</button>
       <button id="quitBtn" class="tbtn" title="List the house and sell. There are only three ways out: foreclosure, dissolving the board, or this.">🏷️ Sell</button>
@@ -374,7 +425,7 @@
       </div>
       <div class="box">
         <h3>📜 RULES THE BOARD HAS PASSED (<span id="ruleCt">0</span>)</h3>
-        <div id="rulesBox"><div style="color:#8a9a78;font-style:italic;">Just the original 214-page rulebook. So far.</div></div>
+        <div id="rulesBox"><div style="color:var(--dim);font-style:italic;">Just the original 214-page rulebook. So far.</div></div>
       </div>
     </div>
     <div class="col" id="colR">
@@ -411,7 +462,14 @@
     <button class="btn" id="startBtn">Move In ▶</button>
     <button class="btn law hidden" id="resumeBtn">💾 Resume</button>
     <button class="btn sm grey" id="menuTutBtn">📖 How to Play</button>
-    <p class="small" style="margin-top:14px;opacity:.75;">© 2026 BigSpoke AI · All rights reserved</p>
+    <div id="menuExtras" style="display:flex; align-items:center; justify-content:center; gap:7px; margin-top:12px; flex-wrap:wrap;">
+      <button id="menuMusicBtn" class="tbtn" title="Background music on/off">🎵</button>
+      <button id="menuSfxBtn" class="tbtn" title="Sound effects and spoken remarks on/off">🔊</button>
+      <span style="width:8px;"></span>
+      <div id="schemeRow" style="display:flex; gap:6px; align-items:center;" title="Paint the neighborhood"></div>
+    </div>
+    <p class="small" id="playersLine" style="margin-top:10px; display:none;">👥 <b id="playersMenuCt">–</b> homeowners have moved in before you</p>
+    <p class="small" style="margin-top:8px;opacity:.75;">v1.0 · © 2026 BigSpoke AI · All rights reserved</p>
   </div>
 </div>
 
@@ -501,7 +559,7 @@
   <div class="panel">
     <h2 id="secTitle">🤖 THE ASSISTANT HAS FOUND SOMETHING</h2>
     <p class="small" id="secConf"></p>
-    <p id="secText" style="font-size:15.5px; text-align:left; background:#141a0e; border:1px solid var(--line); border-radius:8px; padding:10px 12px;"></p>
+    <p id="secText" style="font-size:15.5px; text-align:left; background:var(--deep); border:1px solid var(--line); border-radius:8px; padding:10px 12px;"></p>
     <p class="small" id="secCorrob" style="text-align:left; min-height:18px;"></p>
     <p class="small" style="margin-top:6px;">You cannot tell whether this is true. Neither, in any way that matters, can the assistant.</p>
     <div id="secActions"></div>
@@ -562,14 +620,14 @@
         <div class="chip" data-t="2"><b>🧱 Townhome</b></div>
         <div class="chip" data-t="3"><b>🏢 Condo</b></div>
       </div>
-      <span class="hint" id="hHome" style="display:block;text-align:left;font-size:10.5px;color:#8a9a78;font-style:italic;margin:2px 0 4px;"></span>
+      <span class="hint" id="hHome" style="display:block;text-align:left;font-size:10.5px;color:var(--dim);font-style:italic;margin:2px 0 4px;"></span>
       <div class="selhead">WHO'S HOME AT 2 P.M.</div>
       <div class="chiprow" id="dayRow">
         <div class="chip" data-w="0"><b>🌙 Ghost town till six</b></div>
         <div class="chip sel" data-w="1"><b>💻 Mixed shifts</b></div>
         <div class="chip" data-w="2"><b>🔭 Home and watching</b></div>
       </div>
-      <span class="hint" id="hDay" style="display:block;text-align:left;font-size:10.5px;color:#8a9a78;font-style:italic;margin:2px 0 4px;"></span>
+      <span class="hint" id="hDay" style="display:block;text-align:left;font-size:10.5px;color:var(--dim);font-style:italic;margin:2px 0 4px;"></span>
       <p class="small" style="text-align:left;margin:10px 0 0;">Size sets neighbors, board seats, and recall votes needed. Age sets legacy rules, commons decay, and who chairs the board. Rentals shrink the electorate you can reach — absentee ballots follow property values, not you (until you write to the landlords). The reserve absorbs assessments at its funded share. What you own decides who owns your roof. Cohesion sets how many homes listen to anybody. And who's home at 2 p.m. decides how fast you get cited — and how fast you gather proof.</p>
     </div>
     <div class="pane hidden" id="paneAmenities">
@@ -577,8 +635,8 @@
       <div id="amenityList"></div>
       <div id="amenitySum" class="small" style="text-align:left;margin:6px 0 2px;color:var(--gold);"></div>
     </div>
-    <div id="diffMeter2" style="height:14px;background:#141a0e;border:1px solid var(--line);border-radius:7px;overflow:hidden;margin-top:12px;"><div id="diffFill2" style="height:100%;width:50%;background:#ffd24a;transition:width .25s, background .25s;"></div></div>
-    <div id="diffLabel2" style="font-size:13px;margin-top:6px;color:#ffe9a8;min-height:34px;text-align:left;"></div>
+    <div id="diffMeter2" style="height:14px;background:var(--deep);border:1px solid var(--line);border-radius:7px;overflow:hidden;margin-top:12px;"><div id="diffFill2" style="height:100%;width:50%;background:#ffd24a;transition:width .25s, background .25s;"></div></div>
+    <div id="diffLabel2" style="font-size:13px;margin-top:6px;color:var(--tickink);min-height:34px;text-align:left;"></div>
     <button class="btn" id="customDone">Looks Terrible. Done ▶</button>
   </div>
 </div>
@@ -1543,8 +1601,11 @@ if (window.speechSynthesis){
   document.addEventListener('pointerdown', () => Voice.prime(), { once:true, capture:true });
 }
 function syncSfxBtn(){
-  const b = document.getElementById('sfxBtn');
-  if (b) b.textContent = SFX.on ? '🔊' : '🔈';
+  const t = SFX.on ? '🔊' : '🔈';
+  for (const id of ['sfxBtn', 'menuSfxBtn']){
+    const b = document.getElementById(id);
+    if (b) b.textContent = t;
+  }
 }
 
 // ---------- background music ----------
@@ -1724,8 +1785,11 @@ const Music = {
   },
 };
 function syncMusicBtn(){
-  const b = document.getElementById('musicBtn');
-  if (b) b.textContent = Music.on ? '🎵' : '🔇';
+  const t = Music.on ? '🎵' : '🔇';
+  for (const id of ['musicBtn', 'menuMusicBtn']){
+    const b = document.getElementById(id);
+    if (b) b.textContent = t;
+  }
 }
 
 // ================= state =================
@@ -3752,7 +3816,7 @@ document.getElementById('voteBtn').addEventListener('click', () => {
     const y = Math.round((n.influence || 0) * frac);
     yes += y; no += (n.influence || 0) - y;
     if (v.v === 'yes') yes += 1; else if (v.v === 'no') no += 1;
-    blocLines.push(`<div style="font-size:12px;color:#c9d6b4;">└ ${n.name}'s circle (${n.influence || 0} homes): <b>${y}</b> yes</div>`);
+    blocLines.push(`<div style="font-size:12px;color:var(--muted);">└ ${n.name}'s circle (${n.influence || 0} homes): <b>${y}</b> yes</div>`);
   }
   let un = S.unaffiliated || 0;
   const absHomes = S.wroteLandlords ? 0 : Math.min(un, Math.round((S.homes || 0) * (S.occ || 0)));
@@ -3764,13 +3828,13 @@ document.getElementById('voteBtn').addEventListener('click', () => {
     const aFrac = Math.max(0.05, Math.min(0.85, 0.15 + Math.max(0, 100 - (S.comps || 100)) / 30 * 0.5));
     const aY = Math.round(absHomes * aFrac * 0.5), aN = Math.round(absHomes * (1 - aFrac) * 0.5);
     yes += aY; no += aN;
-    absLine = `<div>🔑 Absentee landlords (${absHomes} homes, half-weight proxies): <b>${aY}</b> yes <span style="color:#c9d6b4">(they vote the comparables, not you)</span></div>`;
+    absLine = `<div>🔑 Absentee landlords (${absHomes} homes, half-weight proxies): <b>${aY}</b> yes <span style="color:var(--muted)">(they vote the comparables, not you)</span></div>`;
   }
   document.getElementById('voteList').innerHTML =
     votes.map((v, i) =>
-      `<div>${icon[v.v]} <b>${v.n.name}</b> — ${v.v.toUpperCase()} <span style="color:#c9d6b4">(${v.why})</span>${blocLines[i]}</div>`
+      `<div>${icon[v.v]} <b>${v.n.name}</b> — ${v.v.toUpperCase()} <span style="color:var(--muted)">(${v.why})</span>${blocLines[i]}</div>`
     ).join('') +
-    `<div>📊 Unaffiliated homes (${un}): <b>${unY}</b> yes <span style="color:#c9d6b4">(your ⭐ reputation${compsBonus ? ' + falling-comps fury' : ''}${S.wroteLandlords ? ' — includes the landlords you wrote to' : ''})</span></div>` + absLine +
+    `<div>📊 Unaffiliated homes (${un}): <b>${unY}</b> yes <span style="color:var(--muted)">(your ⭐ reputation${compsBonus ? ' + falling-comps fury' : ''}${S.wroteLandlords ? ' — includes the landlords you wrote to' : ''})</span></div>` + absLine +
     `<div style="text-align:center;font-weight:bold;margin-top:6px;">YES ${yes} — NO ${no} (of ${S.homes || yes + no} ballots)</div>`;
   document.getElementById('voteList').classList.remove('hidden');
   document.getElementById('voteBtn').classList.add('hidden');
@@ -4066,7 +4130,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
   document.getElementById('menu').classList.add('hidden');
   document.getElementById('endModal').classList.add('hidden');
   document.getElementById('log').innerHTML = '';
-  document.getElementById('rulesBox').innerHTML = '<div style="color:#8a9a78;font-style:italic;">Just the original 214-page rulebook. So far.</div>';
+  document.getElementById('rulesBox').innerHTML = '<div style="color:var(--dim);font-style:italic;">Just the original 214-page rulebook. So far.</div>';
   renderStrip();
   renderBoard();
   // meet the board (reversed so it reads top-down in the prepend-ordered log)
@@ -4105,6 +4169,113 @@ refreshResume();
 window.addEventListener('pageshow', refreshResume);
 document.getElementById('musicBtn').addEventListener('click', () => Music.toggle());
 document.getElementById('sfxBtn').addEventListener('click', () => SFX.toggle());
+document.getElementById('menuMusicBtn').addEventListener('click', () => Music.toggle());
+document.getElementById('menuSfxBtn').addEventListener('click', () => SFX.toggle());
+
+// ================= version & the running tally of the afflicted =================
+const VERSION = '1.0';
+// a free, no-account counter (abacus.jasoncameron.dev). The key survives every
+// deploy because it lives with the service, not the site. If the service is
+// unreachable (offline play, the artifact copy's CSP), the tally simply hides.
+const CountAPI = {
+  base:'https://abacus.jasoncameron.dev/', ns:'bigspoke-hoa-havoc', key:'players',
+  show(n){
+    if (typeof n !== 'number') return;
+    const s = n.toLocaleString('en-US');
+    const m = document.getElementById('playersMenuCt'), t = document.getElementById('playersTop');
+    if (m){ m.textContent = s; document.getElementById('playersLine').style.display = ''; }
+    if (t){ t.textContent = s; document.getElementById('playersStat').style.display = ''; }
+  },
+  load(){
+    try{
+      fetch(this.base + 'get/' + this.ns + '/' + this.key)
+        .then(r => r.ok ? r.json() : null)
+        .then(j => { if (j) this.show(j.value); })
+        .catch(() => {});
+    }catch(e){}
+  },
+  bump(){
+    try{
+      if (localStorage.getItem('hoaCounted')) return;
+      fetch(this.base + 'hit/' + this.ns + '/' + this.key)
+        .then(r => r.ok ? r.json() : null)
+        .then(j => {
+          if (!j) return;
+          try{ localStorage.setItem('hoaCounted', '1'); }catch(e){}
+          this.show(j.value);
+        })
+        .catch(() => {});
+    }catch(e){}
+  },
+};
+CountAPI.load();
+document.getElementById('startBtn').addEventListener('click', () => CountAPI.bump());
+document.getElementById('resumeBtn').addEventListener('click', () => CountAPI.bump());
+
+// ================= paint the neighborhood =================
+const SCHEMES = [
+  { key:'lawn',       name:'Lawn Enforcement',   sw:['#24301b', '#8fd14f', '#ffd24a'] },
+  { key:'midnight',   name:'Midnight Quorum',    sw:['#171e2b', '#9fd0ff', '#ffd24a'] },
+  { key:'terracotta', name:'Terracotta Sunset',  sw:['#2a1a12', '#c98a5a', '#ffb84a'] },
+  { key:'linen',      name:'Clubhouse Linen',    sw:['#f1ead8', '#b3a687', '#996f00'] },
+  { key:'hydrangea',  name:'Disputed Hydrangea', sw:['#ecf0f7', '#a3b2ca', '#6b5ca8'] },
+];
+function currentScheme(){
+  const k = document.documentElement.dataset.scheme || 'lawn';
+  return Math.max(0, SCHEMES.findIndex(s => s.key === k));
+}
+function setScheme(key, announce){
+  document.documentElement.dataset.scheme = key;
+  try{ localStorage.setItem('hoaScheme', key); }catch(e){}
+  document.querySelectorAll('#schemeRow .sw').forEach(b => b.classList.toggle('sel', b.dataset.k === key));
+  const s = SCHEMES.find(x => x.key === key);
+  if (announce && s) setTicker(`🎨 The neighborhood repaints itself in ${s.name}. The board demands to know who approved it.`);
+}
+(function buildSchemeRow(){
+  const row = document.getElementById('schemeRow');
+  for (const s of SCHEMES){
+    const b = document.createElement('button');
+    b.className = 'sw';
+    b.dataset.k = s.key;
+    b.title = s.name;
+    b.style.background = `linear-gradient(135deg, ${s.sw[0]} 55%, ${s.sw[1]} 55% 78%, ${s.sw[2]} 78%)`;
+    b.addEventListener('click', () => setScheme(s.key));
+    row.appendChild(b);
+  }
+  setScheme(document.documentElement.dataset.scheme || 'lawn');
+})();
+document.getElementById('schemeBtn').addEventListener('click', () => {
+  setScheme(SCHEMES[(currentScheme() + 1) % SCHEMES.length].key, true);
+});
+
+// ================= the wary hello at the door =================
+const GREETS = [
+  'Welcome to the neighborhood. Smile at everyone. Trust no one.',
+  'Oh good, you found us. Keep your voice down. The board hears everything.',
+  'Welcome home. The rulebook is two hundred pages, and they have read all of it. About you.',
+  'New neighbor. Lovely. A word of advice: measure your grass tonight.',
+  'Welcome. Wave like you mean it. They are watching from the curtains.',
+  'Come on in. Whatever you do, do not mention the flagpole.',
+];
+let greeted = false;
+document.addEventListener('pointerdown', () => {
+  if (greeted) return;
+  greeted = true;
+  if (!document.getElementById('menu').classList.contains('hidden'))
+    setTimeout(() => Voice.say(pick(GREETS), 'self'), 350);
+}, { capture:true });
+
+// try to start the band the moment the menu opens — most browsers hold the doors
+// until a gesture, so only commit if the context actually reports running
+(function tryAutoMusic(){
+  if (!Music.on) return;
+  try{
+    ensureAC();
+    const p = AC.resume && AC.resume();
+    if (p && p.then) p.then(() => { if (AC.state === 'running') Music.start(); }).catch(() => {});
+    else if (AC.state === 'running') Music.start();
+  }catch(e){}
+})();
 syncSfxBtn();
 document.addEventListener('click', () => { if (Music.on) Music.start(); }); // autoplay rules: first gesture starts the band
 syncMusicBtn();
