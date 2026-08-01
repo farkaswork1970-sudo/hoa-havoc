@@ -381,7 +381,14 @@
 </head>
 <body>
 <!-- HOA HAVOC — © 2026 BigSpoke AI. All rights reserved. -->
-<script>(function(){ var k = null; try{ k = localStorage.getItem('hoaScheme'); }catch(e){} document.documentElement.dataset.scheme = k || 'hydrangea'; })();</script>
+<script>(function(){
+  var k = null, chosen = null;
+  try{ k = localStorage.getItem('hoaScheme'); chosen = localStorage.getItem('hoaSchemeChosen'); }catch(e){}
+  // an earlier build stamped 'lawn' into storage as a boot side-effect; without the
+  // explicit-choice marker that stamp is not a preference — clear it once
+  if (k === 'lawn' && !chosen){ k = null; try{ localStorage.removeItem('hoaScheme'); }catch(e){} }
+  document.documentElement.dataset.scheme = k || 'hydrangea';
+})();</script>
 <div id="wrap">
   <div id="topbar">
     <div id="statGroup">
@@ -4231,7 +4238,8 @@ function currentScheme(){
 }
 function setScheme(key, announce){
   document.documentElement.dataset.scheme = key;
-  try{ localStorage.setItem('hoaScheme', key); }catch(e){}
+  // only explicit picks persist — booting a default must never masquerade as a choice
+  try{ localStorage.setItem('hoaScheme', key); localStorage.setItem('hoaSchemeChosen', '1'); }catch(e){}
   const sel = document.getElementById('schemeSelect');
   if (sel && sel.value !== key) sel.value = key;
   const s = SCHEMES.find(x => x.key === key);
@@ -4246,7 +4254,7 @@ function setScheme(key, announce){
     sel.appendChild(o);
   }
   sel.addEventListener('change', () => setScheme(sel.value));
-  setScheme(document.documentElement.dataset.scheme || 'hydrangea');
+  sel.value = document.documentElement.dataset.scheme || 'hydrangea';   // reflect the boot state, don't persist it
 })();
 document.getElementById('schemeBtn').addEventListener('click', () => {
   setScheme(SCHEMES[(currentScheme() + 1) % SCHEMES.length].key, true);
