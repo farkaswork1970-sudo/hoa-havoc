@@ -1372,38 +1372,38 @@ function shuffle(a){ for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.ran
 function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
 
 const VOICE_LINES = {
-  citation:{ who:'board', o:['A violation has been observed.', 'The measurement was taken twice.', 'Compliance is not optional.', 'Photographs are on file.', 'This is your first notice.'] },
-  appealFiled:{ who:'self', o:['Paperwork against paperwork.', 'Filed in triplicate. Again.', 'I attached the photographs.', 'I found the correct form.', 'This will go nowhere.'] },
-  appealDenied:{ who:'board', o:['The board is not persuaded.', 'Respectfully, no.', 'The original finding stands.', 'Your appeal lacked merit.', 'The committee reviewed it briefly.'] },
-  appealGranted:{ who:'self', o:['I want that in writing.', 'They said yes.', 'Someone made a mistake.', 'That worked. Somehow.', 'I am keeping the letter.'] },
-  comply:{ who:'self', o:['Fine. It is beige now.', 'I paid it.', 'It was cheaper than fighting.', 'I repainted the door.', 'It is done. I hate it.'] },
-  lien:{ who:'board', o:['A lien has been recorded.', 'Interest accrues from today.', 'Your equity now includes us.', 'This attaches to the title.', 'The county has been notified.'] },
-  meeting:{ who:'board', o:['Quorum has been assumed.', 'Refreshments are in the back.', 'Comments are limited to two minutes.', 'Meeting called to order.', 'Roll call is waived.'] },
-  voteWin:{ who:'board', o:['Adjourned. Permanently.', 'This body no longer exists.', 'The keys will be surrendered.', 'The motion carries. So noted.', 'The binders are heavy.'] },
-  voteLose:{ who:'board', o:['The motion fails.', 'Proxies were counted by management.', 'The current board remains seated.', 'Turnout was disappointing again.', 'The outcome was expected.'] },
-  duesHike:{ who:'board', o:['Dues have been adjusted upward.', 'Costs are outside our control.', 'The increase takes effect immediately.', 'This was voted on Tuesday.', 'Notice was properly posted.'] },
-  assessment:{ who:'board', o:['A special assessment is levied.', 'This is not a dues increase.', 'The pool needed unforeseen work.', 'Payment is due in full.', 'Nonpayment carries additional penalties.'] },
-  newRule:{ who:'board', o:['Mailboxes must now face east.', 'Wreaths are seasonal only.', 'Wind chimes are now prohibited.', 'Garage doors will remain closed.', 'Trash cans must be concealed.'] },
-  amendment:{ who:'board', o:['The bylaws have been amended.', 'It passed with two votes.', 'Grandfather status was granted selectively.', 'Certain owners are exempt.', 'Thank you for not reading.'] },
-  mgmtHired:{ who:'board', o:['Professional management has been retained.', 'Service levels will improve.', 'The fee is passed through.', 'They handle correspondence now.', 'The contract renews automatically.'] },
-  mgmtFired:{ who:'board', o:['The contract was not renewed.', 'Their records remain unavailable.', 'Their services are hereby terminated.', 'The transition will be seamless.', 'No cause was stated.'] },
-  boardRemoved:{ who:'board', o:['A member has stepped down.', 'The record is silent.', 'No wrongdoing is admitted.', 'He is spending time elsewhere.', 'The seat is now vacant.'] },
-  insurgent:{ who:'board', o:['A new member was seated.', 'She was not our candidate.', 'Orientation materials will be withheld.', 'The vote was close.', 'The seating is provisional.'] },
-  dirtFound:{ who:'self', o:['Someone bought a boat.', 'His brother owns the company.', 'The invoices do not match.', 'I made copies of everything.', 'Well. Look at that.'] },
-  ally:{ who:'self', o:['Finally. Backup.', 'Someone else is angry too.', 'She has been keeping notes.', 'He signed the petition.', 'Two of us now.'] },
-  spyExposed:{ who:'self', o:['She was taking the photographs.', 'That explains the timing.', 'He waved every morning.', 'The fence had a witness.', 'Everyone knows now.'] },
-  wrongAccusal:{ who:'self', o:['That was the wrong house.', 'I owe someone a casserole.', 'Nobody is waving anymore.', 'He was not the one.', 'That went poorly for me.'] },
-  mow:{ who:'self', o:['Mowed. Again.', 'Edged. Trimmed. Measured.', 'Two and a half inches.', 'Nobody will notice.', 'The lawn is legal again.'] },
-  improve:{ who:'self', o:['Six weekends. Done.', 'The permit cost more than lumber.', 'The deck exists now.', 'It looks better. Probably.', 'Someone will complain about it.'] },
-  arcApproved:{ who:'board', o:['The committee approves the plans.', 'This sets no precedent.', 'Approval is conditional and revocable.', 'The color was acceptable.', 'Do exactly what you drew.'] },
-  arcDenied:{ who:'board', o:['Denied. Try beige.', 'Resubmit in the spring.', 'The committee cited harmony concerns.', 'No reason is required.', 'The submission was incomplete.'] },
-  yardSale:{ who:'self', o:['Permit obtained. Signs approved.', 'Someone bought the ladder.', 'Two dollars for the lamp.', 'Signs come down by noon.', 'The neighbors are watching.'] },
-  overtime:{ who:'self', o:['Overtime again.', 'I do this for grass.', 'The dues do not pay themselves.', 'More hours. Same house.', 'Time and a half.'] },
-  foreclosed:{ who:'board', o:['Thank you for your years here.', 'The property has been reclaimed.', 'The sale was properly noticed.', 'The account is settled.', 'The file is hereby archived.'] },
-  soldOut:{ who:'self', o:['I took the offer.', 'The next place has no association.', 'Let them fine the next guy.', 'Somebody else can mow it.', 'The sign is up.'] },
-  dispute:{ who:'self', o:['Everyone has printed the rules.', 'It is about the pool again.', 'Two hours on parking.', 'The pickleball court is contested.', 'Nobody is backing down.'] },
-  inspection:{ who:'board', o:['An inspection is being conducted.', 'The side gate was unlocked.', 'Please remain inside.', 'No notice is required.', 'This is routine.'] },
-  drone:{ who:'board', o:['The aerial survey has begun.', 'Overhead imaging is not surveillance.', 'Do not wave at it.', 'It flies on Tuesdays.', 'Your backyard is now documented.'] },
+  citation:{ who:'board', o:['A violation has been observed. It always is.', 'The measurement was taken twice. For your benefit.', 'Photographs are on file. They are unflattering.', 'This is your first notice. Treasure it.', 'Compliance is not optional. Happiness is.', 'Your lawn has disappointed the community.', 'We take no pleasure in this. Officially.'] },
+  appealFiled:{ who:'self', o:['Paperwork against paperwork. The house always wins.', 'Filed in triplicate. Buried in quadruplicate.', 'I attached the photographs. They will not look.', 'The correct form. As if that matters.', 'This will go nowhere. I sent it anyway.', 'Hope, notarized.', 'Another envelope into the void.'] },
+  appealDenied:{ who:'board', o:['The board is not persuaded. The board is never persuaded.', 'Respectfully, no. The respect is also no.', 'Your appeal was read. Parts of it.', 'The original finding stands. It enjoys standing.', 'The committee reviewed it during lunch. Briefly.', 'Denied. The form for objecting is also denied.', 'Thank you for participating in the process.'] },
+  appealGranted:{ who:'self', o:['They said yes. Check the sky for locusts.', 'I want that in writing. Laminated.', 'A clerical error, in my favor. Cherish it.', 'That worked. Nothing works. Suspicious.', 'A win. It will cost me later.', 'I am framing the letter next to my will.'] },
+  comply:{ who:'self', o:['Fine. It is beige now. Like my soul.', 'I paid it. They win. They always win.', 'Cheaper than fighting. Everything is cheaper than fighting.', 'I repainted my own front door. For them.', 'It is done. I hate it. It is done.', 'Obedience, with a receipt.', 'Another small surrender. They add up.'] },
+  lien:{ who:'board', o:['A lien has been recorded. The county sends congratulations.', 'Interest accrues from today. It never sleeps.', 'Your equity now includes us. We decorate differently.', 'This attaches to the title. Like ivy.', 'The paperwork is permanent. Unlike you.', 'Nothing personal. It is all personal.'] },
+  meeting:{ who:'board', o:['Quorum has been assumed. Attendance is beside the point.', 'Refreshments are in the back. From last meeting.', 'Comments are limited to two minutes. Hope, generally.', 'Meeting called to order. Order was already here.', 'Roll call is waived. We know where you live.', 'The agenda was finalized before you moved in.'] },
+  voteWin:{ who:'board', o:['Adjourned. Permanently.', 'This body no longer exists. Somewhere, a binder closes.', 'The keys will be surrendered. All two hundred of them.', 'The motion carries. So noted. So ended.', 'Minutes will not be kept. No one is left to keep them.'] },
+  voteLose:{ who:'board', o:['The motion fails. As motions do.', 'Proxies were counted by management. Twice, allegedly.', 'The current board remains seated. Comfortably.', 'Turnout was disappointing. You were the turnout.', 'The outcome was expected. By us.', 'Democracy was observed. From a distance.'] },
+  duesHike:{ who:'board', o:['Dues have been adjusted upward. Adjustment only goes upward.', 'Costs are outside our control. So is sympathy.', 'The increase takes effect immediately. Retroactively, if possible.', 'This was voted on Tuesday. You were at work.', 'Budgeting is hard. Paying is yours.'] },
+  assessment:{ who:'board', o:['A special assessment is levied. Feel special.', 'This is not a dues increase. It is worse.', 'The pool needed unforeseen work. We foresaw it in 2019.', 'Payment is due in full. Grief may be paid in installments.', 'Nonpayment carries penalties. Payment also carries penalties.'] },
+  newRule:{ who:'board', o:['Mailboxes must now face east. The mailboxes know why.', 'Wreaths are seasonal. Joy is quarterly.', 'Wind chimes are prohibited. The wind may appeal.', 'Garage doors will remain closed. Like the comment period.', 'Trash cans must be concealed. Like our minutes.', 'A new rule exists. It found you already.'] },
+  amendment:{ who:'board', o:['The bylaws have been amended. Quietly.', 'It passed with two votes. Both ours.', 'Certain owners are exempt. You can guess which.', 'Grandfather status was granted. Selectively. Fondly.', 'Thank you for not reading. It helps.', 'Page ninety improved overnight.'] },
+  mgmtHired:{ who:'board', o:['Professional management has been retained. Professionally.', 'Service levels will improve. The fee already has.', 'They handle correspondence now. You will notice the tone.', 'The contract renews automatically. Forever is efficient.', 'Their invoice is in the mail. Several are.'] },
+  mgmtFired:{ who:'board', o:['The contract was not renewed. A moment of silence.', 'Their records remain unavailable. Permanently. Conveniently.', 'Their services are terminated. Their fees linger.', 'The transition will be seamless. The seams will be billed.', 'No cause was stated. None was safe to state.'] },
+  boardRemoved:{ who:'board', o:['A member has stepped down. The stairs were provided.', 'The record is silent. The record was advised to be.', 'No wrongdoing is admitted. Extensively.', 'He is spending time with family. His lawyer\'s family.', 'The seat is vacant. The grudge is not.'] },
+  insurgent:{ who:'board', o:['A new member was seated. Reluctantly.', 'She was not our candidate. It will be noted.', 'Orientation materials will be withheld. Tradition.', 'The vote was close. Unfortunately, countable.', 'The seating is provisional. Like everything here.'] },
+  dirtFound:{ who:'self', o:['Someone bought a boat. With our sidewalk money.', 'His brother owns the company. Of course he does.', 'The invoices do not match. Nothing here matches.', 'I made copies of the copies. Trust nothing.', 'Well. Look at that. Look at all of that.', 'The receipts tell a story. A crime story.'] },
+  ally:{ who:'self', o:['Backup. Finally. Probably doomed. Still.', 'Someone else is angry too. Suburban romance.', 'She has been keeping notes since 2019.', 'He signed the petition. In pencil. Baby steps.', 'Two of us now. Against the clipboard horde.', 'An ally. The board will send condolences.'] },
+  spyExposed:{ who:'self', o:['She was photographing my gnomes. My gnomes.', 'That explains the timing. And the casseroles.', 'He waved every morning. Wave data was collected.', 'The fence had a witness. The witness had a lanyard.', 'Everyone knows now. Nothing changes. But everyone knows.', 'Trust no one with lemonade.'] },
+  wrongAccusal:{ who:'self', o:['That was the wrong house. This is my life now.', 'I owe someone a casserole. And a decade.', 'Nobody waves anymore. I earned that.', 'He was not the one. There may not be one.', 'I have become the neighborhood story.', 'Paranoia has a body count. It is my reputation.'] },
+  mow:{ who:'self', o:['Mowed. Again. Forever. Until the end.', 'Two and a half inches. The legal length of joy.', 'Edged. Trimmed. Measured. Judged anyway.', 'Nobody will notice. Someone will report.', 'The lawn is legal. For now.', 'Grass grows back. Hope does not.'] },
+  improve:{ who:'self', o:['Six weekends. Done. Await the complaint.', 'The permit cost more than the lumber. Naturally.', 'The deck exists. Somewhere, a form objects.', 'It looks better. That will be a violation.', 'Improvement is provocation with lumber.', 'Built it. Loved it. Awaiting citation.'] },
+  arcApproved:{ who:'board', o:['The committee approves. This sets no precedent. Ever.', 'Approval is conditional. And revocable. And reluctant.', 'The color was acceptable. Barely. Watch yourself.', 'Do exactly what you drew. We traced it.', 'Approved. The committee is as surprised as you.'] },
+  arcDenied:{ who:'board', o:['Denied. Try beige. Try nothing.', 'Resubmit in spring. Any spring.', 'The committee cited harmony concerns. Hum along.', 'No reason is required. None was prepared.', 'The submission was incomplete. Like all dreams.'] },
+  yardSale:{ who:'self', o:['Permit obtained. Dignity pending.', 'Someone bought the ladder. Escape, for two dollars.', 'Two dollars for the lamp. It saw everything.', 'Signs down by noon. Rules, even for goodbye.', 'Sold the exercise bike. Kept the resentment.'] },
+  overtime:{ who:'self', o:['Overtime again. The house eats hours.', 'I do this for grass. Grass.', 'The dues do not pay themselves. Neither do I, apparently.', 'More hours. Same house. Less me.', 'Time and a half. Life and a quarter.'] },
+  foreclosed:{ who:'board', o:['Thank you for your years here. They were noted.', 'The property has been reclaimed. It was never really yours.', 'The sale was properly noticed. You were properly absent.', 'The account is settled. The account was the point.', 'The file is archived. Next file.'] },
+  soldOut:{ who:'self', o:['I took the offer. The offer took me.', 'The next place has no association. Allegedly.', 'Let them fine the next guy. Godspeed, next guy.', 'Somebody else can mow it now. Somebody else can break.', 'The sign is up. The white flag, technically.'] },
+  dispute:{ who:'self', o:['Everyone printed the rules. Nobody printed the point.', 'Two hours on parking. We will die here.', 'The pickleball court is contested. Like everything.', 'It is about the pool again. It is never about the pool.', 'Nobody is backing down. Nowhere to back down to.'] },
+  inspection:{ who:'board', o:['An inspection is being conducted. Remain calm. Remain inside.', 'The side gate was unlocked. Thank you for that.', 'No notice is required. Notice this.', 'This is routine. You are routine.', 'We inspect because we care. About findings.'] },
+  drone:{ who:'board', o:['The aerial survey has begun. Waving is discouraged.', 'Overhead imaging is not surveillance. Legally.', 'It flies on Tuesdays. It remembers everything.', 'Your backyard is now documented. Forever. In color.', 'Do not wave at it. It does not love you.'] },
 };
 
 // which synthesised effect accompanies each spoken cue
@@ -1540,7 +1540,7 @@ const SFX = {
 // (neural and enhanced voices first, the novelty shelf excluded) and two parts
 // are cast: the board's institutional reader and your own inner monologue.
 const Voice = {
-  lastAt:0, boardV:null, selfV:null, primed:false,
+  lastAt:0, pool:[], boardPool:[], selfPool:[], primed:false,
   AVOID:/\b(albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|junior|ralph|fred|kathy|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley)\b/,
   score(v){
     const n = (v.name || '').toLowerCase(), lang = (v.lang || '').toLowerCase();
@@ -1562,13 +1562,23 @@ const Voice = {
     if (!vs.length) return;
     const ranked = vs.map(v => [this.score(v), v]).filter(x => x[0] > 0)
       .sort((a, b) => b[0] - a[0]).map(x => x[1]);
-    if (!ranked.length){ this.boardV = this.selfV = null; return; }
-    const M = /\b(alex|daniel|evan|nathan|tom|aaron|guy|ryan|brian|christopher|eric|andrew|david|mark|james|oliver|male)\b/,
-          F = /\b(samantha|ava|allison|susan|zoe|aria|jenny|michelle|emma|libby|sonia|karen|moira|tessa|serena|kate|anna|female)\b/;
-    // the board gets the driest register on the shelf; you answer in a different voice entirely
-    this.boardV = ranked.find(v => M.test(v.name.toLowerCase())) || ranked[0];
-    this.selfV  = ranked.find(v => v !== this.boardV && F.test(v.name.toLowerCase())) ||
-                  ranked.find(v => v !== this.boardV) || this.boardV;
+    this.pool = ranked.slice(0, 8);
+    if (!this.pool.length){ this.boardPool = []; this.selfPool = []; return; }
+    const M = /\b(alex|daniel|evan|nathan|tom|aaron|guy|ryan|brian|christopher|eric|andrew|david|mark|james|oliver|rishi|arthur|gordon|jamie|lee|fred|male)\b/,
+          F = /\b(samantha|ava|allison|susan|zoe|aria|jenny|michelle|emma|libby|sonia|karen|moira|tessa|serena|kate|anna|matilda|martha|nicky|catherine|stephanie|fiona|female)\b/;
+    // ensembles, not soloists: the board owns every dry register on the shelf,
+    // and everyone else answers from the rest of the street
+    const males = this.pool.filter(v => M.test(v.name.toLowerCase()));
+    const females = this.pool.filter(v => F.test(v.name.toLowerCase()));
+    this.boardPool = (males.length ? males : this.pool).slice(0, 3);
+    const others = this.pool.filter(v => !this.boardPool.includes(v));
+    const selfCands = [...females.filter(v => !this.boardPool.includes(v)), ...others.filter(v => !females.includes(v))];
+    this.selfPool = (selfCands.length ? selfCands : others.length ? others : this.pool).slice(0, 3);
+    if (this.boardPool.length < 3){
+      // a committee of one is just a clerk — seat spare readers nobody claimed
+      const spare = this.pool.filter(v => !this.boardPool.includes(v) && !this.selfPool.includes(v));
+      this.boardPool = [...this.boardPool, ...spare].slice(0, 3);
+    }
   },
   prime(){   // iOS and Safari only wake the engine from inside a real tap
     if (this.primed || !window.speechSynthesis) return;
@@ -1586,16 +1596,26 @@ const Voice = {
     if (now - this.lastAt < 2600) return;    // never talk over itself
     this.lastAt = now;
     try{
-      if (!this.boardV) this.cast();
+      if (!this.pool.length) this.cast();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = 'en-US';
-      const cv = speaker === 'board' ? this.boardV : this.selfV;
+      // a different reader steps up for every line; the ensembles keep the board
+      // sounding like a committee and everyone else like a street full of people
+      const pool = speaker === 'board' ? this.boardPool : speaker === 'self' ? this.selfPool : this.pool;
+      const cv = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
       if (cv){ u.voice = cv; u.lang = cv.lang || 'en-US'; }
-      // with two real voices cast, pitch stays natural and the casting carries the
-      // characters; only a one-voice household falls back to a pitch split
-      const solo = !this.boardV || this.boardV === this.selfV;
-      if (speaker === 'board'){ u.rate = 0.9; u.pitch = solo ? 0.84 : 1; u.volume = 0.9; }  // institutional, unbothered
-      else { u.rate = 1.0; u.pitch = 1; u.volume = 0.8; }                                    // your own weary head
+      // delivery jitter: even a repeated voice never reads the same way twice;
+      // a one-voice household falls back to a pitch split to keep two characters
+      const solo = this.pool.length < 2;
+      if (speaker === 'board'){
+        u.rate = 0.86 + Math.random() * 0.08;
+        u.pitch = (solo ? 0.82 : 0.95) + Math.random() * 0.07;
+        u.volume = 0.9;
+      } else {
+        u.rate = 0.96 + Math.random() * 0.1;
+        u.pitch = 0.96 + Math.random() * 0.08;
+        u.volume = 0.8;
+      }
       speechSynthesis.resume();              // Chrome parks the engine when a tab sleeps
       if (speechSynthesis.speaking || speechSynthesis.pending){
         speechSynthesis.cancel();
@@ -4264,17 +4284,20 @@ document.getElementById('schemeBtn').addEventListener('click', () => {
 const GREETS = [
   'Welcome to the neighborhood. Smile at everyone. Trust no one.',
   'Oh good, you found us. Keep your voice down. The board hears everything.',
-  'Welcome home. The rulebook is two hundred pages, and they have read all of it. About you.',
-  'New neighbor. Lovely. A word of advice: measure your grass tonight.',
+  'Welcome home. The rulebook is two hundred pages. All of them apply to you.',
+  'New neighbor. Lovely. Measure your grass tonight.',
   'Welcome. Wave like you mean it. They are watching from the curtains.',
-  'Come on in. Whatever you do, do not mention the flagpole.',
+  'Come on in. Do not mention the flagpole.',
+  'You bought here. On purpose. Bless your heart.',
+  'Welcome. The last owner seemed happy too. At first.',
+  'It is a lovely street. Legally, that is a warning.',
 ];
 let greeted = false;
 document.addEventListener('pointerdown', () => {
   if (greeted) return;
   greeted = true;
   if (!document.getElementById('menu').classList.contains('hidden'))
-    setTimeout(() => Voice.say(pick(GREETS), 'self'), 350);
+    setTimeout(() => Voice.say(pick(GREETS), 'any'), 350);   // any neighbor might be the one at the fence
 }, { capture:true });
 
 // try to start the band the moment the menu opens — most browsers hold the doors
