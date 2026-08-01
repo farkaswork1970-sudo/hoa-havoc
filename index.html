@@ -331,6 +331,13 @@
   .vio .appeal{background:#6a5a8a; color:#efe6ff;}
   .vio .stage{color:#c9b8e0; font-size:11.5px; font-style:italic; margin:3px 0;}
   .vio .block{color:#ffc9a6; font-size:12px; margin:3px 0;}
+  .bicker{
+    background:var(--strip); border:1px solid var(--line); border-radius:8px;
+    padding:7px 10px; margin:8px 0; text-align:left; font-size:12.5px; line-height:1.5;
+  }
+  .bicker .bh{color:var(--dim); font-size:10.5px; letter-spacing:1.5px; font-weight:bold; margin-bottom:4px;}
+  .bicker .bl{margin:2px 0;}
+  .bicker .bl b{color:var(--gold);}
   #boardList, #voteList{text-align:left; font-size:13.5px; line-height:1.5; margin:10px 0;}
   #boardList div{margin-bottom:6px; padding:6px 10px; background:var(--box); border-radius:8px; border:1px solid var(--line);}
   #voteList div{margin-bottom:4px; padding:5px 10px; background:var(--box); border-radius:8px; border:1px solid var(--line);}
@@ -533,6 +540,7 @@
   <div class="panel">
     <h2 id="meetTitle">🗳️ THE ANNUAL MEETING</h2>
     <p id="meetIntro"></p>
+    <div id="meetBicker"></div>
     <div id="voteList" class="hidden"></div>
     <p id="meetResult" class="hidden" style="font-size:16px;font-weight:bold;"></p>
     <button class="btn alt" id="voteBtn">Call the Recall Vote 🗳️</button>
@@ -3356,7 +3364,16 @@ function endMonth(){
   resolveTips();
   const lines = boardPhase();
   document.getElementById('boardMonth').textContent = 'Month ' + S.month;
-  document.getElementById('boardList').innerHTML = lines.map(l => `<div>${l}</div>`).join('');
+  // some months the door opens early and you catch them mid-argument
+  let squabbleOdds = 0.4;
+  if (S.anger >= 50) squabbleOdds += 0.2;
+  if (S.board.some(m => m.insurgent && !m.removed)) squabbleOdds += 0.25;
+  if ((S.comps || 100) < 95) squabbleOdds += 0.15;
+  const squabble = Math.random() < Math.min(0.85, squabbleOdds) ? boardBicker() : null;
+  document.getElementById('boardList').innerHTML =
+    bickerHTML(squabble, '🥊 OVERHEARD BEFORE THE CALL TO ORDER') +
+    lines.map(l => `<div>${l}</div>`).join('');
+  if (squabble) for (const l of squabble) log(`🥊 ${l.m.arch.ico} <b>${l.m.name}:</b> “${l.t}”`, 'info');
   for (const l of lines) log(l, l.includes('nothing found') || l.includes('quiet') ? 'good' : 'bad');
   S.mode = 'board';
   document.getElementById('boardModal').classList.remove('hidden');
@@ -3424,7 +3441,11 @@ const ACTIONS = [
   { id:'meet',  ico:'🏛️', name:'Attend Board Meeting', cost:'1⚡', can:() => S.ap >= 1 && !S.planRevealed,
     run(){ S.ap--; S.planRevealed = true; S.anger = Math.max(0, S.anger - 5);
       const desc = S.plan.length ? S.plan.map(p => PLAN_DESC[p.kind]).join(', ') : 'nothing — an empty agenda';
-      log(`🏛️ You sat through 3 hours of it. This month's real agenda: <b>${desc}</b>. (−5 😠 for showing up.)`, 'tip'); } },
+      log(`🏛️ You sat through 3 hours of it. This month's real agenda: <b>${desc}</b>. (−5 😠 for showing up.)`, 'tip');
+      if (Math.random() < 0.55){
+        const ex = boardBicker();
+        if (ex) log(`🥊 Hour two was ${ex[0].m.arch.ico} <b>${ex[0].m.name}</b> — “${ex[0].t}” — and ${ex[1].m.arch.ico} <b>${ex[1].m.name}</b>: “${ex[1].t}”`, 'info');
+      } } },
   { id:'law',   ico:'⚖️', name:'Retain Lawyer', cost:'1⚡ · $250', can:() => S.ap >= 1 && S.cash >= 250 && !S.lawyer,
     run(){ S.ap--; S.cash -= 250; S.lawyer = true; S.anger = Math.min(100, S.anger + 10);
       log('⚖️ You retained Fine, Grievance & Repeat LLP. Violations can now be CONTESTED. The board is livid (+10 😠).', 'tip');
@@ -3795,12 +3816,80 @@ document.getElementById('socClose').addEventListener('click', () => {
 
 // ================= meetings & the recall vote =================
 const meetingModal = document.getElementById('meetingModal');
+// ================= the board argues with itself =================
+// every archetype has a way of starting a fight and a way of ending one badly;
+// the exchanges surface in meetings so the player can watch the committee eat itself
+const BICKER = {
+  enforcer: {
+    open:["{other} has been approving things. I have a list.", "Setback violations are up nine percent. I counted them personally.", "Somebody waved the Hendersons through. Somebody at this table.", "I move we re-measure every lawn. Tonight.", "Leniency is how sheds happen."],
+    retort:["Cite me. I dare you. I also have the forms.", "Not everything is a violation. Almost everything. Not everything.", "You measured my hedge at midnight. We all saw the flashlight.", "File a complaint. The committee is me.", "Your ruler is not a personality."],
+  },
+  treasurer: {
+    open:["The reserve is fine. Stop asking about the reserve.", "Line item nine is nobody's business.", "We cannot afford {other}'s little crusade.", "The audit found nothing. I checked the audit myself.", "Dues must rise. The alternative is knowing where the money went."],
+    retort:["There is no budget for that. There is no budget for anything.", "Denied. Fiscally.", "Show me an invoice and I will show you a mystery.", "The money is allocated. Somewhere. Broadly.", "We will discuss it in executive session. Alone. Me."],
+  },
+  parliamentarian: {
+    open:["Point of order. Nothing tonight has been in order.", "The last vote was invalid. The one before it, also invalid.", "Robert's Rules, page forty. I will wait.", "{other} seconded their own motion again.", "The minutes contradict the minutes."],
+    retort:["Out of order. You are out of order.", "That requires a motion, a second, and a miracle.", "Table it. Table everything. The table is load-bearing.", "Procedure is not your friend tonight.", "I move to strike that from a record we do not keep."],
+  },
+  megaphone: {
+    open:["The Facebook group is furious. All three of them.", "I already announced it. So it is decided.", "Someone leaked the agenda. I will find them. I posted it. Still.", "Community sentiment is with me. I am the community sentiment.", "{other} muted me in the group chat. Motion to censure."],
+    retort:["Post about it. Nobody reads it.", "The newsletter is not a legal instrument.", "You announced my resignation once. I was on vacation.", "Engagement is not governance.", "Caps lock is not a second."],
+  },
+  founder: {
+    open:["In 1987 we did not need a vote. We had standards.", "The original families would weep. Both of them.", "This street was beige before beige was policy.", "I planted that median. I decide what dies in it.", "{other} has lived here eleven years. Practically a renter."],
+    retort:["We have always done it this way. Since before you.", "History disagrees with you. I am history.", "Your predecessor said the same thing. We outlasted her.", "Noted. Overruled. Traditionally.", "The bylaws were fine when I wrote them in the garage."],
+  },
+  declarant: {
+    open:["The covenants are clear. I wrote them on a Friday.", "Phase two was always going to be townhomes. Read the plat.", "My company retains three votes per unsold lot. Forever.", "The clubhouse defect claims are frivolous. I built the clubhouse.", "{other} keeps saying developer like it is an accusation."],
+    retort:["Take it up with the declarant. Which is me.", "The warranty expired. Conveniently. Legally.", "I hold the votes. You hold opinions.", "That was a construction feature, not a defect.", "Sue me. The indemnity clause says you cannot."],
+  },
+  insurgent: {
+    open:["I read the bylaws. All of them. You should try it.", "Why does line nine say miscellaneous consulting?", "The homeowners can hear us. That is the point of a meeting.", "I move we publish the minutes. The real ones.", "Who approved the president's fence? Show of hands."],
+    retort:["That is not in the bylaws. I checked. I am the only one who checked.", "Noted for the record. The record I am now keeping.", "The homeowners sent me. Wave to them.", "You keep saying tradition. The word you want is habit."],
+  },
+  _gavel:["Enough. Both of you. The gavel is decorative, but I will use it.", "We are a family. A family in litigation.", "Take it to executive session, where everything true is said.", "The homeowners are watching. Smile, and argue quietly.", "Adjourned, before this becomes minutes.", "This is why we stopped recording the meetings."],
+  _themed:["The {name} again. Item one, apparently. Forever.", "I refuse to spend another meeting on the {name}.", "The {name} has its own folder now. Its own drawer."],
+};
+function bickerKey(m){
+  if (m.insurgent) return 'insurgent';
+  const k = Object.keys(BOARD_ARCHS).find(x => BOARD_ARCHS[x] === m.arch);
+  return (k && BICKER[k]) ? k : 'parliamentarian';
+}
+function boardBicker(){
+  const act = activeBoard();
+  if (act.length < 2) return null;
+  let a, b;
+  const ins = act.filter(m => m.insurgent), old = act.filter(m => !m.insurgent);
+  if (ins.length && old.length && Math.random() < 0.7){
+    a = pick(ins); b = pick(old);            // your insurgent picks the fight; the old guard swats
+  } else {
+    a = pick(act); b = pick(act.filter(m => m !== a));
+  }
+  const lines = [];
+  const themed = S.theme && !a.insurgent && Math.random() < 0.22;
+  const openPool = themed ? BICKER._themed : BICKER[bickerKey(a)].open;
+  lines.push({ m:a, t: pick(openPool).replaceAll('{other}', b.name).replaceAll('{name}', S.theme ? S.theme.name : 'agenda') });
+  lines.push({ m:b, t: pick(BICKER[bickerKey(b)].retort).replaceAll('{other}', a.name) });
+  const pres = act.find(m => m.president && m !== a && m !== b);
+  if (pres && Math.random() < 0.55) lines.push({ m:pres, t: pick(BICKER._gavel) });
+  return lines;
+}
+function bickerHTML(ex, head){
+  if (!ex) return '';
+  return '<div class="bicker"><div class="bh">' + head + '</div>' +
+    ex.map(l => '<div class="bl">' + l.m.arch.ico + ' <b>' + l.m.name + ':</b> \u201C' + l.t + '\u201D</div>').join('') + '</div>';
+}
 function openMeeting(title, intro){
   S.mode = 'meeting';
   S.meetingHeld = true;
   cue('meeting');
   document.getElementById('meetTitle').textContent = title;
   document.getElementById('meetIntro').textContent = intro;
+  // the board bickers in front of everyone; that is what the folding chairs are for
+  const ex = boardBicker();
+  document.getElementById('meetBicker').innerHTML = bickerHTML(ex, '🥊 THE BOARD, IN FRONT OF EVERYONE');
+  if (ex) setTimeout(() => Voice.say(ex[0].t, 'board'), 3100);   // after the meeting line clears the throttle
   document.getElementById('voteList').classList.add('hidden');
   document.getElementById('meetResult').classList.add('hidden');
   document.getElementById('voteBtn').classList.remove('hidden');
