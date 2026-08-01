@@ -106,6 +106,21 @@
   .nb.exposed{border-color:var(--red); opacity:.75;}
   .nb.hostile{opacity:.5;}
   .nb.ally{border-color:#5a965a;}
+  /* one-tap shortcuts: chat from the card, favors from the board row, arrows in the dossiers */
+  .qb{
+    font-family:inherit; background:#3a4a63; color:#cfe2ff; border:1px solid #5a7096;
+    border-radius:6px; font-size:11.5px; font-weight:bold; padding:2px 8px; cursor:pointer;
+  }
+  .qb:hover{filter:brightness(1.25);}
+  .qb:disabled{opacity:.35; cursor:not-allowed;}
+  .nb .qb{margin-top:3px;}
+  .nb.rounds{background:#2b3a52; border-color:#5a7096;}
+  .nb.rounds:hover{border-color:#9fd0ff;}
+  .nb.rounds .rel{color:#9fd0ff;}
+  .nb.spent{opacity:.45; cursor:default;}
+  .nb.spent:hover{border-color:var(--line);}
+  .bmq{float:right; display:flex; gap:4px; margin-left:6px;}
+  .modnav{display:flex; flex-direction:column; gap:5px;}
   #main{
     display:flex; gap:10px; background:var(--panel); border:2px solid var(--line); border-top:none;
     border-radius:0 0 12px 12px; padding:10px; align-items:stretch;
@@ -268,8 +283,8 @@
   #boardList, #voteList{text-align:left; font-size:13.5px; line-height:1.5; margin:10px 0;}
   #boardList div{margin-bottom:6px; padding:6px 10px; background:#1d2716; border-radius:8px; border:1px solid var(--line);}
   #voteList div{margin-bottom:4px; padding:5px 10px; background:#1d2716; border-radius:8px; border:1px solid var(--line);}
-  #socHead{display:flex; align-items:center; gap:14px; text-align:left; margin-bottom:8px;}
-  #socAv{font-size:48px;}
+  #socHead, #bmHead{display:flex; align-items:center; gap:14px; text-align:left; margin-bottom:8px;}
+  #socAv, #bmAv{font-size:48px;}
   #socName{font-size:22px; font-weight:bold;}
   #socRel{color:var(--gold); font-size:13px; letter-spacing:2px;}
   #socStatus{font-size:12.5px; color:#c9d6b4;}
@@ -297,6 +312,7 @@
     #ticker{font-size:12.5px;}
     #nstrip.on{flex-wrap:wrap;}
     .nb{flex:1 1 30%; padding:6px 2px 7px;}
+    .qb{padding:5px 10px; font-size:12.5px;}
     #main{flex-direction:column; padding:8px;}
     #actGrid{grid-template-columns:1fr 1fr;}
     .act{padding:11px 10px; font-size:13px;}
@@ -425,6 +441,10 @@
         <div id="socRel">★☆☆</div>
         <div id="socStatus"></div>
       </div>
+      <div class="modnav">
+        <button class="qb" id="socPrev" title="Previous neighbor">◀</button>
+        <button class="qb" id="socNext" title="Next neighbor">▶</button>
+      </div>
     </div>
     <div id="socLog"></div>
     <div>
@@ -453,12 +473,16 @@
 
 <div id="bmModal" class="overlay hidden">
   <div class="panel">
-    <div id="socHead">
+    <div id="bmHead">
       <div id="bmAv">📏</div>
       <div style="flex:1">
         <div id="bmName">Eugenia</div>
         <div id="bmRole"></div>
         <div id="bmStatus"></div>
+      </div>
+      <div class="modnav">
+        <button class="qb" id="bmPrev" title="Previous board member">◀</button>
+        <button class="qb" id="bmNext" title="Next board member">▶</button>
       </div>
     </div>
     <div id="bmDirt"></div>
@@ -1003,8 +1027,8 @@ const TUTORIAL_STEPS = [
   { t:'📊 Your Stats', b:'💵 <b>Cash</b> — pays for everything; dues drain it monthly.<br>🏠 <b>Equity</b> — your health bar. Liens, blight, and market shocks eat it.<br>🛠️ <b>Condition</b> — decays every month. Below 50% inspections cite you; below 40% equity rots. At 80%+ you get <b>+1⚡</b>.<br>😠 <b>Board anger</b> — angrier boards act more each month.<br>📸 <b>Evidence</b> — fuels legal contests AND gives scared neighbors courage to vote.<br>⭐ <b>Reputation</b> — at 8+ you get <b>+1⚡</b>; fence-sitters won\'t back a nobody.<br>🌳 <b>Commons</b> — the board lets them rot, dragging everyone\'s equity. Fix them yourself. Every amenity you ticked at setup wears them down faster, bills you monthly, and eventually fires a capital assessment nobody budgeted for.<br>📞 <b>Communication</b> — a separate, generous budget for chats, favors, and planted messages. Talk is cheap; use lots of it.<br>📈 <b>Comparables</b> — the neighborhood\'s tracked sale prices. Your equity drifts with them, and falling comps radicalize everyone against the board.' },
   { t:'⚡ Actions', b:'🌱 <b>Mow</b> before inspections — check your board for an Enforcer.<br>💼 <b>Overtime</b> pays more each consecutive month ($80→$160), double in 🔥 crunch months.<br>🏷️ <b>Yard Sale</b> scales with reputation.<br>📸 <b>Document</b> early — you\'ll want 3+ evidence at every vote.<br>🏛️ <b>Attend the meeting</b> to learn the board\'s true monthly plan. Costs 1⚡; never lies.<br>🔨 <b>Improvements</b> boost equity — but where an <b>Architectural Review Committee</b> exists you must 📐 <b>submit plans first</b>, wait out the review, and survive an approval roll. Build without the stamped form and the citation arrives the same week, no warning stage. At maximum review authority they can even re-open a project they already approved (the street finds that outrageous, which is worth ⭐ to you).<br>⚖️ <b>The lawyer</b> unlocks contests and shakes up alliances.' },
   { t:'📋 Violations', b:'Citations have deadlines. Miss one: the fine is charged and it <b>escalates</b> (doubled). Miss again: <b>lien</b>, −15 equity.<br><br>✅ <b>Comply</b> — pay half the fine, done.<br>⚖️ <b>Contest</b> — needs the lawyer, $30, and 1📸. Always wins.<br>📨 <b>Appeal</b> — costs 1📞 and freezes the deadline while it grinds through <b>filing → review → hearing</b>. Expect obstructions: superseded forms, "lost" submissions, notarization fees, hearings rescheduled because the chair "had a thing". Each one must be cleared before the appeal moves.<br><br>Appeals <b>can be won</b> — the odds are shown live. They rise with 📸 evidence, a lawyer, your ⭐ reputation, allies, and above all <b>friends on the board</b>. They fall with board anger, and a petty, grudge-holding board denies almost everything. On a tyrannical setting, don\'t appeal without an insider.' },
-  { t:'🏘️ Neighbors', b:'Every neighbor is secretly a truthful <b>friend</b>, a scared <b>fence-sitter</b>, or a <b>deceiver</b> reporting to the board. All of them offer intel about the board\'s secret monthly plan — deceivers\' first tip is TRUE to earn your trust.<br><br>Watch the <b>✓/✗ record</b> on their card — but carefully: friends are occasionally <i>honestly wrong</i>, and good spies are right most of the time. Expect a year of chatter before you can truly sort the street. 🚨 <b>Accuse</b> only with a pattern, not a single ✗.<br><br>🗣️ Amenities also start <b>standing arguments</b> — the pool heater, the pond fence, who gets Tuesdays in the clubhouse. You will be asked to take a side, and you cannot please both camps: one bloc warms to you, the other cools. Staying out of it annoys everyone slightly and costs ⭐.<br><br>Every neighbor also <b>sways a circle of households</b> (shown in their dossier) — and 🌐 super-connectors float through every circle: message carriers as allies, wide-reach spies otherwise. 📨 <b>Plant messages</b> (1📞) to win blocs before a vote — through the wrong person, your words come back rearranged. And neighbors <b>sell and move</b>: their replacement inherits the circle with an unknown allegiance.' },
-  { t:'🏛️ Working the Board', b:'Each member has an archetype (📏 Enforcer, 🧮 Treasurer-for-Life, 📜 Parliamentarian, 📢 Megaphone, 🕰️ Founder, 🏗️ Declarant) and <b>pushes their own obsessions onto the agenda</b>. Every board action in the log is signed by its author. <b>Click any member</b> to work them:<br><br>🎁 <b>Do them a favor</b> (1📞+$30) — buys trust. At ★★ they start letting your violations slide and taking your appeals seriously; some become quiet allies who leak the agenda.<br>👍 <b>Endorse their agenda</b> (1📞) — cheap trust and calms the board, but they push their pet issue twice as hard. Flattery has a price.<br>🔍 <b>Dig for dirt</b> (1⚡) — hunt real misconduct: breach of fiduciary duty, preferential enforcement, neglect of common areas, procedural violations, retaliation. Trust and evidence make digging easier; get caught and the board hardens.<br>⚖️ <b>File a governance complaint</b> (needs 2 🗂️) — move to remove them. Fail and they retaliate; succeed and a <b>seat opens</b>.<br><br>🗳️ Then <b>run one of your allies</b> for the vacancy. Insurgents kill an agenda item every month, hand you the agenda free, and swing appeals. <b>Control a majority of seats and you win</b> — you don\'t dissolve the board, you take it.' },
+  { t:'🏘️ Neighbors', b:'Every neighbor is secretly a truthful <b>friend</b>, a scared <b>fence-sitter</b>, or a <b>deceiver</b> reporting to the board. All of them offer intel about the board\'s secret monthly plan — deceivers\' first tip is TRUE to earn your trust.<br><br>💬 The button on each card chats in <b>one tap</b>, and ☕ <b>Make the Rounds</b> (front of the strip) chats the whole street in one click until 📞 runs out. Open a card only for the deeper work — helping, planting, alliances — and flip between neighbors with the ◀ ▶ arrows.<br><br>Watch the <b>✓/✗ record</b> on their card — but carefully: friends are occasionally <i>honestly wrong</i>, and good spies are right most of the time. Expect a year of chatter before you can truly sort the street. 🚨 <b>Accuse</b> only with a pattern, not a single ✗.<br><br>🗣️ Amenities also start <b>standing arguments</b> — the pool heater, the pond fence, who gets Tuesdays in the clubhouse. You will be asked to take a side, and you cannot please both camps: one bloc warms to you, the other cools. Staying out of it annoys everyone slightly and costs ⭐.<br><br>Every neighbor also <b>sways a circle of households</b> (shown in their dossier) — and 🌐 super-connectors float through every circle: message carriers as allies, wide-reach spies otherwise. 📨 <b>Plant messages</b> (1📞) to win blocs before a vote — through the wrong person, your words come back rearranged. And neighbors <b>sell and move</b>: their replacement inherits the circle with an unknown allegiance.' },
+  { t:'🏛️ Working the Board', b:'Each member has an archetype (📏 Enforcer, 🧮 Treasurer-for-Life, 📜 Parliamentarian, 📢 Megaphone, 🕰️ Founder, 🏗️ Declarant) and <b>pushes their own obsessions onto the agenda</b>. Every board action in the log is signed by its author. <b>Click any member</b> to work them — the 🎁 👍 buttons sit right on the list for one-click trust-building, and ◀ ▶ arrows flip between dossiers:<br><br>🎁 <b>Do them a favor</b> (1📞+$30) — buys trust. At ★★ they start letting your violations slide and taking your appeals seriously; some become quiet allies who leak the agenda.<br>👍 <b>Endorse their agenda</b> (1📞) — cheap trust and calms the board, but they push their pet issue twice as hard. Flattery has a price.<br>🔍 <b>Dig for dirt</b> (1⚡) — hunt real misconduct: breach of fiduciary duty, preferential enforcement, neglect of common areas, procedural violations, retaliation. Trust and evidence make digging easier; get caught and the board hardens.<br>⚖️ <b>File a governance complaint</b> (needs 2 🗂️) — move to remove them. Fail and they retaliate; succeed and a <b>seat opens</b>.<br><br>🗳️ Then <b>run one of your allies</b> for the vacancy. Insurgents kill an agenda item every month, hand you the agenda free, and swing appeals. <b>Control a majority of seats and you win</b> — you don\'t dissolve the board, you take it.' },
   { t:'🗳️ Meetings & the Recall', b:'The <b>annual meeting</b> comes every 12th month. With enough allies you can 📢 <b>petition</b> a special meeting early (re-usable after a failed vote).<br><br>The vote is <b>community-wide</b>: every home casts a ballot. Primaries vote their conscience (friends need to know you; fence-sitters need ★★ trust, evidence, and ⭐5+ rep; unexposed deceivers vote no) — and each one <b>delivers their influence circle</b>, scaled by how much you\'ve swayed it. Unaffiliated homes follow your reputation. Falling 📈 comps make every group angrier at the board. Win the majority of ballots.<br><br>⚠️ And if the board ever hires a <b>management company</b>, everyone\'s equity bleeds monthly — rally enough allies and 🔥 fire them to claw back every point they drained.' },
   { t:'🤖 AI & 💾 Saving', b:'The <b>🤖 AI assistant</b> is a deal with the devil: ON, you get a monthly strategic advisor that reads the field and sometimes leaks the board\'s real plans — but <b>everyone gets AI</b>: the board acts more often, files algorithmic 3 AM citations, and "optimizes" your dues. Toggle it anytime; decide if the intel is worth the arms race.<br><br>🕵️ Twice a year, with evidence banked and a source who talks to you, you can ask the assistant for a <b>secret</b> — something the neighborhood buried, usually about whatever it cannot stop arguing over. <b>You are never told if it is true.</b> Keep it, use it as leverage, spread it, or file it as misconduct: a true secret is the biggest single swing in the game, and a false one costs you the street. Corroborating with a neighbor helps — if you can tell which neighbors to believe.<br><br>💾 The game <b>autosaves every month</b> — close the tab whenever; the menu will offer to resume. Good luck. The board already knows you\'re reading this.<br><br><span style="opacity:.7;font-size:12.5px;">HOA Havoc — © 2026 BigSpoke AI. All rights reserved.</span>' },
 ];
@@ -1769,7 +1793,27 @@ function renderBoard(){
     el.innerHTML = `${m.arch.ico} <b>${m.name}</b>${badge}${stars}${dirt} — ${m.removed ? '<i>removed from the board</i>' : m.arch.title}` +
       `<br><span class="bd">${m.removed ? 'The seat sits empty. For now.' : m.arch.desc}</span>`;
     el.title = m.removed ? `${m.name} was removed.` : `${m.name} — click to work them: favors, endorsements, or dig for misconduct.`;
-    if (!m.removed) el.addEventListener('click', () => openBoardMember(i));
+    if (!m.removed){
+      el.addEventListener('click', () => openBoardMember(i));
+      if (!m.insurgent && m.trust < 3){
+        const q = document.createElement('span');
+        q.className = 'bmq';
+        const fav = document.createElement('button');
+        fav.className = 'qb';
+        fav.textContent = m.favorMonth === S.month ? '🎁✓' : '🎁';
+        fav.disabled = !canFavor(m);
+        fav.title = m.favorMonth === S.month ? `Already did ${m.name} a favor this month` : `Do ${m.name} a favor — 1📞 · $30 (+1 trust)`;
+        fav.addEventListener('click', ev => { ev.stopPropagation(); quickFavor(i); });
+        const end = document.createElement('button');
+        end.className = 'qb';
+        end.textContent = m.endorseMonth === S.month ? '👍✓' : '👍';
+        end.disabled = !canEndorse(m);
+        end.title = m.endorseMonth === S.month ? `Already endorsed ${m.name} this month` : `Endorse ${m.name}'s agenda — 1📞 (+1 trust, −4 😠, fuels their pet plan)`;
+        end.addEventListener('click', ev => { ev.stopPropagation(); quickEndorse(i); });
+        q.appendChild(fav); q.appendChild(end);
+        el.insertBefore(q, el.firstChild);
+      }
+    }
     box.appendChild(el);
   });
   if (S.seatOpen > 0){
@@ -1862,10 +1906,10 @@ document.getElementById('bmClose').addEventListener('click', () => {
   if (S.mode === 'board-member') S.mode = 'playing';
   renderBoard(); render();
 });
-document.getElementById('bmFavorBtn').addEventListener('click', () => {
-  if (S.boardTarget == null || S.comms < 1 || S.cash < 30) return;
-  const m = S.board[S.boardTarget];
-  if (m.trust >= 3 || m.favorMonth === S.month) return;
+// shared cores — reached from the dossier buttons and the one-click row shortcuts
+function canFavor(m){ return !m.removed && S.comms >= 1 && S.cash >= 30 && m.trust < 3 && m.favorMonth !== S.month; }
+function canEndorse(m){ return !m.removed && S.comms >= 1 && m.trust < 3 && m.endorseMonth !== S.month; }
+function doFavor(m){
   S.comms--; S.cash -= 30; m.trust = Math.min(3, m.trust + 1); m.favorMonth = S.month;
   log(`🎁 You ${pick(['dropped off a pie for', 'fixed the sticky gate for', 'watched the dog for', 'brought in the trash cans for'])} <b>${m.name}</b>. ` +
       `They were charmed despite themselves. (trust ★${m.trust})`, 'good');
@@ -1873,18 +1917,52 @@ document.getElementById('bmFavorBtn').addEventListener('click', () => {
     m.ally = true;
     log(`🤝 <b>${m.name}</b> lowers their voice: "Between us — some of what this board does isn't right." You have a friend on the inside.`, 'tip');
   }
-  renderBoardMember(); renderBoard(); render();
-});
-document.getElementById('bmEndorseBtn').addEventListener('click', () => {
-  if (S.boardTarget == null || S.comms < 1) return;
-  const m = S.board[S.boardTarget];
-  if (m.trust >= 3 || m.endorseMonth === S.month) return;
+}
+function doEndorse(m){
   S.comms--; m.trust = Math.min(3, m.trust + 1); m.endorseMonth = S.month; m.endorsed = true;
   S.anger = Math.max(0, S.anger - 4);
   log(`👍 You told <b>${m.name}</b> you're fully behind their vision for the community. They glowed. ` +
       `(trust ★${m.trust}, −4 😠) — they will now push <i>${PLAN_DESC[m.arch.kinds[0]]}</i> harder, which is the price of flattery.`, 'info');
+}
+function quickFavor(i){
+  if (!S || S.mode !== 'playing') return;
+  const m = S.board[i];
+  if (!canFavor(m)) return;
+  doFavor(m);
+  renderBoard(); render();
+}
+function quickEndorse(i){
+  if (!S || S.mode !== 'playing') return;
+  const m = S.board[i];
+  if (!canEndorse(m)) return;
+  doEndorse(m);
+  renderBoard(); render();
+}
+document.getElementById('bmFavorBtn').addEventListener('click', () => {
+  if (S.boardTarget == null) return;
+  const m = S.board[S.boardTarget];
+  if (!canFavor(m)) return;
+  doFavor(m);
   renderBoardMember(); renderBoard(); render();
 });
+document.getElementById('bmEndorseBtn').addEventListener('click', () => {
+  if (S.boardTarget == null) return;
+  const m = S.board[S.boardTarget];
+  if (!canEndorse(m)) return;
+  doEndorse(m);
+  renderBoardMember(); renderBoard(); render();
+});
+function bmNav(d){
+  if (S.boardTarget == null || !S.board.length) return;
+  const N = S.board.length;
+  let j = S.boardTarget;
+  for (let k = 0; k < N; k++){ j = (j + d + N) % N; if (!S.board[j].removed) break; }
+  S.boardTarget = j;
+  renderBoardMember();
+  beep(620, 0.04, 'sine', 0.02);
+}
+document.getElementById('bmPrev').addEventListener('click', () => bmNav(-1));
+document.getElementById('bmNext').addEventListener('click', () => bmNav(1));
 document.getElementById('bmDigBtn').addEventListener('click', () => {
   if (S.boardTarget == null || S.ap < 1) return;
   const m = S.board[S.boardTarget];
@@ -2537,6 +2615,10 @@ function startMonth(){
   }
   resolveKeptSecret();
   idleTicker();
+  // the strip and board rows carry month-stamped states (chatted, favored, endorsed)
+  // and comms-gated buttons — a new month must redraw them or they stay spent
+  renderStrip();
+  renderBoard();
   render();
   saveGame();
 }
@@ -3413,6 +3495,16 @@ function renderStrip(){
   if (!S.factions){ nstrip.classList.remove('on'); return; }
   nstrip.classList.add('on');
   nstrip.innerHTML = '';
+  // one card that walks the whole street: chats every willing neighbor until 📞 runs out
+  const todo = S.neighbors.filter(n => !n.exposed && !n.hostile && n.chattedMonth !== S.month).length;
+  const nChats = Math.min(todo, S.comms);
+  const r = document.createElement('div');
+  r.className = 'nb rounds' + (nChats ? '' : ' spent');
+  r.innerHTML = `<div class="av">☕</div><span class="nm">Make the Rounds</span>` +
+    `<div class="rel">${nChats ? `chat ${nChats} · ${nChats}📞` : todo ? 'out of 📞' : 'street covered'}</div><div class="rec">&nbsp;</div>`;
+  r.title = 'One click: chat every neighbor still willing to talk, until the phone budget runs out.';
+  if (nChats) r.addEventListener('click', chatAll);
+  nstrip.appendChild(r);
   S.neighbors.forEach((n, i) => {
     const el = document.createElement('div');
     el.className = 'nb' + (n.exposed ? ' exposed' : '') + (n.hostile ? ' hostile' : '') + (n.alliance && !n.exposed ? ' ally' : '');
@@ -3424,6 +3516,16 @@ function renderStrip(){
                n.hostile ? `${n.name} — no longer speaks to you` :
                `${n.name} — ${REL_NAMES[n.rel]}. ✓/✗ = tip track record. Click to interact.`;
     el.addEventListener('click', () => openSocial(i));
+    if (!n.exposed && !n.hostile){
+      const q = document.createElement('button');
+      q.className = 'qb';
+      const done = n.chattedMonth === S.month;
+      q.textContent = done ? '💬✓' : '💬';
+      q.disabled = done || S.comms < 1;
+      q.title = done ? `Already chatted with ${n.name} this month` : `Chat with ${n.name} — 1📞, no card-opening required`;
+      q.addEventListener('click', ev => { ev.stopPropagation(); quickChat(i); });
+      el.appendChild(q);
+    }
     nstrip.appendChild(el);
   });
 }
@@ -3468,10 +3570,8 @@ function renderSocial(){
   document.getElementById('allyBtn').textContent = n.alliance ? '🤝 Allied' : '🤝 Alliance (1⚡)' + (n.rel < 2 ? ' — need ★★' : '');
   document.getElementById('accuseBtn').disabled = n.accused || S.ap < 1;
 }
-document.getElementById('chatBtn').addEventListener('click', () => {
-  if (S.socialTarget == null || S.comms < 1) return;
-  const n = S.neighbors[S.socialTarget];
-  if (n.chattedMonth === S.month) return;
+// the one true chat — the modal button, the card shortcut, and the rounds all land here
+function chatWith(n){
   S.comms--; n.chattedMonth = S.month;
   if ((S.cohesion ?? 0.5) >= 0.67 && n.tips.length === 0 && n.rel < 3){
     n.rel++;
@@ -3479,9 +3579,48 @@ document.getElementById('chatBtn').addEventListener('click', () => {
   }
   const tip = makeTip(n);
   log(`${n.ico} <b>${n.name}</b>: "${tip.text}"`, 'tip');
+  return tip;
+}
+function quickChat(i){
+  if (!S || S.mode !== 'playing' || S.comms < 1) return;
+  const n = S.neighbors[i];
+  if (n.exposed || n.hostile || n.chattedMonth === S.month) return;
+  const tip = chatWith(n);
+  setTicker(`${n.ico} ${n.name}: "${tip.text}"`);
+  renderStrip(); render();
+}
+function chatAll(){
+  if (!S || S.mode !== 'playing' || S.comms < 1) return;
+  const todo = S.neighbors.filter(n => !n.exposed && !n.hostile && n.chattedMonth !== S.month);
+  if (!todo.length) return;
+  SFX.play('phone');
+  log(`☕ <b>You make the rounds.</b> Porch by porch, driveway by driveway.`, 'info');
+  let done = 0;
+  for (const n of todo){
+    if (S.comms < 1) break;
+    chatWith(n); done++;
+  }
+  const left = todo.length - done;
+  setTicker(`☕ You made the rounds — ${done} conversation${done === 1 ? '' : 's'}.` +
+    (left ? ` ${left} neighbor${left === 1 ? '' : 's'} will keep — you're out of 📞.` : ''));
+  renderStrip(); render();
+}
+document.getElementById('chatBtn').addEventListener('click', () => {
+  if (S.socialTarget == null || S.comms < 1) return;
+  const n = S.neighbors[S.socialTarget];
+  if (n.exposed || n.hostile || n.chattedMonth === S.month) return;
+  const tip = chatWith(n);
   setTicker(`${n.ico} ${n.name}: "${tip.text}"`);
   renderSocial(); renderStrip(); render();
 });
+function socNav(d){
+  if (S.socialTarget == null || !S.neighbors.length) return;
+  S.socialTarget = (S.socialTarget + d + S.neighbors.length) % S.neighbors.length;
+  renderSocial();
+  beep(700, 0.04, 'sine', 0.02);
+}
+document.getElementById('socPrev').addEventListener('click', () => socNav(-1));
+document.getElementById('socNext').addEventListener('click', () => socNav(1));
 document.getElementById('socHelpBtn').addEventListener('click', () => {
   if (S.socialTarget == null || S.comms < 1) return;
   const n = S.neighbors[S.socialTarget];
