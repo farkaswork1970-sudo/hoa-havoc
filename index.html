@@ -163,12 +163,15 @@
   .nb.spent:hover{border-color:var(--line);}
   .bmq{float:right; display:flex; gap:4px; margin-left:6px;}
   .modnav{display:flex; flex-direction:column; gap:5px;}
-  .sw{
-    width:26px; height:26px; border-radius:50%; border:2px solid var(--line);
-    cursor:pointer; padding:0; flex:0 0 auto;
+  #schemeLabel{
+    display:flex; align-items:center; gap:7px;
+    font-size:12px; font-weight:bold; letter-spacing:.5px; color:var(--muted);
   }
-  .sw:hover{transform:scale(1.12);}
-  .sw.sel{border-color:var(--gold); box-shadow:0 0 7px rgba(255,210,74,.55);}
+  #schemeSelect{
+    background:var(--deep); color:var(--ink); border:2px solid var(--line); border-radius:8px;
+    font-family:inherit; font-size:12.5px; font-weight:bold; padding:5px 8px; cursor:pointer;
+  }
+  #schemeSelect:focus{outline:none; border-color:var(--gold);}
   #main{
     display:flex; gap:10px; background:var(--panel); border:2px solid var(--line); border-top:none;
     border-radius:0 0 12px 12px; padding:10px; align-items:stretch;
@@ -378,7 +381,7 @@
 </head>
 <body>
 <!-- HOA HAVOC — © 2026 BigSpoke AI. All rights reserved. -->
-<script>(function(){ try{ var k = localStorage.getItem('hoaScheme'); if (k) document.documentElement.dataset.scheme = k; }catch(e){} })();</script>
+<script>(function(){ var k = null; try{ k = localStorage.getItem('hoaScheme'); }catch(e){} document.documentElement.dataset.scheme = k || 'hydrangea'; })();</script>
 <div id="wrap">
   <div id="topbar">
     <div id="statGroup">
@@ -452,11 +455,11 @@
     </div>
     <div class="selhead">HOW ANNOYED ARE YOU GOING TO BE? — pick one, or open the workshop</div>
     <div class="chiprow" id="regimeRow">
-      <div class="chip" data-r="reasonable"><b>😌 Barely Bothered</b><span>Months pass with no letter. Three months to fix it when one comes.</span></div>
-      <div class="chip sel" data-r="stickler"><b>📋 Fed Up, Politely</b><span>Two notices a month. You have started a folder, and dated it.</span></div>
-      <div class="chip" data-r="tyrant"><b>⚖️ Consulting an Attorney</b><span>Three notices a month, thirty days to cure, a lawyer on retainer.</span></div>
+      <div class="chip" data-r="reasonable"><b>😌 Suspiciously Chill</b><span>Months pass without a letter. When one finally comes, it apologizes — and gives you three months.</span></div>
+      <div class="chip sel" data-r="stickler"><b>📋 Weaponized Politeness</b><span>Two notices a month, each signed "Warmly, The Board." You have a folder now. The folder has dates.</span></div>
+      <div class="chip" data-r="tyrant"><b>⚖️ The Clipboard Junta</b><span>Three notices a month, thirty days to cure, and a lawyer who bills the HOA to threaten you with your own dues.</span></div>
     </div>
-    <button class="btn sm law" id="customBtn" style="margin-top:6px;">⚙️ Customize — size, age &amp; six dials of dysfunction</button>
+    <button class="btn sm law" id="customBtn" style="margin-top:6px;">🛠️ The Neighborhood Workshop — size, age &amp; six dials of dysfunction</button>
     <div id="diffMeter"><div id="diffFill"></div></div>
     <div id="diffLabel"></div>
     <button class="btn" id="startBtn">Move In ▶</button>
@@ -466,7 +469,9 @@
       <button id="menuMusicBtn" class="tbtn" title="Background music on/off">🎵</button>
       <button id="menuSfxBtn" class="tbtn" title="Sound effects and spoken remarks on/off">🔊</button>
       <span style="width:8px;"></span>
-      <div id="schemeRow" style="display:flex; gap:6px; align-items:center;" title="Paint the neighborhood"></div>
+      <label id="schemeLabel" title="Paint the neighborhood">🎨 Color scheme
+        <select id="schemeSelect"></select>
+      </label>
     </div>
     <p class="small" id="playersLine" style="margin-top:10px; display:none;">👥 <b id="playersMenuCt">–</b> homeowners have moved in before you</p>
     <p class="small" style="margin-top:8px;opacity:.75;">v1.0 · © 2026 BigSpoke AI · All rights reserved</p>
@@ -589,7 +594,7 @@
 
 <div id="customModal" class="overlay hidden">
   <div class="panel">
-    <h2>⚙️ DESCRIBE YOUR HOA</h2>
+    <h2>🛠️ THE NEIGHBORHOOD WORKSHOP</h2>
     <div class="tabbar" id="setupTabs">
       <button class="tab sel" data-p="paneBoard">🏛️ The Board</button>
       <button class="tab" data-p="paneCommunity">🏘️ Community</button>
@@ -683,9 +688,9 @@
 'use strict';
 // ================= data =================
 const REGIME_PRESETS = {
-  reasonable: { petty:15, fines:15, dues:20, mercy:100, grudge:10, arc:15, label:'😌 Barely Bothered, Frankly Fine' },
-  stickler:   { petty:55, fines:50, dues:45, mercy:50,  grudge:50, arc:50, label:'📋 Fed Up, Politely, and In Writing' },
-  tyrant:     { petty:95, fines:95, dues:90, mercy:0,   grudge:100, arc:95, label:'⚖️ Radicalized, Consulting an Attorney' },
+  reasonable: { petty:15, fines:15, dues:20, mercy:100, grudge:10, arc:15, label:'😌 Suspiciously Chill (Enjoy It While It Lasts)' },
+  stickler:   { petty:55, fines:50, dues:45, mercy:50,  grudge:50, arc:50, label:'📋 Weaponized Politeness, In Writing' },
+  tyrant:     { petty:95, fines:95, dues:90, mercy:0,   grudge:100, arc:95, label:'⚖️ The Clipboard Junta' },
 };
 const CUSTOM_REGIME_LABEL = '🛠️ Exactly As Annoyed As I Specified';
 // the meter reads as the homeowner's own rising exasperation, not the board's cruelty
@@ -4214,35 +4219,34 @@ document.getElementById('resumeBtn').addEventListener('click', () => CountAPI.bu
 
 // ================= paint the neighborhood =================
 const SCHEMES = [
-  { key:'lawn',       name:'Lawn Enforcement',   sw:['#24301b', '#8fd14f', '#ffd24a'] },
-  { key:'midnight',   name:'Midnight Quorum',    sw:['#171e2b', '#9fd0ff', '#ffd24a'] },
-  { key:'terracotta', name:'Terracotta Sunset',  sw:['#2a1a12', '#c98a5a', '#ffb84a'] },
-  { key:'linen',      name:'Clubhouse Linen',    sw:['#f1ead8', '#b3a687', '#996f00'] },
-  { key:'hydrangea',  name:'Disputed Hydrangea', sw:['#ecf0f7', '#a3b2ca', '#6b5ca8'] },
+  { key:'hydrangea',  name:'Disputed Hydrangea (light)' },
+  { key:'linen',      name:'Clubhouse Linen (light)' },
+  { key:'lawn',       name:'Lawn Enforcement (dark)' },
+  { key:'midnight',   name:'Midnight Quorum (dark)' },
+  { key:'terracotta', name:'Terracotta Sunset (dark)' },
 ];
 function currentScheme(){
-  const k = document.documentElement.dataset.scheme || 'lawn';
+  const k = document.documentElement.dataset.scheme || 'hydrangea';
   return Math.max(0, SCHEMES.findIndex(s => s.key === k));
 }
 function setScheme(key, announce){
   document.documentElement.dataset.scheme = key;
   try{ localStorage.setItem('hoaScheme', key); }catch(e){}
-  document.querySelectorAll('#schemeRow .sw').forEach(b => b.classList.toggle('sel', b.dataset.k === key));
+  const sel = document.getElementById('schemeSelect');
+  if (sel && sel.value !== key) sel.value = key;
   const s = SCHEMES.find(x => x.key === key);
-  if (announce && s) setTicker(`🎨 The neighborhood repaints itself in ${s.name}. The board demands to know who approved it.`);
+  if (announce && s) setTicker(`🎨 The neighborhood repaints itself in ${s.name.replace(/ \((light|dark)\)$/, '')}. The board demands to know who approved it.`);
 }
-(function buildSchemeRow(){
-  const row = document.getElementById('schemeRow');
+(function buildSchemeSelect(){
+  const sel = document.getElementById('schemeSelect');
   for (const s of SCHEMES){
-    const b = document.createElement('button');
-    b.className = 'sw';
-    b.dataset.k = s.key;
-    b.title = s.name;
-    b.style.background = `linear-gradient(135deg, ${s.sw[0]} 55%, ${s.sw[1]} 55% 78%, ${s.sw[2]} 78%)`;
-    b.addEventListener('click', () => setScheme(s.key));
-    row.appendChild(b);
+    const o = document.createElement('option');
+    o.value = s.key;
+    o.textContent = s.name;
+    sel.appendChild(o);
   }
-  setScheme(document.documentElement.dataset.scheme || 'lawn');
+  sel.addEventListener('change', () => setScheme(sel.value));
+  setScheme(document.documentElement.dataset.scheme || 'hydrangea');
 })();
 document.getElementById('schemeBtn').addEventListener('click', () => {
   setScheme(SCHEMES[(currentScheme() + 1) % SCHEMES.length].key, true);
