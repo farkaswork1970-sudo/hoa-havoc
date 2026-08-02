@@ -331,6 +331,16 @@
   .vio .appeal{background:#6a5a8a; color:#efe6ff;}
   .vio .stage{color:#c9b8e0; font-size:11.5px; font-style:italic; margin:3px 0;}
   .vio .block{color:#ffc9a6; font-size:12px; margin:3px 0;}
+  /* the one screen without a joke on it */
+  .panel.real{max-width:680px; text-align:left;}
+  .panel.real h2{font-size:18px; letter-spacing:2px; color:var(--ink); text-align:center; margin-bottom:12px;}
+  .panel.real p{font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+  .panel.real ul{margin:0 0 10px 18px; font-size:13.5px; line-height:1.5;}
+  .panel.real li{margin-bottom:7px;}
+  .panel.real a{color:var(--blue); font-weight:bold; text-decoration:none; border-bottom:1px solid var(--blue);}
+  .panel.real .fine{font-size:11.5px; color:var(--muted); text-align:center; margin-top:12px;}
+  .quietlink{cursor:pointer; opacity:.65; transition:opacity .2s;}
+  .quietlink:hover{opacity:1;}
   .bicker{
     background:var(--strip); border:1px solid var(--line); border-radius:8px;
     padding:7px 10px; margin:8px 0; text-align:left; font-size:12.5px; line-height:1.5;
@@ -488,6 +498,7 @@
       </label>
     </div>
     <p class="small" id="playersLine" style="margin-top:10px; display:none;">👥 <b id="playersMenuCt">–</b> homeowners have moved in before you</p>
+    <p class="small quietlink" id="realLinkMenu" style="margin-top:10px;">This is satire. The power it makes fun of is not. →</p>
     <p class="small" style="margin-top:8px;opacity:.75;">v1.0 · © 2026 BigSpoke AI · All rights reserved</p>
   </div>
 </div>
@@ -696,6 +707,27 @@
     <h2 id="endTitle"></h2>
     <p id="endText"></p>
     <button class="btn" id="againBtn">Back to the Listings ↻</button>
+    <p class="small quietlink" id="realLinkEnd" style="margin-top:12px;">The joke ends here. The power is real — and it can be changed. →</p>
+  </div>
+</div>
+
+<div id="realModal" class="overlay hidden">
+  <div class="panel real">
+    <h2>THE PART THAT ISN'T SATIRE</h2>
+    <p>This game runs on jokes. The power structure it makes fun of is real, and it is not funny.</p>
+    <p>Roughly 75 million Americans live under community associations. The authority those boards hold comes from <b>state law</b> and recorded covenants: private corporations, mostly run by volunteers, with the power to fine you, lien your home, and in some states push that lien to foreclosure — over disputes that began as grass height or a paint color. The practical check on that power is civil litigation, which costs more than most families can risk. A right you cannot afford to enforce is barely a right at all. That absurdity is the engine this entire game runs on.</p>
+    <p>Because it is state law, <b>state legislatures can change it</b> — and some have begun to. Reform bills tend to die quietly, because the industry's trade group (the Community Associations Institute) lobbies in every state capitol, while homeowners rarely find out the hearing happened at all.</p>
+    <p><b>Where to push:</b></p>
+    <ul>
+      <li><b>Your state legislators.</b> HOA law is state law. One letter, one call, one afternoon of testimony at a hearing carries real weight — reform bills usually fail in empty rooms, not close votes.</li>
+      <li><b><a href="https://hoaunited.org" target="_blank" rel="noopener">HOA United</a></b> — a national homeowner-advocacy network with state chapters organizing for reform.</li>
+      <li><b><a href="https://www.aarp.org" target="_blank" rel="noopener">AARP</a></b> has published a model <i>Bill of Rights for Homeowners in Associations</i> — print it and hand it to your representative.</li>
+      <li><b>State offices, where they exist:</b> Nevada's CIC Ombudsman (<a href="https://red.nv.gov" target="_blank" rel="noopener">red.nv.gov</a>), Colorado's HOA Information &amp; Resource Center (<a href="https://dre.colorado.gov" target="_blank" rel="noopener">dre.colorado.gov</a>), Virginia's CIC Ombudsman (<a href="https://www.dpor.virginia.gov" target="_blank" rel="noopener">dpor.virginia.gov</a>), Illinois's CCIC Ombudsperson (<a href="https://idfpr.illinois.gov" target="_blank" rel="noopener">idfpr.illinois.gov</a>), Florida's DBPR (<a href="https://www.myfloridalicense.com" target="_blank" rel="noopener">myfloridalicense.com</a>), Arizona's HOA dispute process (<a href="https://azre.gov" target="_blank" rel="noopener">azre.gov</a>), South Carolina Consumer Affairs (<a href="https://consumer.sc.gov" target="_blank" rel="noopener">consumer.sc.gov</a>). Most states have <b>no office at all</b> — that absence is worth a letter by itself.</li>
+      <li><b>Further reading:</b> <i>Privatopia</i> by Evan McKenzie — how private government got this far.</li>
+    </ul>
+    <p>And the unglamorous one: go to your own association's meetings. Read the budget. Run for the board. Most boards go bad in empty rooms, too.</p>
+    <p class="fine">None of this is legal advice. It is an encouragement to be governed on purpose.</p>
+    <div style="text-align:center;"><button class="btn sm grey" id="realClose">Back to the satire</button></div>
   </div>
 </div>
 
@@ -4368,6 +4400,13 @@ function setScheme(key, announce){
 document.getElementById('schemeBtn').addEventListener('click', () => {
   setScheme(SCHEMES[(currentScheme() + 1) % SCHEMES.length].key, true);
 });
+
+// ================= the part that isn't satire =================
+// no sounds, no mode change, no jokes — the quiet room in a loud house
+function openReal(){ document.getElementById('realModal').classList.remove('hidden'); }
+document.getElementById('realLinkMenu').addEventListener('click', openReal);
+document.getElementById('realLinkEnd').addEventListener('click', openReal);
+document.getElementById('realClose').addEventListener('click', () => document.getElementById('realModal').classList.add('hidden'));
 
 // ================= the wary hello at the door =================
 const GREETS = [
